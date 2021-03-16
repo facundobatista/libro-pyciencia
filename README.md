@@ -4,7 +4,7 @@
 
 Este proyecto es parte del soporte de construcción del libro "Python en Ámbitos Científicos" de Facundo Batista y Manuel Carlevaro.
 
-![Logo del proyecto](logo.png)
+![Logo del proyecto](logo.png){:height="200px" width="200px"}
 
 Todavía en desarrollo, aquí se irán publicando capítulos por separado (en distintos grados de finalización) con la idea de poder compartir el contenido y en lo posible ir recibiendo feedback.
 
