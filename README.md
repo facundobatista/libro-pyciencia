@@ -1,11 +1,10 @@
 # Python en Ámbitos Científicos
 
-[![Twitter](https://img.shields.io/twitter/follow/libro_pyciencia.svg?style=social)](https://twitter.com/libro_pyciencia)  
-[![Licencia](https://img.shields.io/badge/License-CC%20BY%20NC%20SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es)
+[![Licencia](https://img.shields.io/badge/License-CC%20BY%20NC%20SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es) [![Twitter](https://img.shields.io/twitter/follow/libro_pyciencia.svg?style=social)](https://twitter.com/libro_pyciencia)  
 
 Este proyecto es parte del soporte de construcción del libro "Python en Ámbitos Científicos" de Facundo Batista y Manuel Carlevaro.
 
-.. image:: logo.png
+![Logo del proyecto](logo.png)
 
 Todavía en desarrollo, aquí se irán publicando capítulos por separado (en distintos grados de finalización) con la idea de poder compartir el contenido y en lo posible ir recibiendo feedback.
 
