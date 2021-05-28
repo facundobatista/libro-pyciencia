@@ -15,4 +15,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 ## Capítulos
 
-- [Introducción a Python](intro.pdf)
+- [Introducción a Python](intro.pdf): Qué es Python. Propiedades del lenguaje, multiparadigma, interpretado. Biblioteca estándar, módulos externos, integrado en Python. Editando y ejecutando, usando módulos. El intérprete interactivo, Jupyter Notebooks, explorando. Tipos de datos: números, cadenas, listas, tuplas. Pensando como un Pythonista. Más tipos: conjuntos y diccionarios. Iteradores. Controles de flujo: if, while, for. Excepciones. Encapsulando código: funciones, espacios de nombres, generadores, clases, módulos. Cómo pedir ayuda.
+
