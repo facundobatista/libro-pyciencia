@@ -1,0 +1,372 @@
+
+% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Numpy} \label{ch:numpy}
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        NumPy & 1.20.2 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+    
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/numpy/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+NumPy es una biblioteca muy utilizada en Python para trabajar con vectores multidimensionales (arreglos, matrices, etc.) que ofrece también una gran colección de funciones matemáticas de alto nivel para operar con ellos.
+
+El punto de entrada a NumPy es la estructura \mip{array}, que nos permite manejar matrices de cualquier dimensión (incluso de una). Estos arreglos, a diferencia de las listas integradas en el lenguaje, son homogéneos: todos sus elementos deben ser del mismo tipo (lo cual es clave en la eficiencia y potencia de cálculo de esta biblioteca).
+
+Podemos crear un arreglo utilizando un iterable como fuente:
+
+\jupynotex[1,3]{Chapters/numpy/code/numpy.ipynb}
+
+\begin{info}
+Es común importar el módulo principal de NumPy llamándolo \mip{np}: es más corto y conciso, y no confunde porque todo el mundo está acostumbrado a eso.
+\end{info}
+
+NumPy nos ofrece formas rápidas de crear arreglos de distintos tamaños, por ejemplo con los números secuenciales como el conocido \mip{range}, pero también inicializado con ceros y con unos (lo cual es muy normal, ya que son la identidad aditiva y multiplicativa respectivamente):
+
+\jupynotex[4-6]{Chapters/numpy/code/numpy.ipynb}
+
+En este capítulo vamos a ver otras funciones que posee NumPy, como estas que acabamos de mostrar, pero siempre es interesante explorar y tener a mano la Documentación de Referencia \cite{numpy_referencia}.
+
+Vemos que por default NumPy crea todos los arreglos con \mip{float}s. Como decíamos antes, todos los elementos tienen que ser del mismo tipo, pero tenemos control sobre cual tipo es ese; por ejemplo, si vamos a trabajar con enteros:
+
+\jupynotex[7]{Chapters/numpy/code/numpy.ipynb}
+
+
+\section{Forma de trabajo}
+
+Hagamos una comparación entre las listas integradas y este nuevo tipo de dato, para empezar a notar las diferencias. Supongamos que queremos trabajar sobre un millón de números al mismo tiempo (pero por simplificación para el libro, usemos sólo 10... para el caso es lo mismo). Entonces tenemos nuestro millón de números:
+
+\jupynotex[8]{Chapters/numpy/code/numpy.ipynb}
+
+Esto, en numpy sería:
+
+\jupynotex[9]{Chapters/numpy/code/numpy.ipynb}
+
+Ahora, supongamos que queremos los cuadrados de esos números. Como vimos en la subsección \ref{sub:for}, podemos hacer una list comprehension. Ingenuamente, intentamos lo mismo para ambas estructuras.
+
+\jupynotex[10-11]{Chapters/numpy/code/numpy.ipynb}
+
+Y acá es donde descubrimos el inmenso poder de NumPy: nos permite procesar los arreglos directamente, manejando simultaneamente todos sus elementos internos.
+
+En el ejemplo que acabamos de mostrar, Python tiene que recorrer el iterable, ir recibiendo uno por uno los elementos, elevar ese elemento al cuadrado, e irlo agregando a una lista. Con diez elementos no pasa nada, pero recordemos, nuestro ejemplo imaginario tiene un millón de números.
+
+Numpy, repetimos, nos permite procesar todos los elementos del arreglo al mismo tiempo:
+
+\jupynotex[12-13]{Chapters/numpy/code/numpy.ipynb}
+
+Acá tenemos en Python solamente una llamada a una función que estará implementada en C, Fortran o algún lenguaje de bajo nivel, y fuertemente optimizada. Y se realiza todo el procesamiento necesario solamente con esa llamada a función, obteniendo efectivamente performances comparables con esos lenguajes de más bajo nivel. De cualquier manera, la idea de usar NumPy es justamente despreocuparnos sobre cómo está implementada y optimizada, y enfocarnos en usar la biblioteca correctamente, de la misma manera que al usar Python en sí por ejemplo nos despreocupamos sobre la administración dinámica que hace de la memoria.
+
+Como ejercicio, comparemos las performances de los dos casos de nuestro ejemplo anterior.
+
+\jupynotex[14]{Chapters/numpy/code/numpy.ipynb}
+
+¡Epa! Vemos que es más lento en NumPy, ¿cómo puede ser eso? Simple, porque no tiene sentido usar NumPy para conjuntos pequeños de datos, realmente estamos moviendo toda una infrastructura para procesar pocos casos. Tengamos en cuenta que \mip{timeit.timeit} mide lo que pedimos un millón de veces por default, así que el número que estamos viendo ahí es en microsegundos.
+
+Veamos un ejemplo más real, haciendo lo mismo pero con un millón de números:
+
+\jupynotex[15]{Chapters/numpy/code/numpy.ipynb}
+
+Como trabajar sobre un millón de números obviamete tarda mucho más, le decimos a \mip{timeit.timeit} que mida sólo una determinada cantidad de veces, y luego dividimos por esa cantidad, así que ahora estamos viendo segundos.
+
+Y encontramos que para este caso más real, NumPy es más de cien veces más rápido.
+
+Entonces, es responsabilidad nuestra saber cuando utilizar esta biblioteca. Por un lado, no vale la pena para algunos pocos datos, pero especialmente tenemos que tener el cuidado de NO caer en la tentación de procesar los arreglos ``a mano en Python'', sino siempre utilizar las herramientas correctas de NumPy.
+
+¿Tenemos que sumar los números usando el \mip{sum} de Python? No. ¿Sacar el máximo usando \mip{max}? Tampoco. ¿Y si queremos aplicar alguna función matemática? De nuevo, usar las herramientas de NumPy:
+
+\jupynotex[16-19]{Chapters/numpy/code/numpy.ipynb}
+
+
+\section{Multidimensionalidad}
+
+Hasta ahora sólo armamos un arreglo de una sola dimensión, pero como decíamos arriba, NumPy permite que sean de varias dimensiones.
+
+Incluso esas dimensiones pueden no ser iguales. Armemos por ejemplo una matriz de dos dimensiones que nos quede como una ``tabla rectangular'':
+
+\jupynotex[20]{Chapters/numpy/code/numpy.ipynb}
+
+No estamos limitados en cantidad de dimensiones, armemos un arreglo de tres dimensiones: un paralelepípedo de 2x2x5:
+
+\jupynotex[21]{Chapters/numpy/code/numpy.ipynb}
+
+También, podemos cambiarle la forma. Armemos la misma matriz pero con números secuenciales:
+
+\jupynotex[22-25]{Chapters/numpy/code/numpy.ipynb}
+
+En el ejemplo vemos como podemos preguntar la forma de un arreglo: en el primer caso es de largo 20 en la única dimensión que tiene, mientras que ya la matriz tiene largos 2, 2 y 5 en cada una de sus dimensiones.
+
+También podemos preguntar la cantidad de dimensiones, y el tamaño del arreglo (que es sencillamente la cantidad de elementos que contiene, no confundir con los otros atributos recién mencionados):
+
+\jupynotex[26-29]{Chapters/numpy/code/numpy.ipynb}
+
+Para acceder a los elementos adentro de los arreglos, NumPy nos permite explotar la natural multidimensionalidad de los mismos, y utilizaremos una sintaxis muy similar a la que estábamos acostumbrados con las secuencias de Python, pero con este gran detalle: podemos expresar al mismo tiempo el índice de cada dimensión, separándolos por coma.
+
+En el caso de los arreglos de una sola dimensión nos queda exactamente como siempre:
+
+\jupynotex[30-31]{Chapters/numpy/code/numpy.ipynb}
+
+Es en el caso de los arreglos de más de una dimensión donde podemos explotar esto, si es necesario. En el siguiente ejemplo accedemos a la matriz con un sólo índice, que nos dará la ``submatriz'' correspondiente:
+
+\jupynotex[32-34]{Chapters/numpy/code/numpy.ipynb}
+
+Si queremos acceder a la primer submatriz, y luego a un subarreglo de la misma, y de ahí a un elemento, podríamos hacer lo que estamos acostumbrados en Python, o utilizar la forma de NumPy (obviamente, el segundo caso es más rápido, porque no vamos y venimos de NumPy, sino que se procesa todo en una misma llamada):
+
+\jupynotex[35-36]{Chapters/numpy/code/numpy.ipynb}
+
+El verdadero potencial de esta forma se expresa cuando trabajamos con slices, ya que nos permite trabajar con varias dimensiones al mismo tiempo (como recién, separando cada dimensión con coma, ¡pero con slices!). En este caso lo complicado es ajustar el ojo para leer lo que está dentro de los corchetes, porque cuando en Python clásico tenemos algo como \mip{[2:5]}, separamos el contenido con los dos puntos, leyendo el 2 primero, luego el 3, y entendiendo que es un "desde-hasta".
+
+Pero con NumPy la separación realmente es "por dimensión". Entonces si vemos algo como \mip{matriz[:,1:,2]} lo tenemos que separar por las comas, entender que para la primer dimensión tenemos \texttt{:} (todo el contenido en esa dimensión, que en el caso del ejemplo serían las dos matrices de 2 x 5 que se muestran), luego para la segunda dimensión tenemos \texttt{1:} (todo el contenido luego desde el primer item, que para el ejemplo seria exceptuar la primer linea de cada grupo), y finalmente para la tercer dimensión tenemos \texttt{2} (el elemento en la posición dos, en el caso del ejemplo nos quedamos con el 7 y con el 17).
+
+Veamos progresivamente esto, y al final el detalle de cómo luego de recortar las distintas dimensiones de la matriz original, el resultado queda con su propia "forma":
+
+\jupynotex[37-41]{Chapters/numpy/code/numpy.ipynb}
+
+Cuando hacemos \textit{slicing} de arreglos de Numpy tenemos que tener un gran detalle en cuenta: a diferencia del mismo procedimiento en las listas integradas de Python, donde efectivamente tenemos una copia de la lista original, en el caso de NumPy lo que obtenemos es una ``vista'' del arreglo original. 
+
+Esta vista es afectada si modificamos el arreglo original, y viceversa. Esto es algo que hace NumPy en pos de la velocidad de procesamiento, ya que evita estar copiando objetos en memoria todo el tiempo.
+
+Veamos este comportamiento. Primero un ejemplo usando las listas integradas en Python, para resaltar el efecto ``copia'' de las mismas:
+
+\jupynotex[42-44]{Chapters/numpy/code/numpy.ipynb}
+
+Y ahora el caso de los arreglos de NumPy, con el comportamiento de las vistas:
+
+\jupynotex[45-47]{Chapters/numpy/code/numpy.ipynb}
+
+
+\section{Indización avanzada}
+
+NumPy ofrece una funcionalidad aún más interesante que lo que recién vimos sobre indizar con varias dimensiones al mismo tiempo: ¡podemos también indizar usando otros arreglos! Esto explota en distintas funcionalidades que vemos en esta sección.
+
+Si el arreglo-índice tiene números, esos números indicarán la posición de los elementos que queremos del arreglo que estamos indizando.
+
+En el siguiente ejemplo usamos esta funcionalidad para sacar los cuadrados de las posiciones 2, 3, 15 y 7:
+
+\jupynotex[48-49]{Chapters/numpy/code/numpy.ipynb}
+
+Vemos que no hace falta que el índice sea un arreglo de NumPy, pero obviamente eso también es soportado.
+
+Tengamos en cuenta que los índices pueden ser repetidos (lo cual es útil en estadística para hacer muestreos eficientemente, por ejemplo):
+
+\jupynotex[50]{Chapters/numpy/code/numpy.ipynb}
+
+Por otro lado, si el arreglo-índice está compuesto por booleanos, los mismos indicarán qué elementos elegimos del arreglo que estamos indizando (en este caso el índice tiene que tener el mismo largo que el arreglo indizado).
+
+\jupynotex[51]{Chapters/numpy/code/numpy.ipynb}
+
+Esto es muy útil para elegir elementos de un arreglo en función de si cumplen alguna condición (lo cual en muchos contextos se denomina \emph{máscara}).
+
+Veamos un ejemplo donde tenemos muchos números y queremos calcular el logaritmo sólo de los positivos (claro que lo podríamos hacer con una \textit{list comprehension} eliminando a los negativos y luego calculando el logaritmo de cada uno, pero recordemos que la idea es siempre quedarnos adentro de NumPy, para aprovechar al máximo la potencia de esta biblioteca).
+
+\jupynotex[52-55]{Chapters/numpy/code/numpy.ipynb}
+
+NumPy también nos da mecanismos para trabajar con arreglos correlacionados (esto es, dos o más arreglos donde cada elemento de un arreglo tiene una relación con el elemento de la misma posición en los otros arreglos).
+
+Por ejemplo, podemos tener unas mediciones para graficar, con los valores del eje \verb|x| en un arreglo y los correspondientes del eje \verb|y| en otro. Por algún motivo necesitamos ordenar los puntos del eje \verb|x|, pero obviamente debemos mantener la relación con los valores correspondientes del eje \verb|y|.
+
+Para ello usaremos la función \mip{np.argsort}, que nos devuelve un arreglo-índice que ordenaría el arreglo indicado, y luego usamos ese índice con ambos arreglos \verb|x| e \verb|y|:
+
+\jupynotex[56-58]{Chapters/numpy/code/numpy.ipynb}
+
+Vemos que al indizar \verb|x| obtenemos el arreglo ordenado, y al indizar \verb|y| obtenemos los valores correspondientes según el nuevo orden de x (se sigue manteniendo la relación entre los elementos de x e y para cada posición).
+
+En todos estos casos de indización avanzada tenemos que prestar atención al hecho de que aunque arrancamos con un arreglo y terminamos en un arreglo, no hay relación entre estos dos (a diferencia de cuando hacíamos slicing, que teníamos una vista). En definitiva no es más que una forma expresiva y eficiente de indizar el arreglo por posición varias veces. Es por esto que si modificamos el arreglo que tenemos como resultado no estaremos modificando el arreglo original.
+
+\section{Broadcasting}
+
+El término \textit{broadcasting} (que podríamos traducir como ``transmisión'') describe como NumPy trata durante las operaciones aritméticas a los arreglos que tienen distintas formas.
+
+Porque cuando los arreglos tienen la misma forma es sencillo, los elementos mapean uno a uno y la operación se realiza entre los correspondientes:
+
+\jupynotex[59-60]{Chapters/numpy/code/numpy.ipynb}
+
+Las reglas se complican (y el concepto de broadcasting aparece) cuando los arreglos \textbf{no} tienen el mismo tamaño.
+
+Sin embargo, no cualquier combinación funciona. Cuando NumPy opera sobre dos arreglos compara la cantidad de elementos en cada dimensión (arrancando por las últimas), y en cada caso se tiene que cumplir una de dos condiciones:
+
+\begin{itemize}
+ \item ambas dimensiones tienen la misma cantidad de elementos: en este caso se opera entre cada elemento de esa dimensión
+ \item alguna de las dimensiones tiene sólo un elemento: en este caso se ``estira'' esa dimensión (se repite ese único elemento para igualar la otra dimensión)
+\end{itemize}
+
+El ejemplo más sencillo de esto es cuando operamos aritméticamente entre un arreglo y un escalar:
+
+\jupynotex[61]{Chapters/numpy/code/numpy.ipynb}
+
+La operación que realizó allí es equivalente a haber repetido ese escalar la cantidad suficiente de veces, similar a lo que mostramos a continuación:
+
+\jupynotex[62]{Chapters/numpy/code/numpy.ipynb}
+
+El \textit{broadcasting}, entonces, provee una forma de vectorizar operaciones de arreglos, de manera que los loops occurran en C en vez de Python. Y hace eso sin realizar copias innecesarias de los datos, lo que normalmente lleva a implementaciones muy eficientes de los algoritmos (hay casos, sin embargo, donde el broadcasting lleva a un uso ineficiente de la memoria y termina ralentizando el cálculo).
+
+Veamos un ejemplo donde broadcasting funciona porque las dimensiones tienen la misma cantidad de elementos.
+
+Supongamos un sensor óptico (pero simplificando, en vez de tener una matriz de 4096x4096, tenemos una matriz de 2x2, cada pixel con los tres valores correspondientes a RGB), Ahora, lo que queremos es aplicar un efecto donde reducimos el rojo muchísimo, dejando el verde y el azul en los valores originales (nuestro filtro tiene una sola dimensión y tres valores).
+
+Prestemos atención al comentario luego de pedir cada forma, porque ahí estamos alineando las dimensiones arrancando por la última, que es como NumPy las compara. Entonces broadcasting funciona porque ambos arreglos tienen la dimensión con la misma cantidad de elementos.
+
+\jupynotex[63-66]{Chapters/numpy/code/numpy.ipynb}
+
+Entonces, como la última dimensión tiene tres elementos en cada caso, multiplica los tres valores del filtro por los tres valores para cada uno de los cuatro píxeles de la foto (va haciendo lo mismo en las otras dimensiones, porque ``filtro'' sólo tenía una.
+
+Como vimos al principio, cuando el escalar se repetía varias veces en un arreglo monodimensional para ser multiplicado por el otro arreglo con la misma forma, acá sucede lo mismo. No es tan fácil de ver, sin embargo, pero podemos pedirle a NumPy que nos muestre cómo quedaría \verb|filtro| si lo brodcasteamos a la forma de la foto:
+
+\jupynotex[67]{Chapters/numpy/code/numpy.ipynb}
+
+Veamos ahora un caso donde ambos arreglos tienen más de una dimensión:
+
+\jupynotex[68-71]{Chapters/numpy/code/numpy.ipynb}
+
+En este caso también aplica broadcasting, porque cada par de dimensiones compara bien: arrancando desde atrás (que es lo que hace NumPy) \verb|nros| tiene 4 elementos y \verb|factor| tiene 1 (válido, porque una de las dos tiene un elemento), y luego la anteúltima dimensión en cada caso tiene 2 elementos (válido, porque tienen la misma cantidad).
+
+\jupynotex[72]{Chapters/numpy/code/numpy.ipynb}
+
+Vemos que al operar, la dimensión de \verb|factor| que tenía un elemento se \textit{estira} hasta cubrir los cuatro elementos del \verb|nros|, entonces nos queda que 0, 1, 2 y 3 multiplican cada uno por 3, mientras que 4, 5, 6 y 7 multiplican cada uno por 5.
+
+Cerremos con un ejemplo más complicado:
+
+\jupynotex[73-74]{Chapters/numpy/code/numpy.ipynb}
+
+En este caso también broadcasting va a funcionar: de atrás para adelante tenemos 3 y 3 (iguales), 2 y 1 (uno es 1), 1 y 2 (uno es 1), y dejamos de comparar porque para un arreglo se nos acabaron las dimensiones.
+
+\jupynotex[75]{Chapters/numpy/code/numpy.ipynb}
+
+
+\section{Vectores y matrices}
+
+Venimos hablando de arreglos, tanto unidimensionales como multidimensionales, que son estructuras genéricas que NumPy nos ofrece para hacer un montón de cosas. Pero nosotros en álgebra lineal tenemos los conceptos de vectores y matrices, que sí, pueden ser considerados arreglos de determinadas dimensiones, pero tienen sus semánticas específicas.
+
+Veamos entonces qué podemos hacer si miramos y usamos los arreglos desde este ángulo.
+
+Arrancamos con la advertencia de que el operador \verb|*| es para multiplicar los elementos en sí, cuyo uso ya vimos más arriba, y aplican las reglas de broadcasting que también comentamos. Algunos ejemplos:
+
+\jupynotex[76-78]{Chapters/numpy/code/numpy.ipynb}
+
+Por otro lado, si queremos "multiplicación de matrices", desde Python 3.5 tenemos el operador arroba (\verb|@|) justamente pensado para esta operación (antes teníamos que usar la función \texttt{np.matmul}).
+
+Veamos distintos ejemplos usando esta operación, escalando en complejidad.  Si la operación es entre dos vectores, el resultado es la suma de la multiplicación entre sí de los escalares de cada posición (tengamos en cuenta que los dos vectores deben tener el mismo largo)
+
+\jupynotex[79]{Chapters/numpy/code/numpy.ipynb}
+
+Si multiplicamos una matriz por un vector, la regla es que el largo del vector tiene que coincidir con la cantidad de columnas de la matriz, y el resultado será un vector de largo igual a la cantidad de filas de la matriz, y en cada posición la suma del producto los escalares del vector y esa fila de la matriz:
+
+\begin{equation*}
+    \begin{bmatrix}
+        a_{11} & a_{12} & \cdots & a_{1n}  \\
+        a_{21} & a_{22} & \cdots & a_{2n}  \\
+        \vdots & \vdots & \ddots & \vdots  \\
+        a_{m1} & a_{m2} & \cdots & a_{mn}   
+    \end{bmatrix}
+    \begin{bmatrix}
+        b_1 \\
+        b_2 \\
+        \vdots \\
+        b_n
+    \end{bmatrix} 
+    =
+    \begin{bmatrix}
+        a_{11} b_1 + a_{12} b_2 + \cdots + a_{1n} b_n  \\
+        a_{21} b_1 + a_{22} b_2 + \cdots + a_{2n} b_n  \\
+        \vdots \\
+        a_{m1} b_1 + a_{m2} b_2 + \cdots + a_{mn} b_n 
+    \end{bmatrix}
+\end{equation*} 
+
+Probemos eso en numpy:
+
+\jupynotex[80-82]{Chapters/numpy/code/numpy.ipynb}
+
+Para el caso bien genérico de multiplicar dos matrices, la regla a tener en cuenta es que el número de columnas de la primer matriz sea igual al número de filas de la segunda, y el resultado será otra matriz (con el número de filas de la primera y la cantidad de columnas de la segunda) donde cada elemento será:
+
+\begin{equation*}
+    c_{ij} = \sum_{r=1}^{n}a_{ir}b_{rj}
+\end{equation*} 
+
+Entonces en el caso genérico de $\mathbb{AB=C}$, si $\mathbb{A}$ tiene \verb|m| filas y \verb|n| columnas, $\mathbb{B}$ deberá tener \verb|n| filas (y cualquier cantidad de columnas, digamos \verb|p|); entonces el resultado $\mathbb{C}$ será una matriz de \verb|m| filas y \verb|p| columnas, donde:
+
+\begin{equation*}
+    \begin{bmatrix}
+        a_{11} & \cdots & a_{1n}  \\
+        \vdots & \ddots & \vdots  \\
+        a_{m1} & \cdots & a_{mn}   
+    \end{bmatrix}
+    \begin{bmatrix}
+        b_{11} & \cdots & b_{1p}  \\
+        \vdots & \ddots & \vdots  \\
+        b_{n1} & \cdots & b_{np}   
+    \end{bmatrix} 
+    =
+    \begin{bmatrix}
+        a_{11}b_{11} + \cdots + a_{1n}b_{n1} & \cdots & a_{11}b_{1p} + \cdots + a_{1n}b_{np} \\
+        \vdots & \ddots & \vdots  \\
+        a_{m1}b_{11} + \cdots + a_{mn}b_{n1} & \cdots & a_{m1}b_{1p} + \cdots + a_{mn}b_{np}
+    \end{bmatrix}
+\end{equation*} 
+
+
+En código:
+
+\jupynotex[83-85]{Chapters/numpy/code/numpy.ipynb}
+
+Más allá de todas estas operaciones entre matrices y/o vectores, también hay otros cálculos que generalmente se realizan en álgebra lineal para una matriz, y que por supuesto podemos hacer facilmente en NumPy. Veamos algunos de ellos...
+
+Podemos calcular la determinante:
+
+\jupynotex[86-87]{Chapters/numpy/code/numpy.ipynb}
+
+Las inversas de esas mismas matrices:
+
+\jupynotex[88-89]{Chapters/numpy/code/numpy.ipynb}
+
+O su normas, en toda su diversidad; no vamos a mostrar todas aquí, se puede explorar el item correspondiente en la Referencia de NumPy \cite{numpy-normas}, pero mostremos como ejemplo unas de las más usadas, la Frobenius 2:
+
+\jupynotex[90-91]{Chapters/numpy/code/numpy.ipynb}
+
+E incluso podemos resolver un sistema de ecuaciones lineales con varias incógnitas. 
+
+Por ejemplo resolvamos el siguiente sistema con tres ecuaciones y tres incógnitas:
+
+\begin{align*}
+    3x+y &= -3 \\
+    4y-z &= 5 \\
+    x+3y-2z &= -7
+\end{align*}
+
+Lo primero es cargar una matriz con las ecuaciones y un vector con los resultados, de manera que toda la resolución sea:
+
+\begin{equation*}
+    \mathbb{A} \cdot \bm{x} = \bm{b}
+\end{equation*} 
+
+En código:
+
+\jupynotex[92-93]{Chapters/numpy/code/numpy.ipynb}
+
+Luego, NumPy nos calculará $\bm{x}$:
+
+\jupynotex[94]{Chapters/numpy/code/numpy.ipynb}
+
+Podemos validar facilmente el resultado:
+
+\jupynotex[95]{Chapters/numpy/code/numpy.ipynb}
+
+Tengamos en cuenta sin embargo que estamos lidiando con punto flotante, y como vimos en el capítulo correspondiente \ref{ch:puntoflotante} podemos tener errores mínimos en las operaciones que hacen que ``comparar por igual'' sea engañoso:
+
+\jupynotex[96-98]{Chapters/numpy/code/numpy.ipynb}
+
+Para seguir con este tema y profundizarlo, les recomendamos el Capítulo de Ecuaciones Algebraicas \ref{ch:algebraicas}.

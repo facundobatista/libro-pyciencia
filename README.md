@@ -19,3 +19,6 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 - [Ecuaciones diferenciales ordinarias](ecuaciones_ordinarias.pdf): Introducción. Solución analítica. Métodos numéricos. Ecuación diferencial con valores iniciales.
 
+- [Numpy](numpy.pdf): Introducción y conceptos. El `array`. Multidimensionalidad. Slices. Indización avanzada, máscaras, arreglos correlacionados. Broadcasting.
+
+
