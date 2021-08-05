@@ -85,4 +85,5 @@ if __name__ == "__main__":
         "--archivo",
         help="Graba la imagen al archivo indicado (default: abre una ventana para mostrarlo).")
     args = parser.parse_args()
+    print("Opciones del script:", args)
     main(args.archivo, args.usar_tex)
