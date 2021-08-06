@@ -21,4 +21,4 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 - [Numpy](numpy.pdf): Introducción y conceptos. El `array`. Multidimensionalidad. Slices. Indización avanzada, máscaras, arreglos correlacionados. Broadcasting.
 
-
+- [Ecuaciones en diferenciales parciales](ecuaciones_parciales.pdf): Clasificación. Método de las diferencias finitas. Ecuación 1D con método explícito. Solución con método implícito. Implementación con matriz rala. Método de elementos finitos. Ecuación de Poisson. Formulación variacional. Implementación en FEniCS.
