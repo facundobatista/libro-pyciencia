@@ -47,7 +47,6 @@ def main(archivo, usar_tex):
         'axes.labelsize': 'large',
     }
     if usar_tex:
-        # LaTeX Error: File `type1ec.sty' not found.
         matplotlib_config['text.usetex'] = True
     plt.rcParams.update(matplotlib_config)
     print(f"Config de matplotlib: {matplotlib_config}")
@@ -60,7 +59,8 @@ def main(archivo, usar_tex):
     sol = solve_ivp(sistema, [0, 100], [1, 0], t_eval=t)
 
     # Gráfico de la solución y del diagrama de fase
-    fig, (ax0, ax1) = plt.subplots(1, 2)
+    fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(10, 5))
+    plt.subplots_adjust(wspace=.4)
     ax0.plot(sol.t, sol.y[0])
     ax0.set_ylim(8, -19)
     ax0.set_xlabel(r'$t$')
