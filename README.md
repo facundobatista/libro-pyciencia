@@ -15,12 +15,12 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 ## Capítulos
 
-- [Introducción a Python](intro.pdf): Qué es Python. Propiedades del lenguaje, multiparadigma, interpretado. Biblioteca estándar, módulos externos, integrado en Python. Editando y ejecutando, usando módulos. El intérprete interactivo, Jupyter Notebooks, explorando. Tipos de datos: números, cadenas, listas, tuplas. Pensando como un Pythonista. Más tipos: conjuntos y diccionarios. Iteradores. Controles de flujo: if, while, for. Excepciones. Encapsulando código: funciones, espacios de nombres, generadores, clases, módulos. Cómo pedir ayuda.
+- [Introducción a Python](intro.pdf?raw=True): Qué es Python. Propiedades del lenguaje, multiparadigma, interpretado. Biblioteca estándar, módulos externos, integrado en Python. Editando y ejecutando, usando módulos. El intérprete interactivo, Jupyter Notebooks, explorando. Tipos de datos: números, cadenas, listas, tuplas. Pensando como un Pythonista. Más tipos: conjuntos y diccionarios. Iteradores. Controles de flujo: if, while, for. Excepciones. Encapsulando código: funciones, espacios de nombres, generadores, clases, módulos. Cómo pedir ayuda.
 
-- [Ecuaciones diferenciales ordinarias](ecuaciones_ordinarias.pdf): Introducción. Solución analítica. Métodos numéricos. Ecuación diferencial con valores iniciales.
+- [Ecuaciones diferenciales ordinarias](ecuaciones_ordinarias.pdf?raw=True): Introducción. Solución analítica. Métodos numéricos. Ecuación diferencial con valores iniciales.
 
 - [Numpy](numpy.pdf): Introducción y conceptos. El `array`. Multidimensionalidad. Slices. Indización avanzada, máscaras, arreglos correlacionados. Broadcasting.
 
-- [Ecuaciones en derivadas parciales](ecuaciones_parciales.pdf): Clasificación. Método de las diferencias finitas. Ecuación 1D con método explícito. Solución con método implícito. Implementación con matriz rala. Método de elementos finitos. Ecuación de Poisson. Formulación variacional. Implementación en FEniCS.
+- [Ecuaciones en derivadas parciales](ecuaciones_parciales.pdf?raw=True): Clasificación. Método de las diferencias finitas. Ecuación 1D con método explícito. Solución con método implícito. Implementación con matriz rala. Método de elementos finitos. Ecuación de Poisson. Formulación variacional. Implementación en FEniCS.
 
-- [Aritmética de punto flotante](punto_flotante.pdf): Introducción. La necesidad del punto flotante. La estructura y sus partes. Valores especiales.Binario y decimal. Errores, comparaciones. Uso en aplicaciones científicas.
+- [Aritmética de punto flotante](punto_flotante.pdf?raw=True): Introducción. La necesidad del punto flotante. La estructura y sus partes. Valores especiales.Binario y decimal. Errores, comparaciones. Uso en aplicaciones científicas.
