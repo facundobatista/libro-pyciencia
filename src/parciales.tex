@@ -1,0 +1,553 @@
+
+% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Ecuaciones en derivadas parciales} \label{ch:parciales} 
+
+La mayoría de los problemas presentados en la naturaleza, que son de interés en para físicos y matemáticos, se representan por medio de una o de un sistema de ecuaciones diferenciales. En general, los sistemas físicos involucran más de una variable independiente, por lo que en ese caso el modelo matemático contiene ecuaciones en derivadas parciales (EDP).
+
+Las EDP juegan un papel fundamental en muchas ramas de las ciencias aplicadas y 
+las ingenierías, por ejemplo, en transferencia de calor, elasticidad, dinámica de fluidos, electromagnetismo, óptica, mecánica cuántica, matemática financiera, etc. En particular, fenómenos como el flujo de calor en una varilla metálica u ondas en una cuerda se pueden representar por una EDP de segundo orden del tipo
+\begin{equation} \label{eq:general}
+ R(x,y) \frac{\partial^2 u}{\partial x^2} + S(x,y) \frac{\partial^2 u}{\partial x \partial y} + T(x,y) \frac{\partial^2 u}{\partial y^2} + L \left( x, y, u, \frac{\partial u}{\partial x}, \frac{\partial u}{\partial y} \right) = 0
+\end{equation} 
+en la que $u$ es la función desconocida de $x$ y $y$ (omitimos por simplicidad la dependencia explícita en las expresiones), las funciones $R$, $S$ y $T$ son funciones continuas de las variables $x$ y $y$, mientras que $L$ es una función continua de $x$, $y$, $u$, $\partial u / \partial x$ y $\partial u / \partial y$, de esta manera, la ecuación es lineal.
+
+En lo que sigue, con el propósito de simplificar la escritura, adoptaremos la notación:
+\[ u_x = \frac{\partial u}{\partial x}, \; u_{xx} = \frac{\partial^2 u}{\partial x^2}, \; u_{xy} = \frac{\partial^2 u}{\partial x \partial y} \]
+
+\begin{wraptable}[12]{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        argparse & 1.1 \\
+        Matplotlib & 3.3.4 \\
+        NumPy & 1.19.5 \\
+        SciPy & 1.6.0 \\
+        Sympy & 1.7.1 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+    
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/ecuaciones_parciales/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+La ecuación \eqref{eq:general} se clasifica en tres clases diferentes según el valor de $S^2-4RT$:
+\begin{itemize}
+ \item[a)] Elíptica, si $S^2-4RT < 0$.
+ \item[b)] Parabólica, si $S^2-4RT = 0$.
+ \item[c)] Hiperbólica, si $S^2-4RT > 0.$
+\end{itemize}
+
+
+Esta clasificación es útil por dos razones. Por un lado, cada clase está asociada a diferentes problemas específicos, y por otro, cada grupo requiere técnicas de solución analítica especiales. La terminología utilizada para clasificar las ecuaciones surge por analogía con la utilizada en la clasificación de ecuaciones generales de segundo orden en la geometría analítica. Es importante notar que según como sea la dependencia de $R$, $S$ y $T$ de $x$ y $y$, la ecuación puede estar en una clase diferente dependiendo del dominio para el cual se quiere obtener la solución.
+
+Para determinar completamente una solución particular de una EDP es necesario definir las condiciones de borde, que son valores conocidos de la función o una combinación de sus derivadas sobre la frontera del dominio $\Omega$ del problema. Usualmente, la frontera del dominio se denota como $\Gamma$ o $\partial \Omega$, y por lo general las condiciones de borde pueden especificarse de forma diferente en partes distintas de la frontera. Dos condiciones de borde importantes son las de Dirichlet, en las que se especifica el valor de la función en la frontera, $u(\bm{x}) = h(\bm{x})$ para $\bm{x} \in \Gamma_D$, y las de Neumann, que especifica la derivada normal en la frontera:
+\[ \frac{\partial u(\bm{x})}{\partial \bm{n}} = g(\bm{x}) \]
+para $\bm{x} \in \Gamma_N$, donde $n$ es el vector normal a la frontera con sentido hacia afuera. Aquí, $h(\bm{x})$ y $g(\bm{x})$ son funciones arbitrarias.
+
+Del mismo modo que sucede con las ecuaciones diferenciales ordinarias, solo se puede hallar soluciones analíticas de un problema representado mediante EDP en muy pocos y especiales casos \cite{tijonov1983}. En casi todos los problemas de interés es necesario buscar soluciones mediante mediante técnicas numéricas. 
+
+Muchas de las técnicas numéricas para la solución de EDP se basan en la idea de discretizar el dominio en cada una de las variables independientes que aparecen en las ecuaciones, transformando de este modo el problema en un sistema de ecuaciones algebraicas. Este abordaje suele ser muy demandante de recursos computacionales, en parte debido a que el número de puntos requerido para discretizar una región crece exponencialmente con el número de dimensiones. Por ejemplo, si en un problema unidimensional discretizamos su dominio en $100$ puntos, un problema bidimensional con resolución similar requiere $100^2 = 10^4$ puntos, y uno tridimensional necesita $100^3 = 10^6$ puntos. Dado que cada punto en el espacio discretizado corresponde a una variable desconocida, un problema en tres dimensiones puede resultar en un sistema muy grande de ecuaciones.
+
+En este capítulo abordaremos dos de estas técnicas. En primer lugar, el método de las diferencias finitas (MDF) que consiste en aproximar las derivadas por sus expresiones en diferencias finitas, y posteriormente veremos el método de los elementos finitos (MEF), en el que la función desconocida se escribe como combinación lineal de una base de funciones simples que pueden ser diferenciadas e integradas fácilmente. La función desconocida se describe entonces por un conjunto de coeficientes en esta representación, y mediante una reformulación
+del problema se pueden obtener ecuaciones algebraicas para estos coeficientes.
+ 
+
+\section{Método de las diferencias finitas}
+El método de las diferencias finitas es conceptualmente simple y el más utilizado para resolver ecuaciones diferenciales con condiciones de borde. Consiste, básicamente, en discretizar el dominio y aproximar las ecuaciones diferenciales con sus expresiones en diferencias finitas, calculadas en los puntos discretos del dominio.
+
+Estas ecuaciones en diferencias finitas proceden de las expansiones en series de Taylor de funciones multivariadas, que dan origen a diferentes esquemas. Por ejemplo, la expansión en serie de Taylor de la función $u = u(x,y)$ es:
+\begin{align*}
+ u(x + h, y) &= u(x,y) + h u_x + \frac{h^2}{2!} u_{xx} + \frac{h^3}{3!} u_{xxx} + \cdots \\
+ u(x - h, y) &= u(x,y) - h u_x + \frac{h^2}{2!} u_{xx} - \frac{h^3}{3!} u_{xxx} + \cdots \\
+ u(x + 2h, y) &= u(x,y) + 2h u_x + \frac{(2h)^2}{2!} u_{xx} + \frac{(2h)^3}{3!} u_{xxx} + \cdots \\
+ u(x - 2h, y) &= u(x,y) - 2h u_x + \frac{(2h)^2}{2!} u_{xx} - \frac{(2h)^3}{3!} u_{xxx} + \cdots \\
+ u(x, y + k) &= u(x,y) + k u_y + \frac{k^2}{2!} u_{yy} + \frac{k^3}{3!} u_{yyy} + \cdots \\
+ u(x, y - k) &= u(x,y) - k u_y + \frac{k^2}{2!} u_{yy} - \frac{k^3}{3!} u_{yyy} + \cdots \\
+            &\cdots \\
+ u(x + h, y +k) &= u(x,y) + (h u_x + k u_y) + \frac{1}{2!} (h^2 u_{xx} + 2 h k u_{xy} + k^2 u_{yy}) + \cdots
+ \end{align*}
+ 
+ A partir de estas expresiones es sencillo obtener las aproximaciones para las derivadas parciales de primer y segundo orden. Para las de primer se pueden obtener diferencias hacia adelante:
+\begin{align*}
+ u_x &= \frac{u(x + h, y) - u(x,y)}{h} + O(h) \\
+ u_y &= \frac{u(x, y + k) - u(x,y)}{k} + O(k)
+\end{align*}
+también diferencias hacia atrás:
+\begin{align*}
+ u_x = \frac{u(x,y) - u(x-h,y)}{h} + O(h) \\
+ u_y = \frac{u(x,y) - u(x,y-k)}{k} + O(h) 
+\end{align*}
+y diferencias centrales:
+\begin{align*}
+ u_x = \frac{u(x+h, y) - u(x-h,y)}{2 h} + O(h^2) \\
+ u_y = \frac{u(x, y +k) - u(x,y -k)}{2 k} + O(k^2)
+\end{align*}
+
+Del mismo modo se pueden obtener expresiones en diferencias para las derivadas parciales de segundo orden. En el caso de diferencias hacia adelante resultan:
+\begin{align*}
+ u_{xx} =& \frac{u(x+2h, y) -2u(x+h, y) + u(x,y)}{h^2} + O(h) \\
+ u_{yy} =& \frac{u(x, y+2k) -2u(x, y+k) + u(x,y)}{k^2} + O(h) \\
+ u_{xy} =& \frac{u(x+h, y+k) - u(x, y+k) -u(x+h, y) + u(x, y)}{hk} + O(h, k)
+\end{align*}
+donde la última derivada mixta se obtiene a partir de aproximaciones en diferencias finitas de las derivadas de primer orden. Para el caso de las diferencias hacia atrás las aproximaciones son
+\begin{align*}
+ u_{xx} =& \frac{u(x, y) - 2u(x - h, y) + u(x -2h,y)}{h^2} + O(h) \\
+ u_{yy} =& \frac{u(x, y) - 2u(x, y - k) + u(x,y -2k)}{k^2} + O(h) \\
+ u_{xy} =& \frac{u(x, y) - u(x, y - k) - u(x - h, y) + u(x - h, y - k)}{hk} + O(h, k)
+\end{align*}
+y por último, para las diferencias centrales, se obtiene
+\begin{align*}
+ u_{xx} =& \frac{u(x + h, y) - 2 u(x, y) + u(x-h, y)}{h^2} + O(h^2) \\
+ u_{yy} =& \frac{u(x, y + k) - 2 u(x, y) + u(x, y - k)}{k^2} + O(k^2) \\
+ u_{xy} =& \frac{u(x+h, y+k) - u(x+h, y-k) -u(x-h, y+k) + u(x-h, y-k)}{4 h k} + O(hk)
+\end{align*}
+
+Debe notarse que las expresiones en diferencias centrales son mejores aproximaciones que las demás, dado que estamos despreciando términos que son de orden $h^2$ en diferencias centrales comparados con términos de orden $h$ en las diferencias hacia adelante y hacia atrás. Por este motivo, es preferible utilizar expresiones en diferencias centrales.
+
+Para utilizar las expresiones en diferencias finitas obtenidas en la solución de una EDP es necesario discretizar el dominio. Esto se hace introduciendo una malla particionada uniformemente. Los puntos de la malla son $x_i = i h$ y $y_j = j k$, donde $i = 0, 1, \cdots, N_x$, siendo $N_x + 1$ el número de puntos en los que particionamos el dominio en la dimensión $x$. Si $x \in [0, L_x]$, resulta que $h = L_x / N_x$. Análogamente, $j = 0, 1, \cdots, N_y$, y si $y \in [0, L_y]$ el valor de $k$ es $L_y/N_y$.
+
+Una vez discretizado el dominio, procederemos a la obtención de una aproximación a la solución de la EDP en los puntos de la malla. Consideremos la función $u(x_i, y_j) =u_{i,j}$. Las expresiones anteriores para las derivadas parciales de primer y segundo orden en el punto $(x_i, y_j)$ se pueden establecer para cada caso. Por ejemplo, para las derivadas de primer orden en diferencias finitas hacia adelante resultan:
+\begin{align*} 
+ \frac{\partial u(x_i, y_j)}{\partial x} = u_x \Bigr|_{i,j} =& \frac{u(x_i + h, y_j) - u(x_i, y_j)}{h} + O(h) \\
+                  =& \frac{u(x_{i+1}, y_j) - u(x_i, y_j)}{h} + O(h) \\
+                  =& \frac{u_{i+1, j} - u_{i,j}}{h} + O(h)
+\end{align*}
+
+Análogamente para $u_y$:
+\begin{equation*}
+ \frac{\partial u(x_i, y_j)}{\partial y} = u_y \Bigr|_{i,j} = \frac{u_{i, j+1} - u_{i,j}}{k} + O(k)
+\end{equation*} 
+
+Del mismo modo, las expresiones para las ecuaciones en diferencias hacia atrás:
+\begin{align*}
+ \frac{\partial u(x_i, y_j)}{\partial x} =& u_x \Bigr|_{i,j} = \frac{u_{i, j} - u_{i-1,j}}{h} + O(h) \\
+ \frac{\partial u(x_i, y_j)}{\partial y} =& u_y \Bigr|_{i,j} = \frac{u_{i, j} - u_{i,j-1}}{k} + O(k)
+\end{align*}
+y para las diferencias centrales:
+\begin{align*}
+ \frac{\partial u(x_i, y_j)}{\partial x} =& u_x \Bigr|_{i,j} = \frac{u_{i+1, j} - u_{i-1,j}}{2h} + O(h^2) \\
+ \frac{\partial u(x_i, y_j)}{\partial y} =& u_y \Bigr|_{i,j} = \frac{u_{i, j+1} - u_{i,j-1}}{2k} + O(k^2)
+\end{align*}
+
+Las expresiones de las derivadas de segundo orden, aproximadas por ecuaciones en diferencias finitas, calculadas sobre los puntos de la malla se obtienen de manera análoga que las de primer orden. Para las ecuaciones en diferencias hacia adelante se obtienen:
+
+\begin{align*}
+ \frac{\partial^2 u(x_i, y_j)}{\partial x^2} = u_{xx} \Bigr|_{i,j} =& \frac{u(x_i+2h,y_j) - 2u(x_i+h, y_j) + u(x_i, y_j)}{h^2} + O(h) \\
+ =& \frac{u(x_{i+2}, y_j)-2u(x_{i+1},y_j)+u(x_i, y_j)}{h^2} + O(h) \\
+ =& \frac{u_{i+2,j}-2u_{i+1,j}+u_{i,j}}{h^2} + O(h)
+\end{align*}
+Del mismo modo se obtienen:
+\begin{align*}
+ \frac{\partial^2u(x_i, y_j)}{\partial y^2} = u_{yy} \Bigr|_{i,j} =& \frac{u_{i,j+2}-2u_{i, j+1}+u_{i,j}}{k^2} + O(k) \\
+ \frac{\partial^2u(x_i, y_j)}{\partial x \partial y} = u_{xy} \Bigr|_{i,j} =& \frac{u_{i+1, j+1} - u_{i+1, j} - u_{i, j+1} + u_{i,j}}{hk} + O(h,k)
+\end{align*}
+
+Procediendo de forma análoga se obtienen las expresiones para las diferencias hacia atrás:
+\begin{align*}
+ \frac{\partial^2 u(x_i, y_j)}{\partial x^2} = u_{xx} \Bigr|_{i,j} =& \frac{u_{i,j} - 2 u_{i-1,j} + u_{i-2,j}}{h^2} + O(h) \\
+ \frac{\partial^2u(x_i, y_j)}{\partial y^2} = u_{yy} \Bigr|_{i,j} =& \frac{u_{i,j}- 2 u_{i, j-1} + u_{i,j-2}}{k^2} + O(k) \\
+ \frac{\partial^2u(x_i, y_j)}{\partial x \partial y} = u_{xy} \Bigr|_{i,j} =& \frac{u_{i, j} - u_{i-1, j} - u_{i, j-1} + u_{i-1,j-1}}{hk} + O(h,k)
+\end{align*}
+y finalmente las expresiones para las diferencias centrales:
+\begin{align*}
+ \frac{\partial^2 u(x_i, y_j)}{\partial x^2} = u_{xx} \Bigr|_{i,j} =& \frac{u_{i+1, j} - 2 u_{i,j} + u_{i-1, j}}{h^2} + O(h^2) \\
+ \frac{\partial^2u(x_i, y_j)}{\partial y^2} = u_{yy} \Bigr|_{i,j} =& \frac{u_{i,j+1} - 2 u_{i,j} + u_{i, j-1}}{k^2} + O(k^2) \\
+ \frac{\partial^2u(x_i, y_j)}{\partial x \partial y} = u_{xy} \Bigr|_{i,j} =& \frac{u_{i+1, j+1} - u_{i+1, j-1} - u_{i-1, j+1} + u_{i-1, j-1}}{4hk} + O(hk)
+\end{align*}
+
+\subsection{Ecuación de conducción de calor en 1D con un método explícito} \label{subsec:calor_explicito}
+Aplicaremos ahora el método de las diferencias finitas a la resolución de la EDP que representa la conducción de calor en una varilla (1D):
+\begin{equation}\label{eq:calor1}
+ u_t = c u_{xx}, \qquad x \in (0, L), \, t \in  (0, T)
+\end{equation} 
+
+En esta ecuación, del tipo parábólico, $u(x,t)$ es la temperatura en función de la localización en la barra y el tiempo, y $c >0$ es la difusividad térmica del medio:
+\[c = \frac{k}{c_p \rho}\]
+donde $k$ es la conductividad térmica (cuyas unidades son J m$^{-1}$ s$^{-1}$ K$^{-1}$), $c_p$ es el calor específico a presión constante (en J kg$^{-1}$ K$^{-1}$) y $\rho$ es la densidad del material que compone la barra (en kg m$^{-3}$), por lo que las unidades de $c$ resultan m$^{2}$ s$^{-1}$. Consideramos que dicha barra es unidimensional (una de sus dimensiones es mucho mayor que las otras dos) y se encuentra térmicamente aislada en su superficie lateral, intercambiando calor solo por sus extremos que se mantienen a temperatura constante.
+
+Para obtener una solución única necesitamos condiciones de borde. Con solo una derivada temporal en el tiempo, necesitamos solamente una condición inicial, mientras que al haber una derivada de segundo orden espacial, son necesarias dos condiciones de borde. En el caso de la variable temporal, especificar la solución a $t=0$ representa una condición inicial que podemos formalizar como $u(x,0) = I(x)$ donde $I$ es una función conocida. En la variable espacial las condiciones de borde se establecen en cada punto de la frontera del dominio, en los que debemos conocer el valor de $u$, $u_x$ o una combinación de ambos.
+
+Para resolver un problema simple, adoptaremos las condiciones de borde en $x$ estableciendo el valor de $u$. Entonces, el sistema completo es:
+\begin{align} 
+ u(x,0) =& I(x), \quad x \in [0, L] \label{eq:bordet0}\\
+ u(0, t) =& 0, \qquad t > 0 \label{eq:bordex0}\\
+ u(L, t) =& 2, \qquad t > 0 \label{eq:bordex1}
+\end{align}
+
+El primer paso en el procedimiento de discretización es reemplazar el dominio $[0, L] \times [0, T]$ por un conjunto de puntos de una malla. Tomaremos los puntos equiespaciados:
+\[ x_i = i \Delta x, \quad i = 0, 1, \cdots, N_x \]
+y
+\[ t_j = j \Delta t, \quad j = 0, 1, \cdots, N_t \]
+
+donde tomamos $\Delta x = h = L/N_x$ y $\Delta t = k = T/N_t$. Como hicimos antes, $u_{ij}$ denota la función en los puntos de la malla que aproxima a $u(x_i, t_j)$. Dado que la ecuación \eqref{eq:calor1} debe cumplirse en el punto $(x_i, t_j)$ se obtiene la ecuación:
+\begin{equation}
+ u_t \Bigr|_{i,j} = c u_{xx}\Bigr|_{i,j}
+\end{equation} 
+
+El próximo paso consiste en reemplazar las derivadas por las aproximaciones en diferencias finitas. Esto da origen a diversos esquemas según la representación elegida. El método computacionalmente más simple resulta de utilizar una diferencia hacia adelante en el tiempo (esquema de Euler hacia adelante) y una diferencia central en el espacio:
+\begin{equation} \label{eq:discreta1}
+ \frac{u_{i,j+1} - u_{i,j}}{k} = c \frac{u_{i+1,j} - 2 u_{i,j} + u_{i-1, j}}{h ^2}
+\end{equation} 
+
+De este modo hemos convertido una EDP en ecuaciones algebraicas (o discretas), que son fáciles de resolver. Esto se hace a partir de una ecuación de recurrencia en la que asumimos que $u_{i,j}$ es conocida, mientras que $u_{i, j+1}$ es la única incógnita en \eqref{eq:discreta1}:
+\begin{equation} \label{eq:recurrencia1}
+ u_{i, j+1} = u_i + F(u_{i+1,j} - 2 u_{i,j} + u_{i-1, j})
+\end{equation} 
+donde hemos introducido al número de malla de Fourier $F = ck/h^2$. $F$ es un número adimensional que agrupa el parámetro físico $c$ del problema, junto con los parámetros de la discretización $h$ y $k$. Las propiedades del método numérico dependen en forma crítica del valor de $F$.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=0.8\textwidth]{Chapters/ecuaciones_parciales/figs/calor1d.pdf}
+ \caption{Esquema de solución por diferencias finitas de la ecuación de calor en 1D. Puntos negros: valores conocidos de $u(x, 0)$ (condición inicial). Puntos rojos: valores conocidos de $u(0, t)$ y $u(1, t)$ (condiciones de frontera). Puntos verdes, valores ya calculados de $u(x_i, t_j)$. Puntos blancos: valores por calcular sobre la grilla. Punto azul: valor de $u(x_i, t_{j+1})$ que se obtiene al aplicar el esténcil representado por las líneas negras.}
+ \label{fig:calor1d}
+\end{figure}
+
+
+Podemos ver una representación gráfica de la aplicación de este método en la figura \ref{fig:calor1d}. A la ecuación de recurrencia \eqref{eq:recurrencia1} se la puede representar como un esténcil sobre la grilla, que al ir desplazando sobre puntos en los que ya conocemos el valor aproximado de la solución, nos permite obtener los valores sobre los puntos aún no calculados de la malla.
+
+Analizaremos ahora el código que permite resolver la ecuación \eqref{eq:calor1} con las condiciones de borde \eqref{eq:bordet0}--\eqref{eq:bordex1}. En las primeras líneas del programa importamos, como es usual, los módulos necesarios para acceder a las rutinas especializadas para graficar (líneas 7--9), \mip{numpy} para utilizar arrays (línea 10) y algunos módulos de \mip{scipy} para disponer de diversos métodos de álgebra lineal. A continuación configuramos algunos parámetros de los gráficos que vamos a generar (líneas 18--22). Debe notarse que este bloque inicial de código (líneas 1--22) es común al resto del código analizado en esta sección.
+
+\begin{github}
+ El código completo se encuentra en \href{https://github.com/algunaurl/calor1D-completo.py}{calor1D-completo.py}
+ 
+ \noindent Este programa incluye los tres métodos tratados a continuación para resolver el problema en diferencias finitas, y también la visualización de los resultados.
+\end{github}
+
+\pyfile[firstline=1, lastline=64]{Chapters/ecuaciones_parciales/code/calor1D-completo.py}
+
+En la línea 25 definimos la condición inicial. Dado el array \verb|x| como argumento, devuelve un nuevo array con los valores de una función que en este caso es una parábola que abre hacia abajo, manteniendo los valores de borde establecidos. Luego, en las líneas 36--38 definimos los parámetros físicos del problema: longitud de la barra, el valor máximo de tiempo sobre el que vamos a calcular la solución, y el coeficiente de difusividad térmica.
+
+A continuación (líneas 41--64) definimos la función \mip{graficar(x, t)} que se ocupará de visualizar las curvas que obtengamos de la solución a intervalos de tiempo regulares. Esta función trabaja como un administrador de contexto o \textit{context manager} que nos permite utilizarla ``alrededor'' de las diferentes rutinas de resolución de las ecuaciones en diferencias, evitando de este modo la repetición de código para cada caso. 
+
+\pyfile[firstline=67, lastline=103]{Chapters/ecuaciones_parciales/code/calor1D-completo.py}
+
+La implementación del método explícito de solución queda delimitada por la función \\ \mip{resolver_explicito()} entre las líneas 67 y 103. En dicha función, definimos inicialmente los parámetros del algoritmo: los números de puntos en que dividimos la malla en $x$ (\mip{Nx}) y en $t$ (\mip{Nt}), y calculamos el paso en ambas direcciones (\mip{h} y \mip{k}), así como el valor del número de malla de Fourier. Estos valores se imprimen en pantalla en la línea 75, especialmente para verificar la condición de estabilidad de la solución $F \leq 0.5$.
+
+Representamos los valores de la malla en cada variable mediante los arrays \verb|x| y \verb|t|, definidos en las líneas 78 y 79, mientras que los valores de la función $u(x_i, t_j)$ serán almacenados en el array \mip{u} para cada valor de $t_j$, al cual dimensionamos con \mip{Nx + 1} valores nulos en la línea 82.
+
+En la línea 85 inicializamos el administrador de contexto y a continuación almacenamos en el array \mip{up} los valores de la temperatura de la barra para $t=0$, graficando este estado inicial (líneas 87 y 88). A continuación iniciamos el bucle de la línea 90 en el que iremos iterando sobre los valores de \mip{j} que representan los distintos instantes de tiempo en que dividimos la malla para la variable $t$. En la línea 92 calculamos la solución para \mip{j} conociendo los valores de la solución para \mip{(j - 1)} que tenemos almacenados en \mip{up} con la ecuación de recurrencia \eqref{eq:recurrencia1}. Este cálculo se realiza para los puntos interiores de la malla en $x$, dado que conocemos los valores de borde que se agregan al array \mip{u} en las líneas 95--96. Cada 10 pasos de \mip{j} agregamos la curva que representa la solución al gráfico (líneas 99-100) y finalmente actualizamos los valores en el array \mip{up} con los calculados recientemente almacenados en \mip{u} para avanzar en la iteración en el cálculo del siguiente valor de \mip{j}.
+
+Como salida del programa generamos un gráfico que representa el valor de $u(x)$ para distintos valores de $t$, y representamos la evolución temporal con una secuencia de tonos, desde el más oscuro para $t=0$ hasta el más claro para $t=T$. Esta semántica de tonos está definida en las líneas 46--48 del código. Primero elegimos un mapa de color (\verb|'Greens_r'|) entre los disponibles en Matplotlib. Luego, en la línea 47, escalamos los valores del array \verb|t| en el intervalo $[0,1]$ en forma exponencial, ya que la dinámica es rápida al inicio y luego se hace muy lenta a medida que se aproxima a la solución de equilibrio, y esta forma de escalar permite visualizar ese cambio rápido. El resultado obtenido puede verse en la figura \ref{fig:calor1Dsol}.
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.65]{Chapters/ecuaciones_parciales/figs/calor1d-sol.pdf}
+ \caption{Solución obtenida para el problema de transmisión de calor en 1D. La escala de colores indica la evolución temporal de la solución.}
+ \label{fig:calor1Dsol}
+\end{figure}
+
+En esta solución en particular, con la malla establecida obtenemos valores de $h = 0.1$ y $k = \Delta t = 0.002$, lo cual da un valor de $F \approx 0.4 < 0.5$. Las soluciones obtenidas son suaves, a costa de usar un paso temporal pequeño de modo de obtener acotado el valor de $F$. Invitamos al lector a modificar el código del programa para verificar que con valores de $F$ mayores a $0.5$ se obtienen soluciones que presentan inestabilidades no físicas.
+
+\subsection{Ecuación de conducción de calor en 1D con un método implícito} \label{subsec:calor_implicito}
+La solución mediante el esquema de Euler hacia adelante impone la restricción $F \leq 0.5$ para obtener soluciones numéricamente estables. Si fijamos la separación espacial $h$ de la malla, esto significa que debemos tomar un paso temporal de integración $k = \delta t = h^2/(2c)$. En procesos representados por la ecuación \eqref{eq:calor1} (conducción de calor, difusión, etc.) la solución varía rápido al inicio, pero a medida que transcurre el tiempo el proceso se hace más lento a medida que se acerca al equilibrio (en condición estacionaria obtenemos que $u_t = 0$) y en esta situación tener un paso temporal pequeño puede resultar inconveniente. 
+
+Los métodos implícitos dan origen a un sistema acoplado de ecuaciones que se deben resolver en cada paso de tiempo, en los cuales es posible utilizar cualquier paso $\delta t$, sin obtener inestabilidades numéricas, aunque naturalmente la precisión disminuye al aumentar $\delta t$. El método implícito más simple de implementar es el esquema de Euler hacia atrás, que consiste en utilizar nuevamente una diferencia central como aproximación a la derivada parcial espacial, pero una diferencia hacia atrás en el tiempo:
+\begin{equation}\label{eq:discreta2}
+  \frac{u_{i,j} - u_{i,j-1}}{k} = c \frac{u_{i+1,j} - 2 u_{i,j} + u_{i-1, j}}{h ^2}
+\end{equation} 
+
+En este caso asumimos que conocemos la solución $u_{i, j-1}$ en el tiempo $j-1$, pero todas las cantidades en el tiempo $j$ son ahora desconocidas, con lo cual no es posible resolver con respecto de $u_{i,j}$ porque este valor está acoplado a los vecinos en la malla $u_{i-1, j}$ y $u_{i+1,j}$, que también son desconocidos. Esta expresión da origen a un sistema de $(N_x - 1) \times (N_t - 1)$ ecuaciones algebraicas acopladas.
+
+Multiplicando ambos términos de la ecuación \eqref{eq:discreta2} por $k$ y reacomodando obtenemos:
+\begin{equation} \label{eq:recurrencia2}
+ -F u_{i-1, j} + (1+2F) u_{i,j} - F u_{i+1,j} = u_{i,j-1}
+\end{equation} 
+para $i = 1, \cdots, N_x - 1$, ya que por las condiciones de borde \eqref{eq:bordex0} y \eqref{eq:bordex1} conocemos los valores en $i=0$ y $i=N_x$. Entonces, dado un valor de $j$, tenemos $N_x-1$ ecuaciones dadas por \eqref{eq:recurrencia2} sobre los puntos internos de la malla en $x$. Una vez obtenida la solución para este sistema, es necesario iterar sobre $j$ para obtener las sucesivas soluciones que representan la evolución temporal del sistema.
+
+El sistema de ecuaciones acopladas dadas por la ecuación \eqref{eq:recurrencia2}, junto con las condiciones de borde \eqref{eq:bordex0} y \eqref{eq:bordex1}, pueden representarse en forma matricial:
+\begin{equation} \label{eq:sislin}
+ \mathbb{A} \cdot \bm{u} = \bm{b}
+\end{equation} 
+donde $\bm{u} = (u_{1,j}, u_{1,j}, \cdots, u_{N_x-1,j})$ y la matriz $\mathbb{A}$ tiene $N_x-1$ filas y $N_x-1$ columnas con la siguiente estructura tridiagonal:
+
+\begin{equation*}
+ \mathbb{A} = 
+ \begin{pmatrix}
+  (1+2F) & -F &    0    & 0 & \cdots  & \cdots  &  0  & 0\\
+  -F     & (1+2F) & -F & 0  & \cdots   &     \cdots   &  0  & 0 \\
+  0      & -F & (1+2F) & -F & 0   & \cdots &  0  & 0 \\   
+  \vdots & \vdots & \ddots & \ddots & \ddots & \cdots &  \vdots  & \vdots \\ 
+  0      &  0     & \ddots  & 0& -F & (1+2F) & -F & 0 \\
+ \vdots  &   \vdots    & \ddots  &  \ddots &  0  &-F & (1+2F) & -F\\
+  0      & \cdots& \cdots  &   \cdots & 0     &   0     & -F & (1+2F)
+ \end{pmatrix}
+ \end{equation*}
+mientras que el vector $\bm{b}$ es:
+ \begin{equation*}
+ \bm{b} =
+ \begin{pmatrix}
+  u_{1,j-1} + F u_{0,j} \\
+  u_{2,j-1} \\
+  \vdots \\
+  u_{N_x -2,j-1} \\
+  u_{N_x -1,j-1} + F u_{N_x, j}
+ \end{pmatrix}
+ \end{equation*} 
+
+La forma de calcular los valores de la matriz $\mathbb{A}$ puede representarse desplazando el esténcil mostrado en la figura \ref{fig:calor1dimpl} a lo largo de la fila $j$, y resolver este sistema nos permite obtener la solución para el tiempo correspondiente a ese valor de $j$. Una vez resuelto el sistema, se construye uno nuevo para la fila $j+1$ a partir de los valores recién calculados, avanzando de este modo la solución temporal.
+
+Debe notarse que la matriz $\mathbb{A}$ no posee elementos que cambien con el tiempo, por lo que una vez construida es la misma para todos los soluciones de la progresión en $j$, mientras que el vector $\bm{b}$ depende de los valores de $u$ calculados en  $j-1$. Por lo tanto, en cada iteración que resuelva el sistema en su evolución temporal, debemos actualizar los valores de $\bm{b}$.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=0.95\textwidth]{Chapters/ecuaciones_parciales/figs/calor1d-impl.pdf}
+ \caption{Esquema de solución por diferencias finitas de la ecuación de calor en 1D usando un esquema implícito. Puntos negros: valores conocidos de $u(x, 0)$ (condición inicial). Puntos rojos: valores conocidos de $u(0, t)$ y $u(1, t)$ (condiciones de frontera). Puntos verdes, valores ya calculados de $u(x_i, t_j)$. Puntos blancos: valores por calcular sobre la grilla. Puntos azules: valor de $u(x_i, t_{j+1})$ que se calculan al aplicar el esténcil representado por las líneas negras. A la derecha se esquematizan las modificaciones en el esténcil al evaluar las condiciones de borde.}
+ \label{fig:calor1dimpl}
+\end{figure}
+
+La implementación del algoritmo para resolver la ecuación de calor en una dimensión usando el esquema implícito se encuentra integrada al código que presentamos en la subsección anterior (\ref{subsec:calor_exlicito}), esta vez en la definición de la función \mip{resolver_implicito()} en la línea 106. Inicialmente definimos los parámetros del algoritmo: cantidad de puntos en que dividimos la malla en cada dimensión $x$ y $t$ (\mip{Nx} y \mip{Nt}, los pasos en cada malla (\mip{h} y \mip{k}) y el número de malla de Fourier (\mip{F}), tal como se puede ver en las líneas 109--113.
+
+\pyfile[firstline=106, lastline=153]{Chapters/ecuaciones_parciales/code/calor1D-completo.py}
+
+En las líneas siguientes (117--131) generamos las estructuras en arrays para representar la malla en las dimensiones $x$ y $t$, la solución $u(x_i, t_j)$, la matriz $\mathbb{A}$ y el vector $\bm{b}$.
+
+En la línea 133 inicializamos el administrador de contexto y a continuación generamos el valor inicial de la solución, que almacenamos en el array \mip{up}, trazando la solución inicial en la línea 136.
+
+En el bucle \mip{for} de la línea 139 iteramos sobre los valores de $j$ que representan la progresión temporal de la solución, calculando en cada paso de la iteración el valor del vector $\bm{b}$. La solución se obtiene en la línea 145 con el método \mip{linalg.solve} que importamos previamente del módulo \mip{scipy}, y establecemos el valor conocido en el borde en la línea 146. Completamos el bloque del \mip{for} trazando la curva de la solución cada 10 pasos de iteración y finalmente actualizamos el valor del array \mip{up} antes de dar el próximo paso. 
+
+Tal como hicimos al final de la sección anterior, proponemos ahora al lector resolver el sistema utilizando pasos temporales mayores (es decir con menos divisiones de la malla en la dimensión temporal) para observar que, a diferencia del esquema implícito, no se generan inestabilidades numéricas.
+
+\subsection{Implementación con matriz rala}
+Hemos visto que la matriz $\mathbb{A}$ de la sección anterior es tridiagonal, aunque no explotamos este hecho en el código de resolución con el abordaje implícito, ya que almacenamos en el array \mip{A} una representación completa (o \textit{densa}) que incluye muchos elementos que sabemos desde el inicio que son nulos, y el algoritmo implementado en \mip{solve} resuelve el sistema con todos los ceros. Considerando que tenemos $N_x-1$ incógnitas, el método \mip{solve} realiza operaciones del orden de $(N_x -1)^3$ y requiere el almacenamiento de $(N_x - 1)^2$ elementos.
+
+Por otra parte, utilizando el hecho que $\mathbb{A}$ es tridiagonal y utilizando las herramientas de \textit{software} correspondientes, las demanda de cálculo y almacenamiento son proporcionales solamente a $N_x$. Esto conduce a una mejora significativa en el rendimiento del código, tanto por el uso de memoria como por la velocidad de ejecución. Veremos ahora cómo resolver la ecuación de calor en 1 dimensión con un esquema implícito tomando ventaja de que $\mathbb{A}$ es tridiagonal.
+
+La idea es utilizar por un lado una representación de $\mathbb{A}$ como matriz rala (o \textit{sparse}, como se usa en inglés), y para ello usaremos el paquete \mip{scipy.sparse}, de modo de almacenar solamente los elementos no nulos de $\mathbb{A}$. Por otro lado, utilizaremos algoritmos de solución que operan sobre estructuras de matrices ralas, contenidos también en \mip{scipy.sparse}. Esta implementación está contenida en la función \mip{resolver_ralas} del mismo código común a toda esta sección:
+
+\pyfile[firstline=156, lastline=205]{Chapters/ecuaciones_parciales/code/calor1D-completo.py}
+
+Al igual que en los casos de las subsecciones anteriores, las primeras líneas de esta función determinan los parámetros del algoritmo y los arrays que almacenan la grilla y la solución (ver líneas 159--171).
+
+En las líneas 174--176 calculamos los elementos no nulos de $\mathbb{A}$ que componen la diagonal principal, superior e inferior de $\mathbb{A}$, almacenándolos en las variables \mip{diagonal}, \mip{superior} e \mip{inferior}, respectivamente. Con estos valores construimos la matriz rala \mip{A} en la línea 178. Este método requiere varios argumentos: \mip{diagonals} es una lista conteniendo los valores que definen la matriz; \mip{offsets} establece la ubicación en la matriz (0 es la diagonal principal, 1 es la primer diagonal superior, $-$1 es la primer diagonal inferior); \mip{shape} establece la cantidad de elementos en la matriz y finalmente \mip{format} da cuenta de cómo se almacenan internamente los elementos de \mip{A}. En particular, el método \mip{'csr'} (formato \textit{Compressed Sparse Row}) es el apropiado para realizar las operaciones de manipulación y multiplicacion requeridas para resolver el sistema lineal de ecuaciones.\footnote{Ver \href{https://en.wikipedia.org/wiki/Sparse_matrix}{entrada en Wikipedia.}}
+
+En la línea 183 imprimimos en pantalla la representación densa de \mip{A}, para verificar que fue construida correctamente. Cuando establecemos el valor \mip{Nx = 10} en la línea 159 la salida en pantalla es:
+
+\begin{verbatim}
+[[ 1.8 -0.4  0.   0.   0.   0.   0.   0.   0. ]
+ [-0.4  1.8 -0.4  0.   0.   0.   0.   0.   0. ]
+ [ 0.  -0.4  1.8 -0.4  0.   0.   0.   0.   0. ]
+ [ 0.   0.  -0.4  1.8 -0.4  0.   0.   0.   0. ]
+ [ 0.   0.   0.  -0.4  1.8 -0.4  0.   0.   0. ]
+ [ 0.   0.   0.   0.  -0.4  1.8 -0.4  0.   0. ]
+ [ 0.   0.   0.   0.   0.  -0.4  1.8 -0.4  0. ]
+ [ 0.   0.   0.   0.   0.   0.  -0.4  1.8 -0.4]
+ [ 0.   0.   0.   0.   0.   0.   0.  -0.4  1.8]]
+\end{verbatim}
+
+Del mismo modo que hicimos en los métodos explícito e implícito, en la línea 185 iniciamos el administrador de contexto, seguido del cálculo del valor inicial que almacenamos en \mip{up} y graficamos en la línea 188. El bucle \mip{for} de la línea 191 es casi idéntico al mostrado en la subsección anterior (\ref{subsec:calor_implicito}), con la única diferencia de que utilizamos el método \mip{spsolve} del submódulo \mip{linalg} de \mip{scipy.sparse} (ver línea 15) al que nos referimos con el nombre \mip{sparse_linalg} para diferenciarlo del método \mip{linalg} de \mip{scipy}, que resuelve el sistema lineal de ecuaciones, especializado en la utilización de matrices ralas.
+
+Ejecutando el código con una malla fina en $x$ (usando \mip{Nx = 100} en la línea 159) obtenemos la figura \ref{fig:calor1Dsol-imp-rala}, en la que se puede apreciar que con una malla tan fina la curva se aprecia muy suave, a diferencia de la figura \ref{fig:calor1Dsol}. También en este caso hemos incrementado la resolución de la malla temporal, usando \mip{Nt = 1000} en la línea 160.
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.65]{Chapters/ecuaciones_parciales/figs/calor1d-sol-imp-rala.pdf}
+ \caption{Solución obtenida para el problema de transmisión de calor en 1D con el método implícito y usando matrices ralas. La escala de colores indica la evolución temporal de la solución.}
+ \label{fig:calor1Dsol-imp-rala}
+\end{figure}
+
+
+Podemos comparar la eficiencia de usar matrices ralas, al menos en cuanto a su velocidad de ejecución y uso de mamoria, utilizando el comando 
+\begin{verbatim}
+/usr/bin/time -v [programa ejecutable]
+\end{verbatim}
+y comparando la salida al ejecutar ambos códigos en condiciones similares. Para ello comentamos las salidas a pantalla con \mip{print} y todas las líneas relativas a la generación de gráficos. Para realizar la comparación, en ambos casos usamos una grilla temporal con \mip{Nt = 1000} y variamos el tamaño de la grilla espacial (\mip{Nx}). En la Tabla \ref{tab:eqdifperf} podemos ver la salida de \verb|time| extrayendo solo los valores de \verb|System time| (tiempo de ejecución del sistema) y \verb|Maximum resident set size| que es el máximo tamaño que ocupa la ejecución del prograna en memoria. Los valores corresponden a la ejecución de ambos códigos en un procesador Intel© Core\textsuperscript{TM} i7-2600. 
+
+Vemos que el uso de matrices ralas reduce dramáticamente el tiempo de ejecución del programa, debido a la eficiencia en el manejo de los pocos valores que contienen las estructuras de datos de las matrices ralas en comparación con las densas. Por otra parte, la diferencia en memoria no es muy grande para sistemas pequeños, pero la demanda de almacenamiento se reduce a casi el 20 \% para la malla más grande analizada. 
+
+\begin{table}
+\centering
+\begin{tabular}{l c c c c c c}
+\toprule
+\multirow{2}{*}{\mip{Nx}} & \multicolumn{3}{c}{\textbf{Tiempo (s)}} & \multicolumn{3}{c}{\textbf{Memoria (kb)}} \\
+ \cmidrule(l){2-4} \cmidrule(l){5-7}
+ & Densas & Ralas & \% & Densas & Ralas & \% \\
+\midrule
+500 & 20.44 & 0.43 & 2.10 & 82548 & 66144 & 80.13 \\
+1000 & 88.15 & 0.52 & 0.59 & 97212 & 66260 & 68.16 \\
+2000 & 343.49 & 0.59 & 0.17 & 145908 & 67692 & 46.39 \\
+4000 & 651.98 & 0.82 & 0.13 & 342296 & 68332 & 19.96 \\
+\bottomrule
+\end{tabular}
+\caption{Rendimientos con diferentes tamaños de malla. Se comparan los tiempos de ejecución y el máximo uso de memoria. Los porcentajes se calculan como fracción de los valores correspondientes a matrices densas.}
+\label{tab:eqdifperf}
+\end{table}
+
+\section{Método de elementos finitos}
+El método de diferencias finitas descripto en la sección anterior tiene más interés académico que práctico, solo problemas con geometrías simples pueden ser abordados eficientemente de esta forma. Para problemas reales, los métodos de elementos finitos (MEF) o volúmenes finitos (MVF) son los que se usan comúnmente en ciencias e ingenierías.
+
+Aunque ambos métodos (MEF y MVF) son aplicables a cualquier sistema de ecuaciones en derivadas parciales multi-física, el uso de MEF está más consolidado en problemas de análisis estructural, elasticidad y transferencia de calor, mientras que el MVF utiliza el teorema de Gauss para simplificar ecuaciones integrales siempre que sea posible, y tiene amplia difusión en problemas de mecánica de fluidos para resolver la ecuación de Navier-Stokes. Para problemas vinculados al electromagnetismo (ecuaciones de Maxwell), campos gravitacionales, etc., ambos métodos presentan formulaciones útiles. Una descripción detallada de estos métodos excede el alcance de este libro, en esta sección daremos solo un abordaje introductorio al MEF, resolviendo un problema simple con esta técnica y utilizando un \textit{software} específico que implementa los algoritmos necesarios.
+
+Existen numerosos entornos de trabajo, o \textit{frameworks}, para resolver EDP mediante elementos finitos. Entre ellos podemos mencionar scikit-fem\footnote{\href{https://scikit-fem.readthedocs.io/en/latest/index.html}{https://scikit-fem.readthedocs.io/en/latest/index.html}}, SfePy\footnote{\href{http://sfepy.org/doc-devel/index.html}{http://sfepy.org/doc-devel/index.html}}, polyfem\footnote{\href{https://polyfem.github.io/python/}{https://polyfem.github.io/python/}}, fempy\footnote{\href{https://pypi.org/project/fempy/}{https://pypi.org/project/fempy/}} y FEniCS\footnote{\href{https://fenicsproject.org/}{https://fenicsproject.org/}}. Estos \textit{frameworks} incorporan diversas herramientas para resolver una variedad de problemas expresados mediante EDP, especialmente métodos eficientes para resolver los grandes sistemas de ecuaciones usando matrices ralas. El ejemplo que desarrollaremos a continuación lo implementaremos con FEniCS, ya que provee una práctica interfaz en Python a un poderoso código que implementa el MEF (utilizaremos el turorial de FEniCS\cite{LangtangenLogg2017} como guía en esta sección).
+
+\subsection{Ecuación de Poisson}
+
+Tal vez el problema más simple expresado en EDP sea resolver la ecuación de Poisson, que aparece en muchos problemas físicos como la conducción de calor, la difusión de sustancias, electrostática o flujos de fluidos inmiscibles, entre otros. Dicha ecuación se expresa:
+
+\begin{align} 
+ -\nabla^2 u &= f\phantom{_D} \quad \text{ en } \Omega \label{eq:poisson} \\
+           u &= u_D           \quad \text{ en } \partial \Omega \label{eq:poisson-b}
+\end{align}
+
+donde $u = u(\bm{x})$ es la función desconocida mientras que $f = f(\bm{x})$ está determinada. $\nabla^2$ es el operador de Laplace (denotado a menudo $\Delta$), $\Omega$ es el dominio espacial y $\partial \Omega$ su frontera. No tenemos en esta ecuación una derivada temporal, por lo que estamos representando una condición estacionaria, a diferencia del caso aborado en la sección anterior.
+
+En un espacio cartesiano bidimensional con coordenadas $x$ y $y$, la ecuación \eqref{eq:poisson} se escribe:
+\begin{equation}\label{eq:poisson2d}
+ -\frac{\partial^2 u}{\partial^2 x} -\frac{\partial^2 u}{\partial^2 y} = f(x,y)
+\end{equation} 
+en la cual ahora $u$ es función de dos variables, $u(x,y)$, definida sobre el dominio bidimensional $\Omega$.
+
+Resolver un problema con condiciones de borde como la ecuación de Poisson \eqref{eq:poisson2d} con las condiciones de borde dadas por la ecuación \eqref{eq:poisson-b} consiste en transitar las siguientes etapas:
+\begin{enumerate}
+ \item Identificar el dominio computacional $\Omega$, la EDP, sus condiciones de frontera y los términos fuente $f$.
+ \item Reformular la EDP como un problema variacional de elementos finitos.
+ \item Escribir un código en Python que defina el dominio computacional, el problema variacional, las condiciones de contorno.
+ \item Utilizar las rutinas de FEniCS para resolver el problema con condiciones de contorno y, opcionalmente, extender el programa para calcular cantidades derivadas como flujos y promedios, y visualizar los resultados.
+\end{enumerate}
+
+\subsection{Formulación variacional}
+La idea central del método de elementos finitos consiste en representar el dominio sobre el que está definido la EDP con un conjunto finito de regiones discretas, o \textit{elementos}, y aproximar la función desconocida por medio de una combinación lineal de funciones base con soporte local sobre estos elementos (o sobre un grupo de elementos vecinos).
+
+El núcleo del procedimiento para convertir una EDP en un problema variacional es el de multiplicar la EDP por una función $v$, integrar esa función sobre el dominio $\Omega$ mediante integración por partes de los términos con derivadas de segundo orden. A la función $v$ utilizada para multiplicar la EDP se la denomina función de prueba o \textit{test}. Por otra parte, la función desconocida $u$ que se va a aproximar se denomina función ensayo o \textit{trial}. Mantendremos en adelante los nombres en inglés debido a que es como se las llama en el código Python de FEniCS.
+
+Multiplicamos entonces la ecuación de Poisson por la función \textit{test} $v$ e integramos:
+\begin{equation}\label{eq:fem01}
+ -\int_{\Omega} (\nabla^2 u) v \; dx = \int_{\Omega} f v \; dx
+\end{equation} 
+
+Luego aplicamos integración por partes al integrando con derivadas de segundo orden:
+\begin{equation}\label{eq:fem02}
+ -\int_{\Omega} (\nabla^2 u) v \; dx = \int_{\Omega} \nabla u \cdot \nabla v \; dx - \int_{\partial \Omega} \frac{\partial u}{\partial n} v ds
+\end{equation} 
+donde $\partial u / \partial n$ es la derivada de $u$ en la dirección normal a la frontera con sentido hacia afuera del dominio. Un requerimiento que debe cumplir la función $v$ es que se anule en las partes de la frontera donde se conoce $u$, lo que para este problema implica que $v=0$ en toda la frontera $\partial \Omega$. Esta condición anula el segundo término del lado derecho de la ecuación \eqref{eq:fem02}. De las ecuaciones \eqref{eq:fem01} y \eqref{eq:fem02} obtenemos:
+\begin{equation}\label{eq:fem03}
+ \int_{\Omega} \nabla u \cdot \nabla v \; dx = \int_{\Omega} f v \; dx
+\end{equation} 
+
+Esta ecuación es válida para toda $v$ en algún espacio de funciones $\hat{V}$, mientras que la función \textit{trial} $u$ pertenece al (posiblemente diferente) espacio de funciones $V$. La ecuación \eqref{eq:fem03} representa la \textit{formulación débil} del problema con condiciones de borde original (o \textit{formulación fuerte}) dado por las ecuaciones \eqref{eq:poisson} -- \eqref{eq:poisson-b}.
+
+Para resolver numéricamente la ecuación de Poisson necesitamos transformar el problema variacional continuo \eqref{eq:fem03} en un problema variacional discreto. Esto se consigue introduciendo espacios de dimensión finita para las funciones \textit{test} y \textit{trial}, que denotaremos como $\hat{V}_h \subset \hat{V}$ y $V_h \subset V$, respectivamente. El problema variacional discreto puede enunciarse entonces como: encontrar $u_h \in V_h \subset V$ tal que:
+\begin{equation} \label{eq:fem04}
+ \int_{\Omega} \nabla u_h \cdot \nabla v \; dx = \int_{\Omega} f v \; dx \quad \forall v \in \hat{V}_h \subset \hat{V}
+\end{equation} 
+
+La elección de $V_h$ y $\hat{V}_h$ dependen del tipo de elementos finitos que queremos usar en nuestro problema, y para la mayoría de los casos de interés estos espacios son bien conocidos. Por ejemplo, si elegimos elementos lineales triangulares con tres nodos, $V_h$ y $\hat{V}_h$ son los espacios de todas las funciones lineales por tramos sobre una malla de triángulos, en las que las funciones de $\hat{V}_h$ son cero en la frontera y las de $V_h$ son iguales a $u_D$. Para ilustrar estas funciones en una dimensión, la figura \ref{fig:fem01} muestra al intervalo $[0, 6]$ discretizado en cinco puntos interiores, y una función continua (línea negra) se aproxima como una función lineal a tramos (en líneas de puntos verde) mediante una combinación lineal de funciones triangulares base (en líneas azules).
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics[scale=1.0]{Chapters/ecuaciones_parciales/figs/fem01.pdf}
+ \caption{Ejemplo de aproximación de una función (línea negra) mediante funciones base lineales por tramos (líneas azules).}
+ \label{fig:fem01}
+\end{figure}
+
+Es usual en la literatura matemática denotar a $u_h$ como la solución del problema discreto y $u$ la del problema continuo. Sin embargo utilizaremos $u$ para representar la solución discreta para mantener la nomenclatura de FEniCS. La secuencia es, entonces, representar con $u$ a la función desconocida de la EDP, derivar la formulación variacional con $u \in V$ y $v \in \hat{V}$, y luego discretizar el problema eligiendo espacios de dimensión finita para $V$ y $\hat{V}$, con lo cual $u$ se convierte en una función de elemento finito discreto. En la práctica esto ocurre a partir de crear una malla para discretizar el dominio $\Omega$ y la elección del tipo de elemento, y hacer entonces corresponder $V$ a esta malla y elemento elegido. Dependiendo de si $V$ es de dimensión finita o infinita, $u$ será la solución aproximada o la exacta.
+
+Resulta conveniente aquí introducir una notación unificada para representar la formulación débil del problema \eqref{eq:fem04}:
+\begin{equation}\label{eq:fem-debil}
+a(u, v) = L(v)
+\end{equation}
+
+Para la solución de la ecuación de Poisson, las expresiones explícitas en la expresión anterior son
+\begin{align}
+ a(u, v) &= \int_{\Omega} \nabla u \cdot \nabla v \; dx \label{eq:fembilineal} \\
+ L(v) &= \int_{\Omega} f v \; dx \label{eq:femlineal} 
+\end{align}
+
+En la literatura matemática, $a(u, v)$ se conoce como una \textit{forma bilineal} ($V \times \hat{V} \mapsto \mathbb{R}$), mientras que $L(v)$ es una \textit{forma lineal} ($\hat{V} \mapsto \mathbb{R}$). De este modo, para cada problema lineal que queremos resolver tenemos que identificar los términos con la función incógnita $u$ y agruparlos en $a(u, v)$, y del mismo modo agrupar los términos que dependen solo de las funciones conocidas en $L(v)$. Estas fórmulas para $a$ y $L$ se codifican directamente en el programa.
+
+En síntesis, antes de escribir el código de Python para que FEniCS resuelva una EDP, debemos realizar dos pasos:
+\begin{enumerate}
+ \item Convertir la EDP en un problema variacional discreto, esto es, encontrar $u \in V$ tal que:
+ \begin{equation}
+  a(u, v) = L(v) \quad \forall v \in \hat{V}
+ \end{equation} 
+ \item Elegir los espacios $V$ y $\hat{V}$, lo que significa especificar la malla y el tipo de elementos finitos.
+\end{enumerate}
+
+\subsection{Implementación en FEniCS}
+Veamos ahora cómo resolvemos la ecuación de Poisson en un problema concreto. Queremos determinar la condición estacionaria de la temperatura de una placa (es decir, en dos dimensiones) cuyos bordes se mantienen a temperaturas fijas. Elegiremos un problema sencillo, del cual conocemos la solución exacta, para poder verificar la precisión de la solución. Para ello, vamos a elegir la solución exacta:
+\begin{equation}\label{eq:femex}
+ u_e(x,y) = 1 + x + 2 y^2
+\end{equation} 
+en un dominio en dos dimensiones. Si reemplazamos $u_e$ en la ecuación de Poisson \eqref{eq:poisson2d}, vemos que $u_e(x,y)$ es solución si:
+\begin{equation}
+ f(x, y) = -4, \quad u_D(x, y) = u_e(x, y) = 1 + x + 2 y^2
+\end{equation} 
+independientemente de la forma del dominio. Elegiremos por simplicidad un dominio cuadrado $\Omega = [0, 1] \times [0, 1]$. El MEF, sobre un dominio rectangular uniformemente particionado en elementos triangulares lineales, reproduce exactamente un polinomio de segundo grado en los vértices de las celdas, independientemente del tamaño de los elementos. De este modo, la solución aproximada obtenida deberá ser igual a la exacta (con la precisión de la representación de punto flotante) en los nodos.
+
+El código para resolver la ecuación de Poisson en 2D usando FEniCS, dadas las elecciones de $u_D$, $f$ y $\Omega$ es el siguiente:
+
+\pyfile{Chapters/ecuaciones_parciales/code/fem.py}
+
+Iniciamos el programa importando todo lo que está definido en el módulo \mip{fenics}. En particular nos permite usar las funciones \mip{UnitSquareMesh}, \mip{FunctionSpace}, \mip{Expression} y demás definiones. También importamos \mip{numpy} para realizar alguna operación sobre arrays.
+
+Lo primero que hacemos es crear una malla que almacenamos en la variable \mip{mesh}, en la línea 17. Para eso usamos \mip{UnitSquareMesh} que define una malla uniforme sobre el cuadrado unitario $[0,1] \times [0,1]$. Esta malla está compuesta de celdas que en 2D son triángulos. Los parámetros 10 y 10 especifican que el cuadrado debe dividirse primero en 10 divisiones en cada dimensión (lo que genera 100 cuadrados de lado $0.1$ que cubren todo el cuadrado unitario). Cada uno de estos cuadrados interiores se divide en un par de triángulos (incluso se puede definir en qué dirección trazar la diagonal que divide el cuadrado en dos triángulos). En total se generan $2 \times 10 \times 10 = 200$ triángulos, con un total de $(10 + 1) (10 + 1) = 121$ vértices o nodos. FEniCS dispone de rutinas que realizan mallados sobre geometrías simples en una, dos y tres dimensiones, pero en problemas con geometrías complejas es necesario utilizar programas especializados en esta tarea (podemos destacar Gmsh\footnote{\url{https://gmsh.info/}{https://gmsh.info/}} como un excelente generador de mallas). En estos casos, las mallas generadas por programas externos pueden importarse en FEniCS para ser usadas en los cálculos de MEF.
+
+A continuación creamos el espacio $V$ de funciones de elemento finito, almacenado en la variable \mip{V} de la línea 18. Este espacio se crea sobre \mip{mesh}, que es el primer argumento. El segundo, \mip{'P'}, declara la utilización de la familia estándar Lagrange de elementos (también se puede usar \mip{'Lagrange'} para esta familia. FEniCS soporta todos los elementos de la Tabla Periódica de los Elementos Finitos\footnote{\href{https://www-users.math.umn.edu/~arnold/femtable/}{https://www-users.math.umn.edu/~arnold/femtable/}} \cite{arnold2014} con su correspondiente notación. El tercer argumento (\mip{1}) especifica el grado del elemento finito. En este caso, el elemento lineal de Lagrange estándar $P_1$ es un triángulo con nodos en los tres vértices (nombrado en algunas referencias como ``triángulo lineal''). 
+
+Luego tenemos que definir las condiciones de borde $u = u_D$ en $\partial \Omega$. Esto se hace en la línea 26 usando la función \mip{DirichletBC}. En los argumentos de esta función debe especificarse el espacio de funciones (\mip{V}), la expresión matemática que define a $u_D$ y la frontera donde ésta función aplica. 
+
+La definción de la función $u_D$ se hace en la línea 21. La cadena que es el primer argumento de esta función debe ser escrita con la sintaxis de C++, ya que la evaluación de las expresiones se realiza por medio de código especializado en ese lenguaje (todas las funciones que se pueden incluir se encuentran definidas en el archivo de cabecera \mip{cmath} de C++, como \mip{sin}, \mip{exp}, \mip{log}, etc.), y en este caso depende de las variables \mip{x[0]} y \mip{x[1]} correspondientes a las coordenadas $x$ y $y$. Como tercer argumento usamos un \mip{2}, lo que significa que $u_D$ puede representar la solución cuadrática exacta de nuestro problema.
+
+Para finalizar la definición de \mip{bc} debemos indicar en el tercer argumento de la línea 26 la región $\partial \Omega$ que define el borde del dominio. Para eso definimos la función \mip{boundary} en la línea 23, que devuelve \mip{True} si \mip{x} está en el borde del dominio. El argumento \mip{on_boundary} es \mip{True} si \mip{x} está en el borde físico del dominio, por lo que simplemente podemos devolver ese valor en la función \mip{boundary}. Esta función será llamada para cada punto discreto de la malla, lo que significa que podemos definir bordes donde $u$ es conocida incluso dentro de la malla, si es necesario.
+
+Con estas definiciones previas podemos empezar a resolver el problema. En las líneas 29 y 30 declaramos las variables \mip{u} y \mip{v} como funciones \textit{trial} y \textit{test} definidas sobre el espacio \mip{V}. En la matemática del método distinguimos los espacios $V$ y $\hat{V}$, pero en este problema la única diferencia ocurre en las condiciones de borde. FEniCS no especifica estas condiciones como parte de un espacio de funciones, por lo que es suficiente trabajar con un espacio común \mip{V} para las funciones \textit{test} y \textit{trial}.
+
+Antes de definir las formas bilineal y lineal del problema es necesario definir la función $f$. Podemos hacerlo del mismo modo que la variable \mip{u_D} de la línea 21, pero como en este caso la función es constante, se representa en forma más eficiente usando la función \mip{Constant}. Con todas las definiciones en su lugar, podemos ahora especificar $a(u, v)$ y $L(v)$ tal como lo hacemos en las líneas 32 y 33 del programa. Podemos destacar aquí la similiaridad con las contrapartes matemáticas dadas por las ecuaciones \eqref{eq:fembilineal} y \eqref{eq:femlineal}. Esta característica de poder expresar la formulación variacional con un código Python muy similar constituye una de las fortalezas de FEniCS, ya que hace simple representar problemas en EDP más complejos que el de este ejemplo. 
+
+En las líneas 36 y 37 se resuelve el problema. Notemos que primero definimos la variable \mip{u} como \mip{TrialFunction} y la usamos para representar la función desconocida de la forma bilineal \mip{a}. Ahora la redefinimos como un objeto \mip{Function} que representa la solución. Si bien son objetos diferentes, ambos representan el mismo objeto matemático por lo que es natural usar la misma variable.
+
+Utilizaremos en este ejemplo un programa externo para visualizar la solución: ParaView\footnote{\href{https://www.paraview.org/}{https://www.paraview.org/}}. Esta es una herramienta poderosa para la representación gráfica de campos escalares y vectoriales, incluyendo los calculados por FEniCS. Para ello es necesario guardar la información de estos campos, contenida en la variable \mip{u}, en el popular formato VTK\footnote{\href{https://vtk.org/}{https://vtk.org/}}, lo que hacemos en las líneas 40 (definiendo el nombre del archivo que escribiremos en disco) y 41 (escribiendo en el archivo el contenido de \mip{u}). Debe notarse que la forma de esta operación de escritura no es muy \textit{pythónica}, ya que hace uso del operador de inserción ``\mip{<<}'' propio de C++.
+
+Finalmente, dado que empezamos este ejemplo a partir de la solución exacta de la ecuación de Poisson, podemos calcular el error obtenido con el MEF. Este cálculo lo realizaremos de dos maneras: mediante la norma $L^2$ y el error en los vértices de la malla.
+
+Para el primer caso, almacenamos en la variable \mip{error_L2} el resultado de la función \mip{errornorm}, que calcula la norma $L^2$ definida como:
+\begin{equation}
+ E = \sqrt{\int_{\Omega} (u_D - u)^2 \; dx}
+\end{equation} 
+
+Dado que la solución exacta es cuadrática, mientras que la solución por MEF es lineal por tramos, el error será distinto de cero.
+
+Para el segundo caso, debemos recordar que el error en todos los vértices de la malla debería ser nulo con precisión de punto flotante de la máquina. Para calcularlo evaluamos la función exacta y la obtenida por FEniCS en todos los vértices de la malla (usando el método \mip{compute_vertex}, obtenemos el valor absoluto de la diferencia en cada punto, y luego buscamos el máximo de estos valores. Estas operaciones se realizan en las líneas 47 -- 49.
+
+Ejecutando el programa obtenemos:
+\begin{verbatim}
+❯ ./fem.py 
+Solving linear variational problem.
+Error L2 = 0.003651483716703487
+Error máximo = 6.661338147750939e-15
+\end{verbatim}
+
+Podemos ver que, efectivamente, el máximo error en los nodos es del orden del error de máquina.
+
+En la figura \ref{fig:fem-sol} podemos ver la solución obtenida por MEF usando FEniCS. Si la ecuación de Poisson representa un problema térmico, los valores de $u(x,y)$ muestran la distribución de temperaturas en la placa cuadrada. En la vista tridimensional puede apreciarse que se cumplen las condiciones de borde, al presentar una variación lineal de la temperatura en los lados $(x, 0)$ y $(x, 1)$, un una variación cuadrática en los lados $(y, 0)$ y $(y, 1)$.
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics[width=0.45\textwidth,keepaspectratio=true]{Chapters/ecuaciones_parciales/figs/fem-sola.png}
+ \quad
+ \includegraphics[width=0.45\textwidth,keepaspectratio=true]{Chapters/ecuaciones_parciales/figs/fem-solb.png}
+ \caption{Visualización de la solución del problema de Poisson con condiciones de borde. A la izquierda una vista superior de la placa con la distribución de valores de $u(x,y)$. A la derecha una representación tridimensional de la solución, con la visualización de la malla generada por FEniCS.}
+ \label{fig:fem-sol}
+\end{figure}
+
+El ejemplo que motramos aquí es solo una introducción básica a la resolución de EDP usando el método de elementos finitos con el \textit{framework} FEniCS. Queremos destacar que este software ofrece la posibilidad de representar un problema enunciado en términos de EDP de una forma muy cercana a la formulación matemática. Por supuesto que los problemas reales son significativamente más complejos que el que mostramos aquí, incluyendo geometrías complejas, multifísica, diferentes condiciones de borde, etc. Sugerimos al lector interesado las lecturas de la sección siguiente.
+
+\section{Lecturas recomendadas}
+\begin{itemize}
+ \item La categorización de las ecuaciones en derivadas parciales y técnicas de solución analíticas se puede ver en \fullcite{tijonov1983}.
+ \item Para ver un análisis detallado de las inestabilidades numéricas del esquema de Euler hacia adelante se puede ver la sección 3.3 de \fullcite{langtangen2017}. Además, este libro presenta el abordaje en diferencias finitas para una amplia variedad de problemas en EDP.
+ \item Una buena introducción al método de elementos finitos puede leerse en \fullcite{larson2013}
+ \item El tutorial de FEniCS permite una introducción completa al uso del \textit{framework} con muchos ejemplos de aplicación: \fullcite{LangtangenLogg2017}. Este tutorial acompaña a \fullcite{logg2012} que incluye otros aspectos del diseño del \textit{software} y la matemática necesaria.
+\end{itemize}
+
+
