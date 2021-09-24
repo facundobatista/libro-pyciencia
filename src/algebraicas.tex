@@ -1,0 +1,400 @@
+
+% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Ecuaciones algebraicas} \label{ch:algebraicas}
+
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        Matplotlib & 3.3.4 \\
+        NumPy & 1.19.5 \\
+        SciPy & 1.6.0 \\
+        Sympy & 1.7.1 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+    
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/ecuaciones_algebraicas/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+En este capítulo abordaremos la resolución de ecuaciones algebraicas. Es necesario distinguir entre ecuaciones univariadas o multivariadas (es decir, ecuaciones que contienen una variable desconocida o muchas), y también si las ecuaciones son lineales o no lineales. Esta clasificación es necesaria pues cada tipo de ecuación requiere la utilización de técnicas específicas de solución.
+
+Comenzaremos con sistemas de ecuaciones lineales cuya utilidad es central en muchos campos científicos, y pueden resolverse mediante la aplicación del álgebra lineal. Por otra parte, las ecuaciones no lineales son más complicadas de resolver y usualmente demandan métodos que son computacionalmente intensivos.
+
+%%%%%%%%%%%%%%%%%
+%%% Se puede poner algo acerca de la aproximación local a problemas no lineales mediante la linealización de las ecuaciones.
+%%%%%%%%%%%%%%%%%
+
+\section{Sistema de ecuaciones lineales}
+
+Una de las aplicaciones más importantes del álgebra lineal es la resolución de sistemas de ecuaciones lineales. Tanto NumPy como SciPy poseen submódulos con rutinas de álgebra lineal. Sin embargo \mip{scipy.linalg} contiene todas las funciones de \mip{numpy.linalg} y algunas más avanzadas no disponibles en NumPy. Una diferencia importante entre ambos módulos es que \mip{scipy.linalg} está compilado con soporte de las bibliotecas ATLAS LAPACK y BLAS, que son rutinas escritas en Fortran altamente optimizadas para realizar operaciones con vectores y matrices (BLAS) y para resolver sistemas de ecuaciones lineales (LAPACK), mientras que esto es opcional para NumPy. De este modo, la versión de linalg de scipy puede ser más rápida que la de NumPy, dependiendo de cómo se ha instalado Numpy. Por este motivo recomendamos el uso de \mip{scipy.linalg}.
+
+La forma general de un sistema de ecuaciones lineales es:
+
+\begin{align*}
+ a_{11} x_1 + a_{12} x_2 + \ldots + a_{1n} x_n &= b_1 \\
+ a_{21} x_1 + a_{22} x_2 + \ldots + a_{2n} x_n &= b_2 \\
+  &\vdots  \\
+ a_{m1} x_1 + a_{m2} x_2 + \ldots + a_{mn} x_n &= b_m 
+\end{align*}
+
+Este sistema representa un conjunto de $m$ ecuaciones con $n$ incógnitas $x_j$ ($1 \leq j \leq n$), en  las que $a_{ij}$ ($1 \leq i \leq m)$ y $b_j$  son constantes o parámetros conocidos. Naturalmente, al trabajar con sistemas de ecuaciones lineales resulta muy práctico hacerlo en notación matricial:
+
+\begin{equation} \label{eq:sl1}
+ \begin{bmatrix}
+ a_{11} & a_{12} & \ldots & a_{1n}  \\
+ a_{21} & a_{22} & \ldots & a_{2n}  \\
+ \vdots & \vdots & \ddots & \vdots  \\
+ a_{m1} & a_{m2} & \ldots & a_{mn}  
+ \end{bmatrix} \cdot
+\begin{bmatrix}
+ x_1 \\
+ x_2 \\
+ \vdots \\
+ x_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+ b_1 \\
+ b_2 \\
+ \vdots \\
+ b_m
+\end{bmatrix}
+\end{equation} 
+o, en forma compacta, $\mathbb{A} \bm{x} = \bm{b}$. en la que $\mathbb{A}$ es una matriz $m \times n$, $\bm{b}$ es un vector de $m$ componentes (o matriz $m \times 1$) y $\bm{x}$ es el vector incógnita o solución de $n$ componentes (o matriz $n \times 1$).
+
+El sistema representado por la ecuación \eqref{eq:sl1} (o su forma compacta) puede tener solución o no, y en caso de que exista dicha solución la misma puede no ser única, y esto depende de las propiedades de la matriz $\mathbb{A}$.
+
+Cuando tenemos menos ecuaciones que incógnitas, esto es, $n < m$, el sistema está subdeterminado y por lo tanto no puede determinarse una solución única. Por el contrario, cuando existen más ecuaciones que incógnitas ($n > m$) el sistema está sobredeterminado, y en este caso, por lo general, se producen restricciones que no permiten hallar una solución.
+
+Los sistemas cuadrados, esto es, cuando $n = m$, son de importancia debido a que puede existir una solución única, y para ello la matriz $\mathbb{A}$ debe ser \textit{no singular} lo que implica que existe la inversa de $\mathbb{A}$, y la solución puede escribirse como:
+\begin{equation}
+ x = \mathbb{A}^{-1} \cdot \bm{b}
+\end{equation} 
+
+Si la matriz $\mathbb{A}$ es singular, esto es cuando el rango de la matriz es menor que $n$, $\rg(\mathbb{A}) < n$, o equivalentemente el determinante es nulo ($\det(\mathbb{A}) = 0$), la ecuación \eqref{eq:sl1} puede no tener solución o tener infinitas, dependiendo del vector $\bm{b}$. Cuando $\rg(\mathbb{A}) < n$ hay filas o columnas que son combinaciones lineales de otras filas o columnas, y por lo tanto corresponden a ecuaciones que no representan una nueva relación entre las incógnitas, y por lo tanto el sistema está subdeterminado. De este modo, calcular el rango de la matriz que define el sistema de ecuaciones lineales es un método útil para saber si la matriz es singular o no, y en consecuencia saber de antemano si existe la solución del sistema.
+
+Al abordar el problema numéricamente pueden presentarse dos cuestiones adicionales que complican hallar la solución. Por un lado, aunque algunas ecuaciones no sean exactamente combinaciones lineales de otras, pueden estar tan cerca de ser linealmente dependientes que los errores de rendondeo en el cálculo con representación de punto flotante las hacen linealmente dependientes en alguna etapa del cálculo de la solución, y en este caso la solución encontrada no será tal. 
+
+Por otro lado, particularmente cuando el número $n$ es muy grande, los errores de rendondeo acumulados pueden arruinar completamente la solución, aún cuando el proceso algorítmico es correcto. Este hecho se acentúa cuando $\mathbb{A}$ está cerca de ser singular.
+
+
+\subsection{Condicionamiento}\label{sec:condic}
+
+Aún cuando $\rg(\mathbb{A}) = n$ y por consiguiente la solución existe, puede no ser posible obtener dicha solución en forma precisa. En efecto, el número de condición de la matriz, $\cond(\mathbb{A})$ determina si la matriz está bien o mal condicionada. Cuando $\cond(\mathbb{A}) \approx 1$, la matriz está \textit{bien condicionada}, pero cuando $\cond(\mathbb{A}) \gg 1$ se dice que está \textit{mal condicionada}. En este último caso, la solución del sistema de ecuaciones puede tener errores de gran magnitud. Una forma de interpretar cómo afecta el número de condición a los errores consiste en realizar un análisis del error. Supongamos que tenemos un sistema de ecuaciones lineales de la forma $\mathbb{A} \bm{x} = \bm{b}$ donde $\bm{x}$ es el vector solución. A una pequeña variación en $\bm{b}$, $\delta \bm{b}$, le corresponderá un cambio en la solución, $\delta \bm{x}$ dado por $\mathbb{A} (\bm{x} + \delta \bm{x}) = \bm{b} + \delta \bm{b}$, y dado que el sistema es lineal, resulta que $\mathbb{A} \delta \bm{x} = \delta \bm{b}$. Entonces, podemos determinar cuán grande es el cambio relativo en $\bm{x}$ comparado con el cambio relativo en $\bm{b}$ haciendo uso de los cocientes de las normas de estos vectores. Específicamente, comparamos $\lVert \delta \bm{x} \rVert / \lVert \bm{x} \rVert$ y $\lVert \delta \bm{b} \rVert / \lVert \bm{b} \rVert$, donde $\lVert \bm{x} \rVert$ denota la norma del vector $\bm{x}$. Usando la relación $\lVert \mathbb{A} \bm{x} \rVert \leq \lVert \mathbb{A} \rVert \lVert \bm{x} \rVert$, podemos escribir
+
+\[ \frac{\lVert \delta \bm{x} \rVert}{\lVert \bm{x} \rVert} = \frac{\lVert \mathbb{A}^{-1} \delta \bm{b} \rVert}{\lVert \bm{x} \rVert} \leq \frac{\lVert \mathbb{A}^{-1} \rVert \lVert \delta \bm{b} \rVert}{\lVert \bm{x} \rVert} = \frac{\lVert \mathbb{A}^{-1} \rVert \lVert \bm{b} \rVert}{\lVert  \bm{x} \rVert} \frac{\lVert \delta \bm{b} \rVert}{\lVert \bm{b}\rVert} \leq \lVert \mathbb{A}^{-1} \rVert \lVert \mathbb{A} \rVert \frac{\lVert \delta \bm{b} \rVert}{\lVert \bm{b}\rVert} \]
+
+Dado que la definición del número de condición es $\cond(\mathbb{A}) = \lVert \mathbb{A} \rVert \lVert \mathbb{A}^{-1} \rVert$, la expresión anterior da una cota superior al error relativo en la solución dado el error relativo en $\bm{b}$. De aquí se infiere que si un sistema lineal de ecuaciones está definido por una matriz $\mathbb{A}$ que está mal condicionada, pequeñas variaciones del vector $\bm{b}$ pueden originar grandes errores en el vector solución $\bm{x}$. Por esto es que al resolver estos sistemas es necesario calcular el número de condición para estimar la precisión de las soluciones obtenida, particularmente cuando se usan números con representación de punto flotante, que tal como vimos en el Capítulo \ref{ch:puntoflotante} son solo aproximaciones a los números reales.
+
+En el caso en que estemos tratando simbólicamente con una matriz, el rango, el número de condición y la norma se pueden obtener con los métodos \mip{rank}, \mip{condition_number} y \mip{norm} del objeto \mip{Matrix} de SimPy, mientras que si solo trabajamos en forma numérica, las mismas magnitudes se obtienen de las funciones del submódulo \mip{linalg} de NumPy: \mip{matrix_rank}, y \mip{cond} y \mip{norm} (SciPy solo tiene implementada la función \mip{norm} en el submódulo \mip{linalg}).
+
+Como ejemplo veremos cómo calcular estas cantidades en una matriz de Hilbert de $2 \times 2$, que se conoce como ejemplo de matriz mal condicionada. Los elementos de esta matriz son $H_{ij} = 1 / (i+j-1)$. Primero importamos los módulos que vamos a usar:
+\jupynotex[1]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+Luego definimos la matriz de Hilbert, utilizando el método \mip{Rational} de SimPy para manter la expresión de los elementos de la matriz como fracciones (la llamamos \mip{H_s} para destacar que es un objeto \mip{Matrix} de SimPy):
+\jupynotex[2]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+A continuación obtenemos el rango, el número de condición exacto y aproximado, y la norma de $H$
+\jupynotex[3-6]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+Ahora pasamos a la representación en punto flotante de $H$, utilizando las rutinas de NumPy y SciPy para definirla (SciPy permite definir esta matriz indicando el rango de la misma) y para calcular su rango, número de condición y norma:
+\jupynotex[7-11]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+\subsection{Descomposición LU}
+
+La forma directa de resolver un sistema de ecuaciones lineales consiste en obtener la matriz inversa de $\mathbb{A}$, y multiplicarla por el vector $\bm{b}$. Sin embargo esta no es la forma más eficiente de hacerlo, particularmente cuando utilizamos el sistema caracterizado por $\mathbb{A}$ para resolver múltiples sistemas con distintos vectores $\bm{b}$:  $\mathbb{A} \bm{x}_i = \bm{b}_i$. 
+
+La descomposición LU consiste en factorizar la matriz $\mathbb{A}$ de la siguiente forma:
+\begin{equation}
+ \mathbb{L} \cdot \mathbb{U} =\mathbb{A}
+\end{equation} 
+donde $\mathbb{L}$ es una matriz diagonal inferior (es decir, tiene elementos no nulos en la diagonal y debajo de ella) y $\mathbb{U}$ es una matriz diagonal superior (con elementos no nulos en la diagonal y arriba de ella). Para el caso de una matriz $\mathbb{A}$ de $4 \times 4$, esto se vería:
+\begin{equation}
+ \begin{bmatrix}
+  L_{11} & 0 & 0 & 0 \\
+  L_{21} & L_{22} & 0 & 0 \\
+  L_{31} & L_{32} & L_{33} & 0 \\
+  L_{41} & L_{42} & L_{43} & L_{44} 
+ \end{bmatrix} \cdot
+ \begin{bmatrix}
+  U_{11} & U_{12} & U_{13} & U_{14} \\
+  0 & U_{22} & U_{23} & U_{24} \\
+  0 & 0 & U_{33} & U_{34} \\
+  0 & 0 & 0 & U_{44} 
+ \end{bmatrix} =
+  \begin{bmatrix}
+  a_{11} & a_{12} & a_{13} & a_{14}  \\
+  a_{21} & a_{22} & a_{23} & a_{24}  \\
+  a_{31} & a_{32} & a_{33} & a_{34}  \\
+  a_{m1} & a_{m2} & a_{43} & a_{44}  
+ \end{bmatrix}
+\end{equation} 
+
+Utilizando esta factorización podemos resolver el sistema lineal
+\begin{equation}\label{eq:lufull}
+ \mathbb{A} \cdot \bm{x} = (\mathbb{L} \cdot \mathbb{U}) \cdot \bm{x} = \bm{b}
+\end{equation} 
+resolviendo primero para un vector $\bm{y}$ tal que
+\begin{equation}\label{eq:lb}
+ \mathbb{L} \cdot \bm{y} = \bm{b}
+\end{equation}
+y luego resolvemos
+\begin{equation}\label{eq:uy}
+ \mathbb{U} \cdot \bm{x} = \bm{y}
+\end{equation}
+
+Este procedimiento de dividir el problema dado por la ecuación \eqref{eq:lufull} en dos ecuaciones sucesivas resulta eficiente debido a que obtener la solución de sistemas triangulares es trivial: la ecuación \eqref{eq:lb} se resuelve con sustitución hacia adelante mientras que la \eqref{eq:uy} se resuelve con sustitución hacia atrás. De este modo, en el caso de resolver nuestro sistema original para múltiples términos independientes $\bm{b}_i$, solo una vez hay que obtener la factorización LU y luego simplemente se resuelve para cada caso mediante las sustituciones de las ecuaciones \eqref{eq:lb} y \eqref{eq:uy}.
+
+Tanto Sympy como SciPy poseen rutinas que realizan la factorización LU, veamos ejemplos de aplicación de esos métodos. En las celdas siguientes utilizamos el método \mip{LUdecomposition()} aplicado a la matriz de Hilbert:
+\jupynotex[12-14]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+Podemos ver que la matriz \mip{L} posee unos en su diagonal, lo que indica que Sympy realiza una descomposición de Doolittle. En general es posible realizar la factorización de muchas formas, en el caso en que los unos forman la diagonal de la matriz \mip{U}, por ejemplo, estaríamos ante una descomposición de Crout. Tanto Sympy como SciPy tienen implmentada la descomposición de Doolittle.
+
+Vemos además que el método devuelve también la matriz \mip{P}, que está compuesta por filas con pares de índices de intercambio. Esto resulta de intercambiar el orden de las filas de modo eliminar el mal condicionamiento que puede ocurrir cuando un elemento $a_{ij}$ de la matriz es mucho menor que uno. Las estrategias de pivoteo exceden el alcance de este capítulo, pero están implementadas en estos métodos para ofrecer soluciones robustas.
+
+Por último, en la celda 14 podemos ver que el producto de \mip{L} y \mip{U} reconstruye la matriz de Hilbert, tal como establece su factorización.
+
+En el caso de la factorización numérica con SciPy, la función \mip{lu} del submódulo \mip{linalg} devuelve las tres matrices anteriores pero en distinto orden, tal como se puede ver en las celdas siguientes:
+\jupynotex[15-17]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+En la celda 17 comparamos elemento por elemento los valores de \mip{H - P @ L @ U} con un array $2 \times 2$ con elementos nulos, lo que nos devuelve \mip{True} comprobando de este modo que la descomposición LU recupera la matriz de Hilbert original al realizar el producto de las matrices que lo factorizan. Debemos notar en la celda 17 que denotamos el producto de matrices con el operador \mip{@} que es un alias de la función \mip{np.matmul} sobre arrays.
+
+Utilizando la descomposición LU mostraremos ahora un ejemplo de resolución de un sistema lineal de ecuaciones en forma analítica con Sympy y numérica con SciPy, y evaluaremos el efecto del condicionamiento en la precisión de la solución numérica. Por lo general, la solución analítica solo es útil para matrices muy pequeñas, ya que al aumentar el rango de la matriz las expresiones pueden resultar muy difíciles de leer, y finalmente se evalúan numéricamente. 
+
+Nuestro sistema de ejemplo será la matriz:
+\[ 
+\mathbb{A}(p) = 
+\begin{bmatrix}
+ 1 & \frac{1}{p+1} \\
+ \frac{1}{p+1} & \frac{1}{p+2}
+\end{bmatrix}
+\]
+
+Podemos ver que cuando $p = 1$, $\mathbb{A}$ se convierte en la matriz de Hilbert $2 \times 2$. En la siguiente celda definimos esta matriz en forma simbólica con Sympy:
+\jupynotex[18]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+y también calculamos el número de condición \mip{A_cond}. Definimos a continuación el vector de términos independientes y obtenemos la solución del sistema, que obviamente es función del parámetro $p$:
+\jupynotex[19]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+A continuación definimos el problema numérico haciendo uso de funciones \mip{lambda} de modo de poder resolver el problema especificando cada vez el valor del parámetro \mip{p}.
+\jupynotex[20]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+Para el caso en que $p=1$ podemos obtener las soluciones del sistema determinado por la matriz de Hilbert tanto en forma exacta como numérica:
+\jupynotex[21-22]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+También podemos encontrar la solución haciendo uso de la descomposición LU, lo que sería muy eficiente si quisiéramos resolver el sistema para múltiples términos independientes. En primer lugar realizamos la factorización de la matriz \mip{A} para $p = 1$, luego obtenemos la solución numérica \mip{x_lu} y finalmente verificamos que al reemplazar la solución obtenida en el sistema se verifica cada una de las ecuaciones (es decir, que $\mathbb{A}(1) \bm{x} - \bm{b} = 0$):
+\jupynotex[23]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+Para finalizar exploraremos el efecto que tiene el condicionamiento de la matriz $\mathbb{A}(p)$ en la precisión de los resultados obtenidos. Para ello notemos que el número de condición diverge para $p = (\sqrt{5} - 1)/2$ (dejamos la verificación de esto para la lectora o el lector). En consecuencia, construiremos un array de valores de \mip{p} para los que resolveremos el sistema tanto en forma exacta como numérica, y evaluaremos el error relativo de la solución numérica. 
+
+En la celda 24 graficamos a la izquierda este error relativo para cada una de las componentes del vector solución, mientras que el el panel de la derecha mostramos el número de condición. Podemos apreciar que donde diverge el número de condición ($p \approx 0.618$), el error relativo de la solución numérica aumenta significativamente. Pese a que el método de solución es muy robusto para este caso, dado que el error relativo es del orden de $4 \times 10^{-13}$, este valor es tres órdenes de magnitud mayor que el épsilon de la máquina donde ejecutamos el ejemplo (ver Sección \ref{sec:pfbin}), como muestra la celda 25, con lo cual es un error apreciable que puede magnificarse al resolver sistemas grandes de ecuaciones (o al resolver sucesivamente sistemas lineales de ecuaciones en un algoritmo).
+
+\jupynotex[24-25]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+
+
+\section{Problema de autovalores}
+
+Así como los sistemas de ecuaciones lineales suelen originarse a partir de problemas en estado estacionario, los problemas de autovalores son de gran importancia en la representación de problemas dinámicos, por lo que aparecen frecuentemente en muchas áreas de la ciencia y de la ingeniería.
+
+Si $\mathbb{A}$ es una matriz cuadrada $n \times n$, el problema de autovalores de esta matriz se define como
+\begin{equation}\label{eq:avdef}
+ \mathbb{A} \cdot \bm{x} = \lambda \bm{x}
+\end{equation} 
+donde $\lambda$ un escalar denominado \textit{autovalor} y $\bm{x}$ es el \textit{autovector} correspondiente, ambos desconocidos. Obviamente, cualquier múltiplo de un autovector es también un autovector, por lo que no se consideran autovectores distintos (el autovector cero no se considera un autovector). Resolver el problema de autovalores \eqref{eq:avdef} consiste en determinar este par autovalor/autovector.
+
+Para abordar el problema, podemos introducir la matriz identidad $\mathbb{I}$ (matriz cuyos elementos diagonales son unos y el resto son ceros), y reescribir la ecuación \eqref{eq:avdef} como
+\begin{equation}\label{eq:av1}
+ (\mathbb{A} - \lambda \mathbb{I}) \cdot \bm{x} = \bm{0}
+\end{equation} 
+
+Esta expresión nos dice que la matriz $\mathbb{A} - \lambda \mathbb{I}$ multiplicada por el vector $\bm{x}$ nos da el vector nulo, es decir, los autovectores construyen el subespacio nulo de $\mathbb{A} - \lambda \mathbb{I}$. Para que esta expresión sea útil, el subespacio nulo debe contener otros vectores distintos del vector cero, lo que implica que $\mathbb{A} - \lambda \mathbb{I}$ debe ser \textit{singular}, y esto ocurre si y solo si
+\begin{equation}\label{eq:avcaract}
+ \det(\mathbb{A} - \lambda \mathbb{I}) = 0
+\end{equation} 
+que da origen a una ecuación polinómica en $\lambda$ denominada \textit{ecuación característica} de grado $n$. El Teorema Fundamental del Álgebra asegura que la matriz $\mathbb{A}$, de $n \times n$ elementos, siempre tiene $n$ autovalores, aunque éstos pueden no ser reales ni tampoco todos distintos (autovalores iguales que provienen de raíces múltiples se denominan \textit{degenerados}). Los autovalores complejos de una matriz real siempre ocurren en pares conjugados, esto es, si $\alpha + i \beta$ es un autovalor de una matriz real, también lo es $\alpha - i \beta$, siendo $i = \sqrt{-1}$ la unidad imaginaria. Una vez determinados los autovalores se pueden obtener los autovectores resolviendo la ecuación \eqref{eq:av1}.
+
+Tanto Sympy como SciPy tienen rutinas para calcular autovalores y autovectores. En el caso de Sympy podemos resolver un problema de autovalores con elementos simbólicos en la matriz $\mathbb{A}$. Por ejemplo, para la siguiente matriz simétrica:
+
+\jupynotex[1]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+los autovalores se obtienen con \mip{eigenvals()}:
+
+\jupynotex[2]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+La salida de \mip{eigenvals()} es un diccionario, cuya clave es el autovalor y su valor es la multiplicidad del autovalor. Para obtener los autovectores de la matriz, utilizamos el método \mip{eigenvects()}:
+
+\jupynotex[3]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+En este caso, la salida es una lista cuyos elementos son tuplas. A su vez, cada tupla está compuesta por el autovalor, la multiplicidad del mismo y el correspondiente autovector. Podemos desempacar esta información (notando que el autovector es una lista de un solo elemento) para verificar que los autovectores son ortogonales\footnote{Los autovectores de una matriz normal, como la simétrica del ejemplo, con autovalores no degenerados (es decir, todos distintos) forman la base de un espacio vectorial $n$-dimensional.}:
+\jupynotex[4]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+Por supuesto que también podemos usar Sympy para resolver el problema de autovalores con matrices con elementos fraccionales, por ejemplo nuestra conocida matriz de Hilbert $2 \times 2$:
+\jupynotex[5-6]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+El abordaje simbólico se hace impracticable para matrices mayores a $3 \times 3$ debido a la dificultad de encontrar las raíces de la ecuación característica. De echo, el teorema de Abel-Rufini\footnote{Ver entrada en \href{https://es.wikipedia.org/wiki/Teorema_de_Abel-Ruffini}{Wikipedia}.} establece que no existe una solución general para la solución de ecuaciones polinómicas de grado cinco o mayor. Por esto tienen especial importancia los métodos numéricos para la solución del problema de autovalores.
+
+Pese a que los problemas de autovalores son en cierta forma similares a los sistemas de ecuaciones lineales que vimos en la sección anterior, no podemos utilizar los mismos métodos para resolverlos: si a una fila de $\mathbb{A}$ le sumamos otra fila, o intercambiamos filas, los autovalores generalmente cambian. Es por esto que existen rutinas especializadas que resuelven eficientemente los problemas de autovalores (cuya descripción excede el alcance de este libro), y que por lo general obtienen una solución parcial. Por ejemplo, pueden obtener todos los autovalores y ningún autovector, o solo algunos autovectores, o solo los primeros autovalores mayores, o solo los negativos. Estas especializaciones permiten obtener resultados útiles sobre matrices grandes ahorrando tiempo de cálculo y espacio de almacenamiento.
+
+SciPy tiene varias funciones para calcular autovalores y autovectores en el submódulo \mip{linalg}, especializadas en abordar matrices con determinadas estrucrturas. Para matrices generales disponemos de \mip{eigvals} (para autovalores) y \mip{eig} para obtener autovalores y autovectores. Por ejemplo, para la matriz de Hilbert $4 \times 4$ podemos calcular sus autovalores y autovectores con \mip{eig}:
+\jupynotex[7-9]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+Cada uno de los autovectores aparece como una fila del array mostrado en la celda 9. A diferencia de los valores que se obtienen con Sympy, estos autovalores se encuentran normalizados. En la celda 10 podemos verificar esta normalización (con precisión cercana al épsilon de la máquina), y también que los cuatro autovectores son ortogonales:
+\jupynotex[10]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+En la celda 8 vemos que los autovalores se muestran en formato de número complejo (SciPy utiliza la letra \mip{j} para denotar la parte compleja), aunque por ser la matriz de Hilbert una matriz real simétrica, todos sus autovalores son reales. \mip{scipy.linalg} tiene una rutina específica para trabajar con matrices simétricas o hermíticas, \mip{eigh}, que devuelve un array con los autovalores en formato de punto flotante real:  
+\jupynotex[11]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+Podemos verificar dos propiedades de los autovalores, la que establece que la suma de los mismos es igual a la traza de la matriz:
+\jupynotex[12]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+y que el producto de los autovalores dan el determinante de la matriz:
+\jupynotex[13]{Chapters/ecuaciones_algebraicas/code/autovalores.ipynb}
+
+Además de la función para matrices simétricas/hermíticas, \mip{linalg} tiene también rutinas para calcular autovalores y autovectores en matrices banda (\mip{eig_banded}, \mip{eigvals_banded} para solo autovalores), y tridiagonales (\mip{eigh_tridiagonal}, \mip{eigvalsh_tridiagonal} para obtener unicamente los autovalores). En el caso de trabajar con matrices ralas, el submódulo de SciPy \mip{sparse.linalg} tiene las funciones \mip{eigs} para obtener autovalores y autovectores de una matriz arbitraria, y \mip{eigsh} para matrices simétricas o hermíticas.
+
+Cabe destacar que tanto \mip{linalg.eig} como \mip{sparse.linalg.eig}, y sus versiones para matrices simétricas/hermíticas, permiten resolver también el problema de autovalores general
+\begin{equation}
+ \mathbb{A} \cdot \bm{v} = \lambda \mathbb{B} \cdot \bm{v}
+\end{equation} 
+para las matrices cuadradas $\mathbb{A}$ y $\mathbb{B}$, que es una generalización del problema de autovalores usual con $\mathbb{A} = \mathbb{I}$.
+
+
+
+\section{Ecuaciones no lineales}\label{sec:enolin}
+El problema de resolver ecuaciones no lineales aparece frecuentemente en todas las áreas de la ciencia y la tecnología. A diferencia de los sistemas lineales, las soluciones de ecuaciones no lineales no pueden obtenerse fácilmente por sustitucion u otro método directo, por lo cual es necesario recurrir a métodos iterativos en los cuales comenzamos con una estimación inicial de la solución y luego nos acercamos a ella mediante aproximaciones sucesivas hasta satisfacer algún criterio de convergencia.
+
+La forma general del problema puede enunciarse simplemente como
+\begin{equation}\label{eq:nolin}
+ f(x) = 0
+\end{equation} 
+donde $f$ es una función no lineal de $x$. Cuando hay solo una variable dependiente, el problema es unidimensional o univariado, y resolver el problema consiste en hallar la \textit{raíz} o \textit{raíces} de la función. Un conjunto de $n$ ecuaciones no lineales puede representarse en notación vectorial, y se trata de encontrar uno o más vectores solución $\bm{x}$ (de dimensión $n$) tal que
+\begin{equation}\label{eq:sisnolin}
+ \bm{f}(\bm{x}) = \bm{0}
+\end{equation} 
+donde $\bm{f}$ es una función vectorial $n$-dimensional cuyas componentes son las ecuaciones que deben satisfacerse simultáneamente. Pese a la aparente similitud que existe entre las ecuaciones \eqref{eq:nolin} y \eqref{eq:sisnolin}, resolver sistemas de ecuaciones no lineales es \textit{mucho} más difícil que el caso unidimensional, fundamentalmente porque en este último caso es posible encerrar la solución en un intervalo (\textit{bracketing}), y mediante un algoritmo reducir este intervalo hasta dar con la raíz, mientras que en el caso multidimensional esto no es tan simple.
+
+Una complejidad adicional proviene de la existencia de raíces múltiples, especialmente si la multiplicidad de la raíz es un número par. Esto puede cuantificarse mediante el número de condición que, del mismo modo que vimos en la subsección \ref{sec:condic}, establece una medida de cuánto afecta un cambio en el valor de la función al cambio del valor de su argumento. Para establecer este número de condición, llamemos $x^*$ a la raíz de la ecuación \eqref{eq:nolin}, y $\tilde{x}^*$ a nuestra aproximación a la raíz. Expandiendo en serie de Taylor  $f(\tilde{x}^*)$ alrededor de $x^*$, obtenemos
+\begin{equation}\label{eq:nolintaylor}
+ f(\tilde{x}^*) = f(x^* + \delta x^*) = f(x^*) + f'(x^*) \delta x^* + O \left(\delta x^{*2} \right)
+\end{equation} 
+en donde usamos $\delta x^* = \tilde{x}^* - x^*$. Al asumir que $\delta x^*$ es un valor pequeño, podemos despreciar los términos de orden superior en \eqref{eq:nolintaylor}, y entonces resulta:
+\begin{equation}
+ \delta x^* = \tilde{x}^* - x^* \approx \frac{1}{f'(x^*)} \left[ f(\tilde{x}^*) - f(x^*) \right]
+\end{equation} 
+lo que nos permite definir el \textit{número de condición} de nuestro problema:
+\begin{equation}\label{eq:sisnolincond}
+ \kappa_f = \frac{1}{f'(x^*)}
+\end{equation} 
+
+Esta magnitud cuantifica el efecto de un pequeño cambio en el valor de la función sobre la evaluación de la raíz. En efecto, una función que cruza ``rápidamente'' el eje $x$ tiene un valor grande de $f'(x^*)$, y por lo tanto un número de condición $\kappa_f$ pequeño, lo que define un problema \textit{bien condicionado}. Por otra parte, si la función es bastante ``plana'' alrededor de $x^*$, cruzando el eje $x$ suavemente, esto corresponde a un valor pequeño de $f'(x^*)$ y en consecuencia a un valor grande de $\kappa_f$, lo que caracteriza a un problema \textit{mal condicionado}. Este condicionamiento afecta a la dificultad de encontrar la raíz de $f$, ya que puede ser difícil distinguirla de valores vecinos. 
+
+\subsection{Ecuaciones no lineales unidimensionales} \label{sec:nolinunidimensional}
+Para abordar estos problemas siempre es conveniente ``encerrar'' la raíz en un intervalo y para ello es útil visualizar el comportamiento de la función. Los métodos cerrados, o de \textit{bracketing}, consisten en determinar un intervalo inicial donde la función cambia de signo, y si dicha función es continua en el intervalo entonces los algoritmos de \textit{bracketing} garantizan la convergencia sobre la raíz (aunque pueden hacerlo con diferente velocidad). 
+
+Por otra parte, cuando la raíz se encuentra en un intervalo en que la función no cambia de signo (como en el caso de raíces con multiplicidad par), es necesario utilizar métodos abiertos que no garantizan la convergencia a la solución. El submódulo \mip{optimize} de SciPy ofrece una variedad de métodos tanto cerrados como abiertos. Veremos aquí algunos ejemplos de uso.
+
+Comenzaremos analizando un polinomio de cuarto grado, cuyas raíces pueden obtenerse fácilmente por medio de su factorización, de modo que sabemos de antemano cuáles son para evaluar el desempeño de los algoritmos. El polinomio
+\[ p(x) = x^4 - 5 x^3 + 8 x^2 - 4 x \]
+tiene raíces simples en $x_1 = 0$ y $x_2 = 1$, y una raíz doble en ($x_{34} = 2$) Si graficamos esta función, tal como vemos en la celda 1 del \textit{jupyter-notebook} siguiente
+\jupynotex[1]{Chapters/ecuaciones_algebraicas/code/no-lineal-1.ipynb}
+\noindent vemos que $p(x)$ está bien condicionada en $x_1$ ($\kappa_p = -1/4$). En el submódulo encontramos la función \mip{root_scalar} que permite hallar la raíz de una función mediante diversos métodos. Utilizaremos para el ejemplo el método de Brent, que combina un método de \textit{bracketing} como el de bisección con el método de la secante y una interpolación cuadrática inversa, lo que brinda un algoritmo robusto y de rápida convergencia.
+
+\jupynotex[2-3]{Chapters/ecuaciones_algebraicas/code/no-lineal-1.ipynb}
+
+En la celda 2 vemos que llamamos a la función \mip{root_scalar} pasando como primer argumento a la función \mip{p}, luego seleccionamos el método de solución \mip{'brentq'}, y por último establecemos el intervalo que encierra la raíz buscada, que cumple con la condición que $p(x)$ tiene signos opuestos en los extremos del intervalo. Como resultado de la función \mip{root_scalar}, obtenemos un objeto \mip{RootResults} que almacenamos en la variable \mip{sol_1}, y que contiene diversos atributos que dan cuenta del resultado de la aplicación del algoritmo como el motivo de la finalización (\mip{flag}), si hubo convergencia (\mip{converged}), la cantidad de iteraciones y llamadas a la función, y por supuesto, la raíz encontrada. En la celda 3 volvemos a aplicar el método de Brent para hallar $x_2$, encerrando esta raíz en el intervalo $[1/2, 3/2]$.
+
+La situación es diferente para la raíz doble en $x_{34}$, donde la función presenta un mal condicionamiento ya que también la derivada de $p(x)$ se anula en ese punto. Si queremos determinar la raíz, no podemos usar un método de \textit{bracketing} dado que la función no cambia de signo a ambos lados de la raíz. Podemos acudir entonces a métodos abiertos, como el de Newton, que no nos garantiza la convergencia a la solución pero si partimos de una estimación inicial suficientemente cercana, tenemos buenas posibilidades de éxito. La celda 4 muestra el uso de la función \mip{root_scalar} seleccionando el método de Newton. A diferencia del caso anterior, no especificamos un intervalo que encierra a la raíz, pero si un valor inicial \mip{x0}. Además, el método de Newton requiere especificar también la derivada de la función en el argumento \mip{fprime}, al que le pasamos la función \mip{p1(x)} que definimos en la celda 1 (si no disponemos de una expresión para la derivada, es posible utilizar el método de la secante, en el que la derivada se aproxima por diferencia finita):
+\jupynotex[4]{Chapters/ecuaciones_algebraicas/code/no-lineal-1.ipynb}
+
+Puede verse que en comparación con el método de Brent, el método de Newton es más costoso computacionalmente debido la complejidad misma del método (que requiere evaluar dos funciones). Además en este caso la convergencia es más lenta debido al mal condicionamiento de la función en $x_{34}$. 
+
+Para mostrar la importancia de la elección de la estimación inicial, notemos que $p(x)$ tiene un máximo relativo en $x_m = (\sqrt{17} + 7)/8 \approx 1.3904$. Si el valor de \mip{x0} se encuentra a la derecha de $x_m$, el método de Newton convergerá a la solución buscada, tal como muestra la celda 5, mientras que si nuestra estimación inicial está a la izquierda de $x_m$, el método converge a $x_1$ como puede verse en la celda 6. Una variación de apenas 0.072 \% respecto del valor de $x_m$ produce un cambio muy grande en la raíz encontrada, incluso ``saltando'' la raíz en $x_2$. Si nuestro valor inicial se encuentra más próximo al valor de $x_m$, el método no converge a ninguna raíz en el número máximo de iteraciones por defecto (50). Aumentando el número máximo de iteraciones vemos que converge a $x_{34}$ en 70 iteraciones (pero no siempre tenemos esa suerte).
+\jupynotex[5-8]{Chapters/ecuaciones_algebraicas/code/no-lineal-1.ipynb}
+
+Se puede suponer que podemos encontrar $x_{34}$ utilizando un método de \textit{bracketing} utilizando un intervalo más grande que contenga a esta raíz. Sin embargo, esto no siempre funciona, tal como muestra el resultado de la celda 9 en el que el método de Brent utilizando el intervalo $[1/2, 3/2]$ encuentra la raíz en $x_1$, pero no la raíz doble.
+\jupynotex[9]{Chapters/ecuaciones_algebraicas/code/no-lineal-1.ipynb}
+
+\subsection{Sistema de ecuaciones no lineales}
+Tal como anticipamos al comienzo de la sección \ref{sec:enolin}, resolver un sistema de ecuaciones no lineales es mucho más complejo que el caso unidimensional, en parte debido a la gran variedad de escenarios posibles. Para mencionar solo un aspecto de esta complejidad, suele ser habitual no saber si existe solución del problema, o en caso de existir puede que no sea posible determinar cuántas hay. En consecuencia no existe un método que garantice la convergencia a una solución, tal como el método de bisección para el caso unidimensional. Por otra parte, los métodos disponibles son mas costosos computacionalmente que para el caso multidimensional, y este costo crece aceleradamente al aumentar el número de incógnitas.
+
+En este contexto, SciPy ofrece un conjunto de métodos para abordar la solución de estos sistemas. Estos métodos pueden agruparse según el número de ecuaciones a resolver. El método híbrido de Powell (\mip{hibr}) y la implementación del método de Levenberg-Marquardt (\mip{lm}) de MINPACK son eficientes para para un sistema de pocas ecuaciones. Cuando el número de ecuaciones $n$ aumenta, la aplicación de estos métodos se vuelve ineficiente debido a que requieren la inversión de una matriz jacobiana densa $n \times n$ en cada iteración. Para estos casos, SciPy ofrece funciones que implementan el método inexacto de Newton, en los que la matriz jacobiana se evalúa en forma aproximada. Estos métodos son \mip{anderson}, \mip{broyden2} y \mip{krylov}.
+
+Como ejemplo (sencillo) de resolución de un sistema no lineal de ecuaciones, determinaremos las raíces del sistema
+\begin{equation} \label{eq:nolin02}
+ \begin{cases}
+  f_1(x, y) = y -x^2 + x \cos( \pi x)  = 0\\
+  f_2(x, y) = y - x^3 + 4 x - \ln\left( y + 1 \right)^4 = 0
+ \end{cases}
+\end{equation} 
+
+Por ser un sistema con dos incógnitas, cada función define una superficie tridimensional que cruza el plano $xy$. El siguiente \textit{script} genera la figura \ref{fig:nolin01} en donde visualizamos para cada función la curva de nivel cero, es decir, las intersecciones de las superficies generadas por $f_1(x,y)$ y $f_3(x,y)$ con el plano $xy$ (ver las líneas 16 y 18 del \textit{script}). Esto significa que sobre cada una de esas curvas las funciones se anulan individualmente. Y en los puntos donde las curvas se cruzan, ambas funciones se anulan \textit{simultáneamente}. Esto puede orientarnos a proponer valores iniciales para los algoritmos de solución que estén cercanos a los puntos que son solución del sistema. 
+
+\pyfile{Chapters/ecuaciones_algebraicas/code/plot_f1_f2.py}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[scale=0.75]{Chapters/ecuaciones_algebraicas/figs/f1_f2_ceros.pdf}
+ % f1_f2_ceros.pdf: 0x0 px, 300dpi, 0.00x0.00 cm, bb=
+ \caption{Ceros de las funciones del sistema no lineal de ecuaciones.}
+ \label{fig:nolin01}
+\end{figure}
+
+En el siguiente programa determinaremos las soluciones del sistema no lineal de ecuaciones \eqref{eq:nolin02}, y exploraremos las regiones de convergencia a cada solución. En las líneas 3--6 importamos los módulos NumPy, Matplotlib, las funciones coseno, logaritmo (natural) y la constante $\pi$ del módulo \mip{math}, y el submódulo \mip{optimize} de SciPy. En la línea 8 especificamos que el renderizado de la figura se haga utilizando \LaTeX por imprescindibles cuestiones estéticas.
+
+\pyfile{Chapters/ecuaciones_algebraicas/code/sistema_no_lineal.py}
+
+Entre las líneas 10 y 20 generamos nuevamente el mismo gráfico que mostramos en la figura \ref{fig:nolin01}, que usaremos como base para mostrar encima las raíces y las cuencas de convergencia. Implementamos la definición del sistema de ecuaciones en la función \mip{f(x)} de las líneas 23--25, que tiene como argumento una lista de dos elementos ($x \mapsto$ \mip{x[0]}, $y \mapsto$ \mip{x[1]}), y devuelve también una lista con dos elementos que representa cada función evaluada en los argumentos.
+
+En la línea 28 definimos la lista \mip{x_guess} que contiene tres pares de valores iniciales con los que vamos a iniciar la búsqueda de soluciones. Estos valores fueron elegidos inspeccionado visualmente la figura \ref{fig:nolin01} de modo que estén ``cerca'' de los lugares donde se cruzan las curvas de nivel cero de $f_1$ y $f_2$. Si encotramos soluciones, las iremos almacenando en la lista \mip{sols}.
+
+En el bucle de las líneas 29--33 utilizamos cada valor inicial como argumento de la función \mip{root} del submódulo \mip{optimize}, al que le pasamos también la función \mip{f} que representa las ecuaciones y la cadena \mip{'hybr'} al argumento \mip{method}, que es el método por defecto de \mip{root} (y que por lo tanto puede ser omitido). \mip{root} devuelve un objeto que guardamos en \mip{sol} del tipo \mip{OptimizeResult} que contiene varios atributos, y del que imprimimos \mip{sol.message} (que describe la causa de la finalización), \mip{sol.x} que muestra la solución del sistema y \mip{sol.f} que nos permite verificar el valor de las funciones en la solución encontrada. Al ejecutarse este programa la salida es:
+\begin{verbatim}
+❯ ./sistema_no_lineal.py 
+The solution converged.
+x: [-2.169, 6.574] -- root: [2.5308866113959994e-11, 9.906742093335197e-12]
+The solution converged.
+x: [0.000, 0.000] -- root: [0.0, 0.0]
+The solution converged.
+x: [1.562, 2.137] -- root: [9.992007221626409e-16, -1.4210854715202004e-14]
+Proporción de no convergencia: 0.2510
+\end{verbatim}
+
+El objeto \mip{sol} del tipo \mip{OptimizeResult} tiene otros atributos que no mostramos en este programa, pero que resulta útil inspeccionar (se puede ver la lista de atributos en este \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult}{enlace}). Particularmente el atributo booleano \mip{success} que es \mip{True} cuando el algoritmo converge a una solución. A continuación, en las líneas 35--37 marcamos en nuestra figura en construcción las raíces encontradas, con estrellas de colores rojo, azul y verde respectivamente. Utilizaremos este código de colores asignado a cada solución para representar las regiones de convergencia hacia cada una.
+
+Para determinar estas regiones de convergencia armamos una grilla de \mip{n_trial = 100} puntos en cada variable (representada por los arrays \mip{xs} y \mip{ys}), y para cada punto de esta grilla (que recorremos en el bucle doble de las líneas 44 y 45) intentamos obtener una solución utilizando el método híbrido de Powell (\mip{'hybr'}). Si hay convergencia, determinamos a cuál de las soluciones llegó el algoritmo a partir del valor inicial (línea 47), y marcamos este valor inicial con un pequeño círculo con el color correspondiente (línea 48). En caso de no haber convergencia, incrementamos el valor de \mip{n_div} que dará cuenta del número total de valores iniciales que no convergieron a ninguna solución.
+
+Tal como muestra la última línea de la salida anterior mostrada, al ejecutar el algoritmo con el método híbrido de Powell hay un $25.1$ \% de puntos que no convergen a ninguna solución, al menos con el máximo número de llamadas a la función o tolerancia establecidos por defecto. Esto se visualiza en la figura \ref{fig:nolin2_hybr} como zonas blancas. Por el contrario, si ejecutamos nuevamente el programa pero cambiando el argumento \mip{method} de \mip{root} en la línea 45 por el de Levenberg-Marquardt \mip{'lm'}, la proporción de no convergencia se reduce al $0.03$ \%, mostrando que este método es más robusto. Se puede ver en la figura \ref{fig:nolin2_lm} que casi no hay zonas en blanco.
+
+\begin{figure} 
+ \centering
+ \begin{subfigure}[b]{0.49\textwidth}
+  \includegraphics[width=1.0\textwidth]{Chapters/ecuaciones_algebraicas/figs/sol_hybr.pdf}
+  \caption{Método híbrido de Powell.}
+  \label{fig:nolin2_hybr}
+ \end{subfigure}
+ \begin{subfigure}[b]{0.49\textwidth}
+  \includegraphics[width=1.0\textwidth]{Chapters/ecuaciones_algebraicas/figs/sol_lm.pdf}
+  \caption{Método de Levenberg-Marquardt.}
+  \label{fig:nolin2_lm}
+ \end{subfigure}
+ \caption{Regiones de convergencia.}
+\end{figure}
+
+
+\section{Lecturas recomendadas}
+
+\begin{itemize}
+ \item Para profundizar en cuestiones de álgebra lineal, recomendamos el clásico libro de Strang: \fullcite{strang2006}, y también \fullcite{friedberg2014}.
+ \item Se puede ver una lista detallada de métodos de resolución de sistemas de ecuaciones lineales en \fullcite{gupta2019}.
+ \item El libro de Burden, Faires y Burden tiene una excelente introducción a los métodos de resolución de ecuaciones en una y varias variables: \fullcite{burden2016}.
+\end{itemize}
