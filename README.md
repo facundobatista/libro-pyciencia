@@ -28,3 +28,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Ecuaciones algebraicas](ecuaciones_algebraicas.pdf?raw=True): Sistemas de ecuaciones lineales. Condicionamiento. Factorización LU. Problema de autovalores. Ecuaciones no lineales de una y varias dimensiones.
 
 - [Versionado de código](versionado.pdf?raw=True): Control de versiones, utilidad, necesidad, casos de uso. Ramas. Git. Flujo de traajo, ciclo de vida de una rama, ejemplo práctico. Lecturas recomendadas.
+
+- [Integración numérica](integracion.pdf?raw=True): Integración simbólica. Transformaciones integrales. Integración numérica en una dimensión: métodos de Newton-Cotes, cuadraturas gaussianas, integración Monte Carlo. Integración numérica con SciPy. Integración múltiple. 

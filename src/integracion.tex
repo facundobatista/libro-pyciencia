@@ -1,0 +1,464 @@
+
+% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Integración numérica} \label{ch:integracion}   
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        Matplotlib & 3.3.4 \\
+        NumPy & 1.19.5 \\
+        SciPy & 1.6.0 \\
+        SymPy & 1.7.1 \\
+        mpmath & 1.2.1 \\
+        vegas & 5.0 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+    
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/integracion/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+ 
+Muchas aplicaciones científicas y tecnológicas requieren la integración de funciones, en una gran variedad de contextos. La integración analítica de funciones es mucho más compleja que la diferenciación, y solo se puede realizar en los pocos casos en los que existe la primitiva del integrando. Por esta razón es necesario recurrir frecuentemente a la integración numérica, denominada \textit{cuadratura} por razones históricas.
+
+El cálculo de una integral definida en forma analítica consiste en evaluar
+\[ \int_a^b f(x) \, dx = F(b) - F(a)\]
+
+donde 
+\[ f(x) = \frac{dF(x)}{dx} \]
+
+El problema se reduce a encontrar una función primitiva $F$ (o \textit{antiderivada}) correspondiente a una dada $f(x)$. El intervalo de integración $[a, b]$ puede ser finito, semi infinito, (cuando $a = -\infty$ o $b = \infty$), o infinito (ambos $a = -\infty$ y $b = \infty$). Gráficamente, calcular la integral corresponde a evaluar el área entre la curva de $f(x)$ y el eje $x$, tal como muestra la figura \ref{fig:int-areas}, donde el área se considera positiva cuando $f(x) > 0$ (verde) y negativa si $f(x) < 0$ (roja).
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics[scale=0.8]{Chapters/integracion/figs/integral-areas.pdf}
+ % integral-areas.pdf: 309x176 px, 72dpi, 10.90x6.21 cm, bb=0 0 309 176
+ \caption{Interpretación gráfica de la integración.}
+ \label{fig:int-areas}
+\end{figure}
+
+El cálculo de las cuadraturas numéricas consiste en establecer reglas para aproximar el valor de la integral mediante el cálculo de áreas a partir de la información disponible de $f$, ya sea porque se conoce su valor en un número establecido de puntos en el intervalo $[a, b]$ o porque es posible evaluarla numéricamente en ese intervalo. Veremos en la sección siguiente cómo obtener expresiones analíticas (cuando es posible) con SymPy, y las opciones que ofrece SciPy para el cálculo de cuadraturas, en la sección \ref{sec:intScipy}.
+
+
+\section{Integración simbólica}
+SymPy permite calcular integrales definidas e indefinidas de funciones a través del método \mip{integrate()}, que utiliza el poderoso algoritmo Risch-Norman extendido, junto con algoritmos heurísticos y reconocimiento de patrones. De esta forma, SymPy es capaz de integrar funciones polinómicas, racionales, productos de polinomios y exponenciales, senos y cosenos. En el siguiente \textit{jupyter-notebook} vemos algunos ejemplos:
+\jupynotex[1-5]{Chapters/integracion/code/integracion.ipynb}
+
+Tal como muestran las celdas 2--4, SymPy puede obtener las primitivas de algunas funciones, ahorrándonos, en algunos casos, la tediosa aplicación de la integración por partes. Incluso es capaz de resolver en forma analítica la integral definida
+\begin{equation} \label{eq:int01}
+\int_{-1}^{1}{4 \sqrt{1 - x^2} \, dx} = 2 \pi 
+\end{equation} 
+como se ve en la celda 5. No obstante, esta facilidad de obtener la primitiva en forma analítica es la excepción más que la regla, y en general no será posible obtener la expresión analítica en forma cerrada. En la gran mayoría de los casos debemos recurrir a cuadraturas numéricas, como las provistas por SciPy que veremos en la sección \ref{sec:intScipy}, pero es oportuno mencionar acá que es posible integrar numéricamente funciones simbólicas definidas con SymPy pasando estas funciones como argumento de \mip{quad} de la bilbioteca \mip{mpmath}\footnote{\mip{mpmath} es una biblioteca para aritmética real o compleja con punto flotante de precisión arbitraria. Recomendamos ver su \href{https://mpmath.org/}{documentación}.}, la cual permite realizar cuadraturas numéricas con precisión abritraria. Las versiones de SymPy previas a 1.0 incluian \mip{mpmath} como un submódulo, pero actualmente es una biblioteca externa a SymPy.
+
+Con \mip{mpmath.quad()} podemos evaluar integrales definidas con cualquier precisión, sin la restricción de las limitaciones de la representación de punto flotante. Por supuesto, esta virtud se obtiene con el costo de ser un cálculo mucho más lento que el que ofrece SciPy, por lo que es conveniente usar \mip{mpmath.quad()} para cuadraturas numéricas cuando se requiere evaluar pocas integrales con más precisión que las que brinda SciPy. 
+
+Por ejemplo, si queremos evaluar numéricamente la integral de la ecuación \eqref{eq:int01} con una precisión dada utilizando \mip{mpmath}, podemos crear la función integrando usando \mip{sympy.lambdify} pasando \mip{mpmath} como tercer argumento para establecer que usaremos una función compatible con esa biblioteca, tal como vemos a continuación:
+\jupynotex[6-8]{Chapters/integracion/code/integracion.ipynb}
+
+En la celda 6 importamos el módulo \mip{mpmath}, definimos la precisión con la que vamos a trabajar, y construimos la función \mip{f_mpmath} utilizando la función \mip{lambdify} de SymPy, la cual permite transformar expresiones de SymPy a funciones lambda para poder evaluarlas en forma numérica muy rápido. Luego, en la celda 7 asignamos a la variable \mip{valor_num} el resultado de la cuadratura numérica calculada con \mip{mpmath}, y obtenemos su representación numérica con \mip{sympify}, que convierte cualquier expresión arbitraria en un tipo de dato específico que usa internamente SymPy. Finalmente, en la celda 8 calculamos la diferencia entre el valor numérico resultante y el resultado exacto que obtuvimos en la celda 5. Vemos que esta diferencia es un orden de magnitud menor al establecido en la celda 6 ($50$).
+
+\subsection{Transformaciones integrales (Laplace y Fourier)}
+Existen varias clases de problemas que son difíciles de resolver en sus representaciones originales, pero que a partir de una transformación integral que mapea una ecuación en su dominio original a otro, su manipulación y solución pueden ser más convenientes que en el dominio original. Una vez resuelto el problema en el nuevo dominio, es posible volver a la representación original con la operación inversa de la transformación integral. Un problema típico es la transformación de una ecuación diferencial en una algebraica, que se puede realizar mediante una transformada de Laplace, o la transformación de un problema en el dominio temporal al dominio en frecuencia a través de una transformada de Fourier.
+
+En general, la transformada de una función $f$ se puede escribir como
+\begin{equation}\label{eq:intti01}
+ F(u) = (Tf)(u) = \int_{t_1}^{t_2} K(u,t) f(t) \, dt
+\end{equation} 
+
+Aquí, la función $f$ es transformada en una función $F$ mediante el operador $T$, que se define mediante la función núcleo o \textit{kernel} de dos variables $K(u,t)$. Algunos kernels tienen asociados un kernel inverso $K^{-1}(u,t)$ que permite la transformación inversa
+\begin{equation}\label{eq:intti02}
+ f(t) = \int_{u_1}^{u_2} F(u) K^{-1}(t, u) \, du
+\end{equation} 
+
+SymPy dispone de varias funciones para realizar transformaciones integrales. Veremos ejemplos de transformaciones de Laplace y de Fourier.
+
+\subsubsection{Tranformada de Laplace}
+La transformada y antitransformada de Laplace se definen como
+\begin{align}\label{eq:intti03}
+ L(s) &= \int_0^{\infty} \exp(-st) f(t) \, dt \\
+ f(t) &= \frac{1}{2\pi i} \int_{c-i\infty}^{c+i\infty} \exp(st) F(s) \, ds
+\end{align} 
+donde $i = \sqrt{-1}$ y $c$ es lo suficientemente grande como para que $F(s)$ no tenga singularidades en el semiplano $\Re(s) > c - \epsilon$. SymPy puede obtener la transformada de Laplace de muchas funciones elementales y combinaciones de ellas. Por ejemplo, calculemos la transformada de $f(t) = \exp(-a t)$:
+\jupynotex[9-10]{Chapters/integracion/code/integracion.ipynb}
+
+En la celda 9 definimos los símbolos y la función \mip{f}, y en la 10 obtenemos la transformada de Laplace. Como resultado obtenemos una tupla con la función transformada, y las condiciones de convergencia dado que la transformación requiere de una integración indefinida. Si lo que necesitamos es solamente la función, podemos pasar el argumento \mip{noconds=True} y la asignamos a \mip{F}:
+\jupynotex[11]{Chapters/integracion/code/integracion.ipynb}
+
+Podemos recuperar la función original a partir de la antitransformada de \mip{F}:
+\jupynotex[12]{Chapters/integracion/code/integracion.ipynb}
+
+En las celdas 13 y 14 podemos ver un ejemplo en el que combinamos funciones simples en \mip{f}:
+\jupynotex[13-14]{Chapters/integracion/code/integracion.ipynb}
+
+
+\subsubsection{Transformada de Fourier}
+Las transformada y antitransformada de Fourier son calculadas por SymPy de un modo análogo a las de Laplace. Las definiciones de estas transformaciones son:
+
+\begin{align}\label{eq:intti04}
+\mathcal{F}(k) &= \int_{-\infty}^{\infty} f(x) \exp(-2 \pi i x k) \, dx \\
+f(x) &= \int_{-\infty}^{\infty} \mathcal{F}(k) \exp(-2 \pi i x k) \, dk 
+\end{align} 
+
+Veamos como ejemplo la transformada de Fourier de $f(x) = \exp(-a x^2)$ (celda 8):
+\jupynotex[15]{Chapters/integracion/code/integracion.ipynb}
+
+Al calcular la transformación inversa recuperamos la función $f$ original:
+\jupynotex[16]{Chapters/integracion/code/integracion.ipynb}
+
+En caso que las transformadas no puedan obtenerse en forma analítica cerrada, estas funciones devuelven un objeto no evaluado.
+
+
+
+\section{Integración numérica en una dimensión}
+El abordaje central para la integración numérica (definida) de una función consiste en aproximar la integral por una suma:
+\begin{equation}\label{eq:int02}
+ I = \int_a^b f(x) \, dx = \sum_{i=1}^{n} {\omega_i f(x_i)} + r_n
+\end{equation} 
+donde $x_i$ son las \textit{abscisas nodales}, $\omega_i$ son los \textit{pesos} y $r_n$ es el residuo producto de la aproximación. Es importante tener una estimación del término $r_n$ para saber con qué precisión estamos estimando la integral, pero en general asumiremos que es una cantidad pequeña.
+
+En la suma de la expresión \eqref{eq:int02} tenemos $n$ abscisas, por lo que estamos considerando una cuadratura de $n$-puntos. Según cómo elijamos la ubicación de las abscisas y los pesos correspondientes tendremos diferentes esquemas de cuadratura, con diferencias en el grado de precisión alcanzado y la complejidad en el cálculo. En este aspecto, podemos distinguir dos grandes grupos:
+\begin{itemize}
+ \item \textbf{Métodos de Newton-Cotes:} consisten en considerar que la integral se puede aproximar por la suma de áreas de formas elementales (rectángulos, trapecios). Por lo general, este método utiliza abscisas igualmente espaciadas que se utilizan para interpolar la función integrando, lo que resulta útil (y a veces necesario) cuando $f(x)$ ha sido evaluada en puntos de una grilla.
+ \item \textbf{Cuadraturas gaussianas:} utilizan abscisas que no están equiespaciadas, eligiendo los valores $x_i$ de modo que pueda obtenerse un aumento en la precisión. Como resultado se utilizan menos abscisas que en las fórmulas de Newton-Cotes y por lo tanto un número menor de evaluaciones de $f$, lo cual es una ventaja cuando estas evaluaciones son costosas computacionalmente.
+\end{itemize}
+
+Por otra parte, se puede considerar otra categorización teniendo en cuenta si los límites del intervalo de integracion ($a$ y $b$) pertenecen al grupo de abscisas $x_i$ en donde se evalúa la función. Los métodos que incluyen las evaluaciones $f(a)$ y $f(b)$ son \textit{cerrados}, mientras que los que los excluyen son \textit{abiertos}. Las cuadraturas gaussianas forman parte de los métodos abiertos, al igual que la regla del punto medio, mientras que las fórmulas de la regla trapezoidal y Simpson de Newton-Cotes constituyen ejemplos de métodos cerrados.
+
+
+\subsection{Métodos de Newton-Cotes}
+Tal como adelantamos, para explorar estos métodos asumiremos que conocemos los valores de $f$ en un conjunto discreto de $n$ puntos, es decir, en una tabla de $n$ pares $(x_i, f(x_i))$.
+
+Las diversas reglas de integración de Newton-Cotes se derivan del orden de interpolación para la función integrando. Por ejemplo, si aproximamos $f(x)$ con un polinomio de grado cero (es decir, un valor constante) utilizando el valor medio de $f$ en el intervalo $[a, b]$, obtenemos:
+\begin{equation}\label{eq:int03}
+I = \int_a^b f(x) \, dx \approx f \left( \frac{a + b}{2}  \right) \int_a^b dx = (b - a) f \left( \frac{a + b}{2}  \right)
+\end{equation} 
+que se conoce como la \textit{regla del punto medio}. En este caso, la integral se aproxima con el área de un rectángulo cuya base es $(b-a)$ y la altura es $f[(b-a)/2]$, y es capaz de integrar polinomios hasta primer orden (es decir, funciones lineales), y por este motivo se dice que es de grado polinomial uno. Con la misma aproximación (polinomio de grado cero) se puede utilizar uno de los extremos del intervalo dando origen de esta forma a la \textit{regla del rectángulo}. Este abordaje es muy común en las reglas de integración compuestas (de la que hablaremos más adelante).
+
+Aproximando la función $f(x)$ por un polinomio de primer grado, evaluada en los puntos extremos del intervalo de integración, obtenemos la \textit{regla del trapecio}:
+\begin{equation}\label{eq:int04}
+I = \int_a^b f(x) \, dx \approx \frac{(b-a)}{2} \left[ f(a) + f(b) \right]
+\end{equation} 
+
+que también es polinomial de grado uno. Si utilizamos, en cambio, un polinomio de interpolación de segundo grado, resulta la \textit{regla de Simpson}:
+\begin{equation}\label{eq:int05}
+I = \int_a^b f(x) \, dx \approx \frac{(b-a)}{6} \left[ f(a) + 4 f\left( \frac{a+b}{2} \right) + f(b) \right]
+\end{equation} 
+que utiliza la evaluación en los extremos del intervalo de integracion y en el punto medio del mismo. Este método es polinomial de segundo grado, lo que significa que podemos integrar exactamente polinomios de grado menor o igual a tres.
+
+La figura \ref{fig:int01} muestra los distintos esquemas mencionados. En todos los casos la integral (área azul) se aproxima por el área de la figura delimitada por el eje $x$ por debajo, la línea roja por arriba y las líneas verticales en $x=a$ y $x=b$. Utilizaremos las capacidades de álgebra simbólica e integración de SymPy para determinar los valores de los pesos en la regla de Simpson.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=1.0\textwidth]{Chapters/integracion/figs/int-NC.pdf}
+ \caption{Esquemas de Newton-Cotes: los puntos rojos representan los valores de la función evaluada en las abscisas $x_i$. a) Regla del rectángulo; b) regla del punto medio, c) regla del trapecio y d) regla de Simpson.}
+ \label{fig:int01}
+\end{figure}
+
+
+Si consideramos la regla de Simpson como una cuadratura de tres puntos, es muy simple utilizar la condición de integración exacta de un polinomio de segundo grado para obtener los pesos $\omega_i$ de la fórmula \eqref{eq:int02}. Siguiendo con el \textit{jupyter-notebook} de la sección anterior, en la celda 17 definimos los símbolos que vamos a utilizar y declaramos que \mip{f} será una función, y en la celda 18 definimos el conjunto de las abscisas en los que se evalúa la función, y también declaramos la lista \mip{w} conteniendo los pesos respectivos:
+\jupynotex[17-18]{Chapters/integracion/code/integracion.ipynb}
+
+Dadas las abscisas y los pesos, podemos construir la regla de Simpson en forma simbólica:
+\jupynotex[19]{Chapters/integracion/code/integracion.ipynb}
+
+Ahora haremos uso del hecho que con la regla de Simpson podemos integrar en forma exacta hasta polinomios de tercer grado. Dado que tenemos que obtener tres pesos $\omega_i$, nos será suficiente con construir una base de polinomios hasta segundo grado, con los cuales podemos interpolar $f(x)$. Usaremos \mip{sympy.Lambda} para crear las representaciones simbólicas de esta base:
+\jupynotex[20]{Chapters/integracion/code/integracion.ipynb}
+
+Con esta base podemos construir un sistema de ecuaciones para determinar los pesos. Para cada una de las funciones de la base tenemos:
+\[ \sum_{i=0}^2 \omega_i \phi_n(x_i) - \int_a^b \phi_n(x) \, dx = 0 \]
+
+La lista \mip{ecs} de la celda 21 muestra cómo construimos el sistema de ecuaciones, cuya solución obtenemos en la celda 24. En la celda 25 substituimos los $\omega_i$ obtenidos en la regla de Simpson, y podemos ver que recuperamos la expresión dada por \eqref{eq:int05}.
+\jupynotex[21-25]{Chapters/integracion/code/integracion.ipynb}
+
+
+Las reglas de cuadratura de mayor orden se pueden obtener mediante el abordaje general de aproximar la función $f(x)$ mediante un polinomio de interpolación de grado $n$, $P_n(x)$, con $n + 1$ puntos de interpolación. En efecto, para cada $n$ natural las fórmulas de Newton-Cotes
+\begin{equation}
+ \int_a^b P_n(x) \, dx = h \sum_{i=0}^n \omega_i f_i
+\end{equation} 
+proveen valores aproximados para la integral de $f(x)$ en $[a, b]$, siendo $f_i = f(a + ih)$ y $h = (b - a)/n$. Los pesos $\omega_i$ se encuentran tabulados\footnote{Algunos casos se pueden ver en la entrada de \href{https://en.wikipedia.org/wiki/Newton-Cotes_formulas}{Wikipedia}.} y son números racionales con la propiedad
+\begin{equation}
+ \sum_{i=0}^n \omega_i = n
+\end{equation}.
+
+Para funciones $f(x)$ suficientemente suaves en el intervalo cerrado $[a, b]$, se puede demostrar que el error en la aproximación de la integral se puede expresar como:
+\begin{equation}
+ \int_a^b P_n(x) \, dx - \int_a^b f(x) \, dx = K h^{p+1} f^{(p)}(\xi), \quad \xi \in (a, b)
+\end{equation} 
+donde los valores de $K$ y $p$ dependen solo de $n$ pero no del integrando $f$. En particular, para el caso de la regla de Simpson la estimación del error es
+\begin{equation}\label{eq:intsimerr}
+ \varepsilon = \frac{h^5}{90} f^{(iv)}(\xi)
+\end{equation}
+donde $f^{(iv)}$ denota la derivada cuarta de $f$. Podemos observar que esta estimación del error contiene una derivada cuarta, lo que implica que la regla de Simpson es exacta hasta polinomios de tercer grado.
+
+
+Las reglas de cuadratura de mayor orden se pueden obtener aumentando el número de abscisas (y pesos) en el intervalo $[a, b]$. Sin embargo, la interpolación con polinomios de mayor orden pueden introducir efectos indeseables entre los puntos de interpolación, por lo que resulta aconsejable dividir el intervalo $[a, b]$ en subintervalos $[a, x_1]$, $[x_1, x_2]$, $\cdots$, $[x_{n-1}, x_n = b]$, y usar cuadraturas de orden bajo en cada uno de ellos. Este abordaje da origen a las fórmulas compuestas de Newton-Cotes.
+
+
+
+\subsection{Fórmulas de Newton-Cotes compuestas}
+
+El uso de las fórmulas de Newton-Cotes es inapropiado en intervalos largos de integración. Por un lado, esto requeriría usar interpolaciones de grado superior y los pesos correspondientes son engorrosos de calcular. Por otro, dado que estas fórmulas utilizan abscisas equiespaciadas, la naturaleza oscilatoria de los polinomios de interpolación de alto orden no necesariamente convergen al valor exacto de la integral.
+
+El procediemiento para obtener las fórmulas compuestas de Newton-Cotes, por ejemplo para la regla de Simpson, consiste en seleccionar un entero par $n$ y subdividir el intervalo $[a, b]$ en $n$ subintervalos, aplicando la regla de Simpson en cada par consecutivo de ellos. Definiendo el \textit{paso} $h = (b -a)/n$, y $x_i = a + i h$ para cada $i = 0, 1, \ldots, n$ tenemos:
+\begin{align*}
+ \int_a^b f(x) \, dx &= \sum_{i=1}^{n/2} \int_{x_{2i-2}}^{x_{2i}} f(x) \, dx \\
+  &= \sum_{i=1}^{n/2}  \frac{h}{3} \left[ f(x_{2i-2}) + 4 f(x_{2i-1}) + f(x_{2i}) \right] 
+\end{align*} 
+Dado que para cada $i = 1, 2, \ldots, n/2 - 1$ aparece $f(x_{2i})$ en el intervalo $[x_{2i-2}, x_{2i}]$ y también en el $[x_{2i}, x_{2i+2}]$, podemos agrupar estos términos y reducir la suma:
+\begin{equation}
+ \int_a^b f(x) \, dx = \frac{h}{3} \left[ f(x_0) + 2 \sum_{i=1}^{n/2-1} f(x_{2i}) + 4 \sum_{i=1}^{n/2} f(x_{2i-1}) + f(x_n) \right]
+\end{equation} 
+
+Del mismo modo se pueden construir las fórmulas compuestas para la regla del rectángulo y del trapecio. La estimación del error de las fórmulas compuestas se obtiene simplemente sumando los errores en cada subintervalo. Por ejemplo, para el caso de la fórmula compuesta de la regla de Simpson, la suma de los errores dados por la expresión  \eqref{eq:intsimerr} para cada par de subintervalos consecutivos resulta:
+\[ \varepsilon_{\text{C}} = \frac{b-a}{180} h^4 f^{(iv)}(\xi) \quad \xi \in (a,b) \]
+siempre que $f \in C^4[a,b]$, es decir, $f$ sea continua y con todas sus derivadas hasta orden 4 continuas en $[a, b]$. Por lo tanto este método es de orden 4.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=1.0\textwidth]{Chapters/integracion/figs/int-NC-compuesto.pdf}
+ \caption{Fórmulas compuestas de Newton-Cotes: los puntos rojos representan los valores de la función evaluada en las abscisas $x_i$. a) Regla del rectángulo; b) regla del punto medio, c) regla del trapecio y d) regla de Simpson.}
+ \label{fig:int02}
+\end{figure}
+
+
+
+\subsection{Cuadraturas gaussianas}
+En las secciones anteriores hemos visto que dado un conjunto de $n$ abscisas $x_i$, podemos encontrar los pesos $\omega_i$ de modo tal que la fórmula resultante sea exacta para la integración de polinomios de grado menor o igual a $n-1$. En algunos casos, la fórmula de Simpson de tres puntos es exacta para polinomios hasta tercer grado. En las fórmulas de Newton-Cotes tenemos fijos los valores de las abscisas, y obtenemos los pesos para que las integrales sean exactas en el contexto mencionado.
+
+Podemos aumentar la precisión de las aproximaciones si tenemos más parámetros que podamos utilizar aumentando de este modo los ``grados de libertad'' disponibles para este propósito. De esta manera, si podemos \textit{elegir} los valores de las abscisas y de los pesos, podemos obtener expresiones que dan valores exactos para la integración de polinomios hasta de grado $2n-1$, dando origen de este modo a las \textit{cuadraturas gaussianas}.
+
+Ilustraremos el caso de derivación de las abscisas y los pesos de la fórmula de Gauss-Legendre, de modo de poder integrar exactamente polinomios de tercer grado en el intervalo $[-1, 1]$ solo con dos evaluaciones de la función integrando. Usaremos la misma metodología que para derivar la regla de Simpson.
+
+\jupynotex[26-27]{Chapters/integracion/code/integracion.ipynb}
+
+En las celda 26 definimos la lista de abscisas y pesos considerando que usaremos solo dos valores para cada caso, y luego, en la celda 27, la representación de la integral según la cuadratura de Gauss-Legendre de dos puntos:
+\begin{equation}\label{eq:intGL}
+ I = \int_{-1}^{1} f(x) \, dx \approx \omega_0 f(x_0) + \omega_1 f(x_1)
+\end{equation} 
+
+A continuación definimos en \mip{phiGL} la base del espacio de los polinomios de grado menor o igual a 3:
+
+\jupynotex[28]{Chapters/integracion/code/integracion.ipynb}
+
+Ahora construimos el sistema de ecuaciones que establecen la igualdad entre la integración de Gauss-Legendre y la integral exacta para cada una de las funciones base, es decir:
+\[ \omega_0 \phi_n^{GL}(x_0) + \omega_1 \phi_n^{GL}(x_1) - \int_{-1}^{1} \phi_n^{GL}(x) \, dx = 0 \]
+donde $\phi_n^{GL}(x) = x^n$ (que son las funciones base almacenadas en \mip{phiGL}). Las ecuaciones resultantes para cada $n = 0, 1, 2, 3$ se muestran en las celdas 29--32.
+\jupynotex[29-32]{Chapters/integracion/code/integracion.ipynb}
+
+En la celda 33 construimos la lista \mip{y} que concatena las listas \mip{x} y \mip{w} para tener en un único contenedor todas las incógnitas del sistema de ecuaciones, que en la misma celda resolvemos y mostramos las soluciones obtenidas:
+\jupynotex[33]{Chapters/integracion/code/integracion.ipynb}
+
+Estas soluciones muestran que:
+\begin{align*}
+ \omega_0 = \omega_1 &= 1 \\
+  x_0, x_1 &= \pm \frac{1}{\sqrt{3}}
+\end{align*}
+
+De este modo, podemos substituir en la ecuación \eqref{eq:intGL} que resulta en la fórmula de Gauss-Legendre de dos puntos:
+\begin{equation}\label{eq:intGL2}
+ I \approx f\left( -\frac{1}{\sqrt{3}} \right) + f\left( \frac{1}{\sqrt{3}} \right)
+\end{equation} 
+con lo que llegamos al resultado interesante que con la simple suma de los valores de la función en $x = -1/\sqrt{3}$ y $x = 1/\sqrt{3}$ resulta en la estimación de una integral que es precisa hasta tercer orden.
+
+Se puede observar que en la ecuación \eqref{eq:intGL} estamos integrando en el intervalo $[-1, 1]$, lo que hacemos para simplificar la matemática y hacer la formulación tan general como es posible. Si la integración se realiza sobre otro intervalo, se puede reescalar el intervalo de integración para llevarlo al $[-1, 1]$ mediante un simple cambio de variable lineal.
+
+Es posible extender la metodología para obtener fórmulas de Gauss-Legendre de mayor orden aumentando el número de abscisas. Existen tablas\footnote{Ver tablas 3.5.1-5 en \url{https://dlmf.nist.gov/3.5\#v}} en donde figuran las abscisas y los pesos para cuadraturas de Gauss-Legendre con más de dos puntos. En la sección \ref{sec:cuadfuneval} mostramos cómo realizar la evaluación numérica de cuadraturas gaussianas utilizando el módulo \mip{integrate} de SciPy. 
+
+El análisis del error en las cuadraturas gaussianas excede el alcance de este libro (invitamos a las personas interesadas en consultar la referencia \citep{stoer2002} para ver una demostración rigurosa), pero podemos mencionar que en este caso, si $f \in C^{(2n)} [a, b]$, el error en la cuadratura es
+\begin{equation}
+    \varepsilon_{CG} = K \frac{f^{(2n)}(\xi)}{(2n!)}
+\end{equation} 
+donde $K$ es una constante y $\xi$ algún valor en $(a, b)$ (desconocido). Comparando con las fórmulas de Newton-Cotes, vemos que para el mismo esfuerzo computacional (es decir, cantidad de evaluaciones de $f$), la integración gaussiana ofrece una precisión mayor. Sin embargo, dado que las cuadraturas gaussianas requieren la evaluación de las funciones en un conjunto no equiespaciados de puntos dentro del intervalo de integración, no son apropiadas para los casos en los que no se conoce la expresión analítica de la función, como en los casos en que ésta se presenta en forma de tabla sobre una grilla de abscisas. No obstante, cuando es posible evaluar la función en puntos arbitrarios, la eficiencia de las cuadraturas gaussianas es una ventaja, que resulta particularmente útil cuando deben realizarse numerosas evaluaciones de integrales.
+
+
+
+
+\subsection{Integración de Monte Carlo}\label{sec:intMC1d}
+Una forma alternativa de estimar integrales en forma numérica es mediante la integración \textit{Monte Carlo}, que utiliza números aleatorios. No es un método eficiente para evaluar integrales unidimensionales, pero lo mencionamos aquí porque su interpretación gráfica es sencilla, y el método es muy poderoso para evaluar integrales multidimensionales.
+
+La situación se representa en la figura \ref{fig:intMC}. La función $f(x)$ a ser integrada está contenida en un rectángulo cuya base es el intervalo de integración, y su altura supera con cierto margen el máximo de $f$ en ese intervalo. Naturalmente, el valor de la integral es el área bajo la curva que representa a $f(x)$. 
+
+Para estimar el valor del área bajo la curva, generamos a partir de una distribución uniforme una colección $n_{\text{MC}}$ de puntos $(x_i, y_i)$ dentro del área que contiene a la función $f$. La estimación de la integral corresponde, entonces, a la proporción de puntos que caen bajo la función, multiplicado por el área total de la figura. Cuanto mayor sea $n_{\text{MC}}$, mas precisa será la estimación de la integral.
+
+\begin{figure}[ht]
+ \centering
+ \includegraphics[width=0.7\textwidth]{Chapters/integracion/figs/mc-1d.pdf}
+ \caption{Estimación de la integral mediante integración de Monte Carlo con $n_{\text{MC}} = 100$.}
+ \label{fig:intMC}
+\end{figure}
+
+En el código siguiente vemos un ejemplo de cómo realizar la integración de Monte Carlo de la función polinómica:
+\[ f(x) = 400 x^5 - 900 x^4 + 675 x^3 - 200 x^2 + 25 x + 0.2 \]
+en el intervalo $[0, 0.8]$, que está contenida en un rectángulo de altura $4.0$. 
+\pyfile{Chapters/integracion/code/mc-1d.py}
+
+Incialmente importamos los módulos necesarios usuales (\mip{matplotlib.pyplot} y \mip{numpy}) y también \mip{sympy}, ya que usaremos su capacidad de integración para comparar con el resultado que da Monte Carlo. En las líneas 6--10 realizamos alguna configuración de aspectos gráficos de la figura producida, que se muestra en la Figura \ref{fig:intMC}.
+
+En la línea 15 definimos el intervalo de integración $(a, b)$ así como la altura del rectángulo que contiene la función (\mip{c}). En las líneas 16--17 definimos \mip{f(x)} que utilizaremos para las evaluaciones numéricas, y luego definimos en \mip{xs} y \mip{fs} el argumento y la función simbólicas (líneas 18--19) para evaluar la integral con SymPy, que es almacenada en la variable \mip{int_sym} y mostrada en pantalla en las líneas 17--18.
+
+A continuación generamos los puntos de Monte Carlo que usaremos para la evaluación de la integral. Primero definimos en \mip{n_mc} la cantidad de puntos a generar (línea 21), luego inicializamos el generador de números aleatorios con una semilla arbitraria\footnote{Para este ejemplo elegimos el \href{https://es.wikipedia.org/wiki/Número\_de\_la\_suerte}{número de la suerte} $13$, que es la suma y la diferencia de dos cuadrados consecutivos: $13 = 2^2 + 3^2 = 7^2 - 6^2$, además de ser uno de los tres \href{https://es.wikipedia.org/wiki/Número\_primo\_de\_Wilson}{números primos de Wilson} conocidos.} , y finalmente creamos dos arrays a partir de dicho generador, con distribución uniforme en $(a, b)$ para \mip{x} y  $(a, c)$ para \mip{y}, determinando que evaluaremos \mip{n_mc} puntos (líneas 21--24). Estos arrays contienen las coordenadas cartesianas de los puntos en el rectángulo $(a, b) \times (a, c)$ que contiene a $f(x)$.
+
+Ahora realizamos la estimación de la integral. Para ello creamos una máscara\footnote{Para ver como se usan las máscaras en NumPy, invitamos a visitar la sección \ref{sec:numpy_indiz}.} que tiene \mip{True} en los valores del array \mip{y} que son menores que los valores de \mip{f} evaluados para los valores de \mip{x} correspondientes. Para poder distinguir en el gráfico los valores que están por arriba de la función, generamos la máscara \mip{no_mask} que es la negación de la máscara \mip{mask} (lo que convierte los \mip{True} en \mip{False} y viceversa). La estimación del área bajo la curva se obtiene multiplicando la proporción de los puntos bajo la curva por el área total que contiene la función (línea 28). A continuación imprimimos esta estimación y también la diferencia porcentual obtenida con SymPy. El resto del código genera la Figura \ref{fig:intMC}.
+
+Al ejecutar este programa obtenemos, además del archivo PDF con la figura, el cálculo numérico de la integral por ambos métodos y su comparación:
+\begin{shell}
+$ ./mc-1d.py 
+Integral sympy = 1.64053333333333
+   Integral MC = 1.6960000000000002
+Diferencia porcentual = 3.381 % 
+$
+\end{shell}
+
+Se puede apreciar que con apenas 100 puntos al azar, la precisión del método (considerando como ``exacto'' el valor que da SymPy) es de poco más del 3\%. Si repetimos el cálculo con 1000 puntos la diferencia es menor al 1\%. En este caso se obtiene una precisión relativamente buena con pocos puntos dado que en el área de integración, la función ocupa una buena proporción de ésta. No obstante, si la función presenta un ``pico'' en un intervalo pequeño del dominio de integración, el muestreo con una distribución uniforme no resulta eficiente. Existen diversas técnicas que permiten hacer integraciones Monte Carlo mas ``eficientes estadísticamente'', entendiendo por esto que podemos alcanzar una mayor precisión para el mismo número de muestras, u obtener la misma precisión con menos muestras. Podemos mencionar, como ejemplos de métodos de reducción de varianza, el muestreo de importancia o los muestreos estratificado y condicional. La descripción de estas técnicas están fuera del alcance de este libro, por lo que sugerimos a quienes estén interesados las lecturas recomendadas al final del capítulo.
+
+
+\section{Integración numérica con SciPy}\label{sec:intScipy}
+
+El submódulo \mip{integrate} de SciPy ofrece varias técnicas de integración que pueden agruparse según la forma en que disponemos de la función a integrar. Si dicha función se conoce solo en un número dado de valores los métodos disponibles son \mip{trapezoid}, \mip{simpson} y el de Romberg \mip{romb} (extensión recursiva de la regla del trapecio que utiliza la extrapolación de Richardson). Por otra parte, si disponemos del integrando como una función que podemos evaluar en valores arbitrarios del argumento, \mip{integrate} dispone de \mip{quad}, \mip{fixed_quad}, \mip{quadrature} y \mip{romberg}. \mip{integrate} también dispone de rutinas para el cálculo de integrales de varias variables, lo que veremos en la sección \ref{sec:int-multiple}.
+
+
+\subsection{Fórmulas de Newton-Cotes}
+La implementación de las fórmulas de Newton-Cotes comprende la del trapecio (\mip{trapezoid}), la de Simpson (\mip{simpson}) y la fórmula de Romberg (\mip{romb}). En estos últimos dos casos existen requerimientos sobre la partición del intervalo de integración utilizado. Para el caso de Simpson, es necesario que el número de intervalos sobre los que se aplica la fórmula compuesta sea par, por lo que el número de abscisas debe ser impar. Para el caso del método de Romberg, el número de abscisas debe ser $n = 2^k + 1$, con $k$ entero.
+
+Como ejemplos de uso calculamos la integral
+\begin{equation}\label{eq:int06}
+ I = \int_0^5 2 \exp\left( -\frac{x^2}{2} \right) \, dx
+\end{equation}
+de la cual obtenemos primero, haciendo uso de SymPy, su valor exacto y una aproximación numérica con una precisión de 20 cifras significativas (celdas 1--2), de modo de poder estimar la precisión de las cuadraturas de Newton-Cotes. Luego definimos la función en la celda 3, y la evaluamos en el array de abscisas \mip{x} que tiene 17 valores (celda 4), cumpliendo de este modo los requisitos de Simpson y Romberg. En la celda 5 obtenemos los valores de las integraciones numéricas para cada método, notando que en el caso de Romberg es necesario indicar en \mip{dx} el paso de integración (o longitud de cada subintervalo).
+\jupynotex[1-5]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+En la salida de la celda 5 mostramos la diferencia relativa con el valor ``exacto'' de la celda 2. Vemos que la fórmula de Simpson da el resultado más preciso, con $n = 17$, seguido por la fórmula del trapecio y luego por la de Romberg. Sin embargo, si repetimos el cálculo para $n = 257$ (duplicando el valor de $k$), la precisión dada por la fórmula de Romberg mejora significativamente, superando en cuatro órdenes de magnitud a la de Simpson, y en siete a la del trapecio.
+
+En caso que querramos usar la fórmula de Simpson con un número impar de subintervalos ($n$ par), es posible indicarle al método \mip{simpson} que utilice una fórmula mixta usando la regla de Simpson en un número par de intervalos y la del trapecio en el restante. Esto se configura en el parámetro \mip{even} que admite las cadenas \mip{'first'} para el método del trapecio en el primer subintervalo, \mip{'last'} en el último y \mip{'avg'} haciendo un promedio entre los dos casos anteriores (siendo esta la opción por defecto).
+
+\subsection{Cuadraturas con funciones evaluables}\label{sec:cuadfuneval}
+Si tenemos la posibilidad de evaluar la función integrando en argumentos arbitrarios, podemos utilizar los métodos de SciPy \mip{quad}, \mip{fixed_quad}, \mip{quadrature} y \mip{romberg}.
+
+El método \mip{quad} utiliza la biblioteca QUADPACK\footnote{Sitio web de \href{https://nines.cs.kuleuven.be/software/QUADPACK/}{QUADPACK}.} desarrollada en Fortran, que consiste en rutinas automáticas de integración que intentan obtener el resultado con un error (relativo o absoluto) menor al establecido como argumento. En la celda 6 vemos el cálculo de la integral \eqref{eq:int06} pasando la función \mip{f}, los límites de integración \mip{a} y \mip{b}, y los parámetros adicionales \mip{A} y \mip{µ} en \mip{args} (notar que el primer argumento de \mip{f}, \mip{x}, es asumido implícitamente como variable de integración). En este caso usamos el valor por defecto del error absoluto máximo \mip{epsabs} de \mip{1.49e-08}:
+\jupynotex[6]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+En la salida de la celda 6 vemos, entre paréntesis, la diferencia porcentual con el valor obtenido a partir de la integración exacta con 20 cifras significativas (celda 2). En este caso, la estimación obtenida por \mip{quad} se aproxima al valor ``exacto'' en varios órdenes comparados con las estimaciones dadas por las fórmulas de Newton-Cotes. Al pasar el argumento \mip{full_output=1} obtenemos como tercer elemento de la tupla de salida de \mip{quad} un diccionario con diversa información sobre la ejecución del método. En la salida de la celda 6 imprimimos el número de evaluaciones de la función \mip{f} efectuadas durante la integración (21), lo que muestra la eficiencia de este método.
+
+En las celdas 7--8 vemos el cálculo de la integral \eqref{eq:int06} utilizando cuadraturas gaussianas. En el primer caso, el método \mip{fixed_quad} utiliza un número establecido de abscisas (en el caso mostrado usamos el valor por defecto, cinco), mientras que en el segundo \mip{quadrature} utiliza el número de abscisas necesario para obtener el resultado con un error menor que el requerido (que por defecto es \mip{1.49e-08}). En las salidas de ambas celdas mostramos también entre paréntesis la diferencia con el valor ``exacto'' (con 20 cifras significativas), mostrando que con pocos puntos se alcanza una precisión aceptable (el más preciso con apenas 11 puntos).
+\jupynotex[7-8]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+La función \mip{quad} permite calcular integrales impropias con límite de integración infinitos. Estos límites se representan con la representación de punto flotante de infinito \mip{float('inf')}, que en NumPy está disponible como \mip{np.inf}. Por ejemplo, para evaluar la integral
+\[ \int_{-\infty}^{\infty} e^{-x^2} dx \]
+podemos hacerlo con:
+\jupynotex[9]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+\mip{quad} también es capaz de evaluar integrales con singularidades en el integrando, aunque en estas condiciones suele ser necesario ``ayudar'' al método indicando dónde no evaluar la función, ya que puede suceder que la cuadratura gaussiana intente evaluar la función en estos puntos singulares (por ejemplo, cuando la singularidad está en $x = 0$).
+
+
+\section{Integración múltiple}\label{sec:int-multiple}
+No es tarea sencilla evaluar una integral de varias variables. Esto se debe a dos motivos: en primer lugar, el número de evaluaciones de funciones necesarias para realizar un muestreo de un espacio $N$-dimensional crece como la potencia $N$-ésima del número de evaluaciones necesarias para una integral unidimensional. Por ejemplo, si utilizamos 50 puntos para obtener una cuadratura en una dimensión, serán necesarias 125.000 evaluaciones en un espacio tridimensional. En segundo lugar, a diferencia del caso unidimensional donde el dominio de integración queda definido por dos números (los límites del intervalo de integración), una región de integración multidimensional requiere de un contorno de integración $(N-1)$-dimensional que puede ser un objeto muy complejo.
+
+En algunos casos es posible reducir la dimensionalidad de la integración, por ejemplo, aprovechando alguna simetría de la función respecto de sus variables. No obstante, estos suelen ser casos especiales y no la generalidad del problema.
+
+Existen dos abordajes básicos para la integración multidimensional. Si la función a integrar es suficientemente suave y el contorno de integración es simple, es posible descomponer la integración múltiple en sucesivas integraciones unidimensionales utilizando algún esquema de Newton-Cotes o gaussiano. También este enfoque es necesario si se necesita obtener el valor de la integral con alta precisión.
+
+El segundo abordaje, cuando el dominio de integración es complejo o no se require de un alto grado de precisión, es utilizando el método de Monte Carlo. Veremos a continuación algunos ejemplos utilizando estas técnicas.
+
+
+\subsection{Integración en dos, tres y $n$ dimensiones con SciPy}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[scale=1.0]{Chapters/integracion/figs/integral-multiple.pdf}
+ % integral-multiple.pdf: 218x191 px, 72dpi, 7.69x6.74 cm, bb=0 0 218 191
+ \caption{Evaluaciones de la función $f(x, y)$ en una integración bidimensional.}
+ \label{fig:int-2d}
+\end{figure}
+
+SciPy dispone de los métodos \mip{dblquad}, \mip{tplquad} y \mip{nquad} para la integración de funciones en dos, tres y $n$ dimensiones, respectivamente. Todas utilizan el método de integración unidimensional \mip{quad} descripto en la sección \ref{sec:intScipy}, que se invoca sucesivamente en cada dimensión de la integral. Por ejemplo, en el caso de la integral bidimensional
+\begin{equation}\label{eq:intmcmul01}
+I = \int_{a}^{b} \int_{g(x)}^{h(x)} f(x, y) \, dx \, dy
+\end{equation}
+
+el esquema de integración se muestra en la figura \ref{fig:int-2d}. En esta integral doble sobre el dominio sombreado en gris, la rutina externa de integración establece los valores de $x$ (puntos rojos), para los cuales se selecciona un conjunto de valores de $y$ que están delimitados por $g(x)$ y $h(x)$ (puntos azules) y que constituyen la rutina interna de evaluación. La rutina interna evalúa la integral sobre $y$ en valores fijos de $x$, y finalmente la rutina externa obtiene el valor final de la integral sobre los valores de $x$.
+
+Como un ejemplo simple de uso de las rutinas de SciPy, evaluaremos la integral
+\begin{equation}\label{eq:intmcmul02}
+ I = \int_{-1}^{1} \int_{-1}^1 \exp\left( -x^2 - y^2 \right) \, dx \, dy 
+\end{equation}
+
+En la celda 10 definimos la función integrando \mip{f2}, y en la 11 definimos los límites de integración para $x$ (\mip{a} y \mip{b}), así como las funciones $g(x)$ y $h(x)$ utilizando funciones \mip{lambda}, y finalmente invocamos el método \mip{dblquad} de \mip{scipy.integrate}, cuidando que el orden en el que aparecen los argumentos debe respetar el orden de los argumentos de \mip{f2}. El resultado de \mip{dblquad} muestra una tupla con el valor de la integral y una estimación del error.
+\jupynotex[10-11]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+Podemos extender el ejemplo a tres dimensiones fácilmente. En este caso definimos la función \mip{f3} agregando el argumento \mip{z}, así como los límites de integración para esta variable que en este caso deben ser funciones de las variables de las rutinas ``mas internas'' que integran en \mip{x} y \mip{y}. Nuevamente hacemos uso, por simplicidad, de las funciones \mip{lambda} asignando los límites en \mip{z} a \mip{q} y \mip{r}:
+\jupynotex[12]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+Para integrales de dimensiones mayores, SciPy ofrece el método \mip{nquad}. Este método recibe como argumentos la función a ser integrada y los rangos de integración para cada variable como una secuencia de dos números. Naturalmente, \mip{nquad} devuelve los mismos resultados que \mip{dblquad} y \mip{tplquad} para dos y tres dimensiones, respectivamente:
+\jupynotex[13]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+Tal como anticipamos al comienzo de esta sección, la complejidad computacional crece rápidamente al incrementar las dimensiones de la integral. Para cuantificar esta tendencia usaremos \mip{nquad} con una función generalizada del integrando de los ejemplos anteriores que acepta un número arbitrario de argumentos:
+\jupynotex[14]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+Evaluaremos entonces la integral con un número creciente de dimensiones (desde 1 hasta 5) y estimaremos el tiempo de ejecución utilizando el comando \textit{mágico} \verb|%time|\footnote{Estos cálculos se realizaron en un procesador AMD Ryzen 5 5600X.}:
+\jupynotex[15-19]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+Podemos ver que los tiempos de ejecución aumentan desde algunas centenas de microsegundos para una dimensión, hasta 20 segundos para 5. Es decir, aumentando el número de dimensiones 5 veces, el tiempo aumenta cuatro órdenes de magnitud. 
+
+
+
+\subsection{Integración Monte Carlo}
+En la sección anterior vimos que el tiempo de evaluación de integrales múltiples crece rápidamente con el número de dimensiones, por lo que utilizar cuadraturas unidimensionales ``anidadas'' puede resultar impracticable incluso con un número bajo de dimensiones. Si no se requiere una gran precisión en el resultado, la integración Monte Carlo ofrece una alternativa poderosa y simple que consiste en la evaluación del integrando en puntos del dominio seleccionados aleatoriamente. 
+
+El principio básico de la integración Monte Carlo consiste en aproximar la integral de una función $f$ que depende de $d$ variables:
+\begin{equation}\label{eq:intmc01}
+ I = \int_{\Omega} f(\bm{x}) \, dV
+\end{equation} 
+donde $\bm{x} = (x_1, x_2, \ldots, x_d)$, $dV = dx_1 dx_2 \cdots dx_d$ y $\Omega$ es un subconjunto de $\mathbb{R}^d$ con volumen $V$
+\[ V = \int_{\Omega} dV \]
+
+Si hacemos un muestreo de $N$ puntos aleatorios uniformemente distribuidos sobre $\Omega$, que denotamos $\bm{x}_n$ con $n = 1, 2, \cdots, N$, la estimación Monte Carlo de I es
+\begin{equation}\label{eq:intmc02}
+ I_N = \langle f \rangle V \pm V \sqrt{ \frac{\langle f^2 \rangle - \langle f \rangle^2}{N}}
+\end{equation} 
+
+Aquí, $\langle \cdot \rangle$ representa la media aritmética en los $N$ puntos de la muestra:
+\begin{equation}\label{eq:intmc03}
+ \langle f \rangle \equiv \frac{1}{N} \sum_{i=1}^{N} f(\bm{x}_i) \quad \langle f^2 \rangle \equiv \frac{1}{N} \sum_{i=1}^{N} f^2(\bm{x}_i)
+\end{equation} 
+
+La ley de los grandes números asegura que la estimación Monte Carlo converge al valor exacto de la integral:
+\[ \lim_{N\rightarrow \infty} \frac{1}{N} \sum_{i=1}^{N} f(\bm{x}_i) = I \]
+
+El segundo término de \eqref{eq:intmc02} es una estimación del error con una desviación estándar, no una cota rigurosa. El teorema del límite central indica que el error en la integración Monte Carlo escala como $1/\sqrt{N}$, independiente de la dimensión $d$. Este hecho hace que esta técnica de integración resulte muy eficiente para el cálculo de integrales multidimensionales, aunque generalmente la convergencia es lenta.
+
+Estimaremos mediante Monte Carlo la versión generalizada de la integral \eqref{eq:intmcmul01} (\mip{fn} de la celda 13), en cinco dimensiones, utilizando para ello el módulo \textbf{vegas} para la evaluación de integrales multidimensionales utilizando un algoritmo de Monte Carlo adaptativo \cite{lepage1978,lepage2021}. Implementar computacionalmente un algoritmo propio de integración Monte Carlo no es demasiado complicado (como vimos en la sección \ref{sec:intMC1d} para el caso unidimensional). Sin embargo, este módulo especializado tiene rutinas que permiten un muestreo más eficiente, uso de múltiples procesadores y otras características que están fuera del alcance de este libro, y que para el ejemplo de un cálculo simple es muy conveniente ya que en pocas líneas tenemos el resultado buscado.
+
+En la celda 20 importamos el módulo \textbf{vegas}, y a continuación creamos un objeto \mip{Integrator} que almacenamos en \mip{integ} y donde especificamos el volumen de integración (una lista con cinco elementos \mip{[-1, 1]}). A continuación aplicamos el objeto \mip{integ} a nuestro integrando estableciendo que realice \mip{nitn=10} iteraciones con un máximo de \mip{neval=1000} puntos en cada una de ellas. Cada iteración produce una estimación independiente de la integral, pero adaptando el muestreo de los puntos dentro del volumen a partir de la precisión obtenida en iteraciones previas. El resultado de la integración se almacena en \mip{result}, y la ejecución la hacemos con el comando \verb|%time| para obtener el tiempo requerido de la misma. El resultado de cada una de las iteraciones se muestra imprimiendo \mip{result.summary()}, donde se puede ver que en cada nueva iteración se alcanza una mejor precisión debido a que el nuevo muestreo ``aprende'' de los resultados obtenidos en las iteraciones anteriores. El promedio pesado que se muestra en la tercer columna se realiza mediante la inversa de la varianza, por lo que le asigna menos importancia a las primeras iteraciones. Las cuarta y quinta columna muestran los valores de la estimación estadística de los errores (según una distribución $\chi^2$ y el correspondiente $p$-valor o Q). Finalmente mostramos el resultado de la estimación por Monte Carlo, con su correspondiente incerteza entre paréntesis.
+
+\jupynotex[20]{Chapters/integracion/code/integracion-scipy.ipynb}
+
+Lo primero que podemos notar es que el tiempo requerido para evaluar la integral (en la misma computadora que en los casos anteriores) es de poco menos de 400 ms, esto es, unas 50 veces más rápido que utilizando \mip{nquad} de \mip{scipy.integrate} para la misma dimensionalidad del dominio de integración. Como contrapartida, la precisión obtenida es de apenas el $0.16$ \% frente al $1.1 \times 10^{-12}$ \% de \mip{nquad}. Podemos mejorar la precisión obtenida con el método de Monte Carlo incrementando el número de puntos muestreados \mip{neval}, o la cantidad de iteraciones \mip{nitn}, aunque es generalmente mejor aumentar \mip{neval}. Si utilizamos un orden de magnitud mayor (\mip{neval=1e5}), la precisión pude disminuir un poco sin casi incrementar el tiempo de ejecución. Para más detalles sobre el paquete \textbf{vegas} y métodos avanzados de integración, recomendamos leer su documentación\footnote{\href{https://vegas.readthedocs.io/}{https://vegas.readthedocs.io/}}.
+
+
+\section{Lecturas recomendadas}
+Fórmulas de Newton-Cotes y cuadraturas gaussianas:
+\begin{itemize}
+ \item \fullcite{gupta2019}.
+ \item \fullcite{gezerlis2020}.
+ \item \fullcite{burden2016}.
+ \item \fullcite{stoer2002}.
+\end{itemize}
+
+Integración Monte Carlo:
+\begin{itemize}
+ \item \fullcite{gezerlis2020}. 
+ \item \fullcite{weinzierl2000}.
+ \item \fullcite{kalos2009}.
+ \item \fullcite{kroese2011}.
+\end{itemize}
+
