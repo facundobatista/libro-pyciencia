@@ -1,11 +1,16 @@
-#!/usr/bin/env python3
-"""Programa que integra el sistema masa-resorte-banda elástica."""
+#!/usr/bin/env fades
+
+"""Programa que integra el sistema masa-resorte-banda elástica.
+
+fades:
+    PyQt5  # utilizado internamente por matplotlib para abrir una ventana con el resultado
+"""
 
 import argparse
 
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.integrate import solve_ivp
+import matplotlib.pyplot as plt  # fades
+import numpy as np  # fades
+from scipy.integrate import solve_ivp  # fades
 
 # Parámetros del sistema
 a, b = 17, 1  # Combinación de constantes elásticas

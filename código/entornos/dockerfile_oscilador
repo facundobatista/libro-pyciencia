@@ -1,0 +1,17 @@
+# arrancamos con un sistema base mínimo, sólo Python 3.9
+FROM python:3.9
+
+# instalamos las dependencias que necesitamos directamente desde PyPI
+RUN pip install matplotlib numpy scipy
+
+# indicamos que vamos a trabajar en este directorio (se crea automáticamente)
+WORKDIR /oscilador/
+
+# descargamos el script de prueba desde el github del libro mismo
+RUN wget https://raw.githubusercontent.com/facundobatista/libro-pyciencia/main/código/entornos/oscilador.py 
+
+# indicamos que el punto de entrada para cuando corramos el contenedor es el 
+# script, con los parámetros por default que indican que guarde la imagen 
+# resultante como un PDF
+CMD ["--archivo=imagen.pdf"]
+ENTRYPOINT ["python3", "oscilador.py"]

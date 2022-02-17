@@ -1,0 +1,20 @@
+# arrancamos con un sistema base mínimo, sólo Python 3.9
+FROM python:3.9
+
+# instalamos los paquetes necesarios para que LaTeX funcione ok
+RUN apt update && apt install -y texlive-latex-extra cm-super dvipng
+
+# instalamos las dependencias que necesitamos directamente desde PyPI
+RUN pip install matplotlib numpy scipy
+
+# indicamos que vamos a trabajar en este directorio (se crea automáticamente)
+WORKDIR /oscilador/
+
+# descargamos el script de prueba desde el github del libro mismo
+RUN wget https://raw.githubusercontent.com/facundobatista/libro-pyciencia/main/código/entornos/oscilador.py 
+
+# indicamos que el punto de entrada para cuando corramos el contenedor es el 
+# script, con los parámetros por default que indican que guarde la imagen 
+# resultante como un PDF y use LaTeX
+CMD ["--archivo=imagen.pdf", "--usar-tex"]
+ENTRYPOINT ["python3", "oscilador.py"]

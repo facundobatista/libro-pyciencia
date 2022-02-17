@@ -1,0 +1,10 @@
+# arrancamos con un sistema base mínimo, sólo Python 3.9
+FROM python:3.9
+
+# copiamos el archivo que necesitamos desde nuestro entorno a la imagen
+COPY demorona.py ./
+
+# indicamos que ejecute ese script cuando corramos el contenedor; notar como ejecutamos 
+# Python con `-u`, lo que indica que no use buffers para la salida (porque como vamos a
+# imprimir sólo dos lineas, veríamos ambas al final del proceso)
+ENTRYPOINT ["python3", "-u", "demorona.py"]
