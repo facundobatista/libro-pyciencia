@@ -33,3 +33,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 - [Entornos de ejecución de Python](entornos.pdf?raw=True): Introducción a la problemática. Descripción de la necesidad de múltiples entornos. Repetibilidad y aislamiento. Entornos virtuales, creación y activación, instalación de paquetes. Herramientas: virtualenv, virtualenvwrapper, fades, pipenv. Ejemplos prácticos. Contenedores, conceptos, distinción con imágenes. El Dockerfile. Creando imágenes. Ejecutando contenedores. Copiando resultados desde el contenedor. Valor de los contenedores a nivel sistema. Compartiendo imágenes.
 
+- [Elementos de estadística](estadistica.pdf?raw=True): Números aleatorios. Distribuciones: medidas de centralidad y dispersión. Test de hipótesis. Estimación no paramétrica.
+
