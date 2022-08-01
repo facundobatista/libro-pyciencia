@@ -35,3 +35,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 - [Elementos de estadística](estadistica.pdf?raw=True): Números aleatorios. Distribuciones: medidas de centralidad y dispersión. Test de hipótesis. Estimación no paramétrica.
 
+- [Procesamiento en paralelo](proc_paralelo.pdf?raw=True): Introducción. Qué es la concurrencia. Threading. Usando hilos. Modificando estructuras en sistemas multithreading, condiciones de carrera, locks. Sistemas asincrónicos, ventajas y desventajas. Usando async. Procesamiento en múltiples procesadores, compartiendo datos. Trabajando con números. Ejemplo práctico.
+
