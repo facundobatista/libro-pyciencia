@@ -90,7 +90,7 @@ El coeficiente de correlación de Pearson puede verse afectado por la existencia
 
 \jupynotex[6]{Chapters/modelado_estadistico/code/correlation.ipynb}
 
-Lo que muestra la celda 6 es que, para el registro 1, tanto el peso como la altura tienen el orden más bajo (1). Cuando los valores se repiten se toma el valor promedio del orden (en este caso, el valor de peso 185 ocupa los órdenes desde el 3 hasta el 8:  $(3+4+5+6+7+8)/6=5.5$). Con esta diferencia de orden $d$ se calcula el coeficiente de correlación de Spearman como:
+Lo que muestra la celda 6 es que, para el registro 1, tanto el peso como la altura tienen el orden más bajo (1). Cuando los valores se repiten se toma el valor promedio del orden (en este caso, el valor de altura 185 ocupa los órdenes desde el 3 hasta el 8:  $(3+4+5+6+7+8)/6=5.5$). Con esta diferencia de orden $d$ se calcula el coeficiente de correlación de Spearman como:
 
 \[ \rho = º - \frac{6 \sum\limits_{i=1}^n d_i^2}{n(n^2-1)}  \]
 donde $d_i$ es la diferencia de orden entre los valores de $x$ y $y$. Podemos obtener el coeficiente de correlación de Spearman para el \textit{dataset} completo de los atletas olímipicos invocando nuevamente el método \mip{corr()} de Pandas, pero esta vez indicando que el método que queremos utilizar para el cálculo es \mip{'spearman'}:
@@ -276,7 +276,7 @@ Los métodos usuales de regresión lineal que vimos hasta ahora no son suficient
  \[ p = \left( 1 + \exp(-\beta_0 -\beta_1 x) \right)^{-1} \]
  que mapea $x \in (-\infty, \infty)$ a $p \in (0, 1)$, y cuya representación gráfica se muestra en la figura \ref{fig:logplot}. Es decir, que la variable independiente (continua o discreta) $x$ es mapeada a través de los parámetros del modelo lineal $\beta_0$ y $\beta_1$, y posteriormente utilizando la función logística transformamos la salida del modelo lineal en una probabilidad $p$. Si $p < 0.5$ podemos decir que $y = 0$, y si $p \geq 0.5$, la predicción es que $y = 1$. 
  
- \begin{figure}[t]
+ \begin{figure}[ht]
  \centering
  \includegraphics[width=0.6\textwidth]{Chapters/modelado_estadistico/figs/log-plot.pdf}
  \caption{Representación gráfica de la función logística con los valores $\beta_0 = 0$ y $\beta_1 = 1$.}
