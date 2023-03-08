@@ -16,7 +16,7 @@
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
         Matplotlib & 3.5.3 \\
-        Pandas & 1.4.4 \\
+        pandas & 1.4.4 \\
         SciPy & 1.9.1 \\
         statsmodels & 0.13.2 \\
         \bottomrule
@@ -65,7 +65,7 @@ El coeficiente de correlación de Pearson resulta entonces una cantidad adimensi
 %  \footnote{By DenisBoigelot, original uploader was Imagecreator - Own work, original uploader was Imagecreator, CC0, }
 \end{figure}
 
-Veremos un ejemplo de cálculo de coeficiente de correlación de Pearson analizando un conjunto de datos de atletas olímpicos recolectados desde los juegos de Atenas de 1896 hasta Río de Janeiro en 2016, con el propósito de obtener una estimación cuantitativa de las correlaciones entre el peso de los atletas y sus alturas y edades. Estos datos pueden descargarse libremente de kaggle\footnote{\url{https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results/download}}, y analizaremos esta información utilizando las funcionalidades de Pandas.
+Veremos un ejemplo de cálculo de coeficiente de correlación de Pearson analizando un conjunto de datos de atletas olímpicos recolectados desde los juegos de Atenas de 1896 hasta Río de Janeiro en 2016, con el propósito de obtener una estimación cuantitativa de las correlaciones entre el peso de los atletas y sus alturas y edades. Estos datos pueden descargarse libremente de kaggle\footnote{\url{https://www.kaggle.com/datasets/heesoo37/120-years-of-olympic-history-athletes-and-results/download}}, y analizaremos esta información utilizando las funcionalidades de pandas.
 
 En la celda 1 importamos los módulos requeridos para este ejemplo, y en la 2 generamos el \textit{dataset} a partir del archivo de datos descargados.
 
@@ -80,7 +80,7 @@ Para inspeccionar la forma en que se agrupan los puntos tomando los pares altura
 
 \jupynotex[4]{Chapters/modelado_estadistico/code/correlation.ipynb}
 
-Obtenemos el coeficiente de correlación de Pearson entre las variables peso, altura y edad simplemente utilizando el método \mip{corr()} de los \textit{dataset} de Pandas:
+Obtenemos el coeficiente de correlación de Pearson entre las variables peso, altura y edad simplemente utilizando el método \mip{corr()} de los \textit{dataset} de pandas:
 
 \jupynotex[5]{Chapters/modelado_estadistico/code/correlation.ipynb}
 
@@ -93,7 +93,7 @@ El coeficiente de correlación de Pearson puede verse afectado por la existencia
 Lo que muestra la celda 6 es que, para el registro 1, tanto el peso como la altura tienen el orden más bajo (1). Cuando los valores se repiten se toma el valor promedio del orden (en este caso, el valor de peso 185 ocupa los órdenes desde el 3 hasta el 8:  $(3+4+5+6+7+8)/6=5.5$). Con esta diferencia de orden $d$ se calcula el coeficiente de correlación de Spearman como:
 
 \[ \rho = º - \frac{6 \sum\limits_{i=1}^n d_i^2}{n(n^2-1)}  \]
-donde $d_i$ es la diferencia de orden entre los valores de $x$ y $y$. Podemos obtener el coeficiente de correlación de Spearman para el \textit{dataset} completo de los atletas olímipicos invocando nuevamente el método \mip{corr()} de Pandas, pero esta vez indicando que el método que queremos utilizar para el cálculo es \mip{'spearman'}:
+donde $d_i$ es la diferencia de orden entre los valores de $x$ y $y$. Podemos obtener el coeficiente de correlación de Spearman para el \textit{dataset} completo de los atletas olímipicos invocando nuevamente el método \mip{corr()} de pandas, pero esta vez indicando que el método que queremos utilizar para el cálculo es \mip{'spearman'}:
 
 \jupynotex[7]{Chapters/modelado_estadistico/code/correlation.ipynb}
 
@@ -151,7 +151,7 @@ La matriz de diseño obtenida con \mip{dmatrix} es un objeto del tipo \mip{Desig
 
 \jupynotex[5]{Chapters/modelado_estadistico/code/patsy_matrices.ipynb}
 
-En forma alternativa, y dada la popularidad de Pandas para la representación de conjuntos de datos, podemos establecer el argumento \mip{return_type} de \mip{dmatrices} como \mip{"dataframe"}. Además, dado que los objetos \mip{DataFrame} se comportan como diccionarios, los podemos utilizar para definir los datos como segundo argumento de la función \mip{dmatrices}:
+En forma alternativa, y dada la popularidad de pandas para la representación de conjuntos de datos, podemos establecer el argumento \mip{return_type} de \mip{dmatrices} como \mip{"dataframe"}. Además, dado que los objetos \mip{DataFrame} se comportan como diccionarios, los podemos utilizar para definir los datos como segundo argumento de la función \mip{dmatrices}:
 
 \jupynotex[6]{Chapters/modelado_estadistico/code/patsy_matrices.ipynb}
 
@@ -185,7 +185,7 @@ Vamos a considerar que la relación matemática que vincula las variables indepe
 y = 4 + x_1 - 2 x_2 + 3 x_1 x_2
  \end{equation}
 
-Para ello generaremos un conjunto de números aleatorios (estableciendo previamente un valor de la semilla del generador para poder reproducir los valores muestreados) y construiremos a partir de estos valores los correspondientes a la variable dependiente según la ecuación \eqref{eq:rel_lin}. En las siguientes dos celdas del \textit{notebook} importamos primero los módulos necesarios y construimos un \textit{dataframe} de Pandas conteniendo los valores de las variables dependientes $x_1$ y $x_2$ y la variable dependiente $y$:
+Para ello generaremos un conjunto de números aleatorios (estableciendo previamente un valor de la semilla del generador para poder reproducir los valores muestreados) y construiremos a partir de estos valores los correspondientes a la variable dependiente según la ecuación \eqref{eq:rel_lin}. En las siguientes dos celdas del \textit{notebook} importamos primero los módulos necesarios y construimos un \textit{dataframe} de pandas conteniendo los valores de las variables dependientes $x_1$ y $x_2$ y la variable dependiente $y$:
 
 \jupynotex[1-2]{Chapters/modelado_estadistico/code/modelo_lineal.ipynb}
 
