@@ -90,7 +90,7 @@ El coeficiente de correlación de Pearson puede verse afectado por la existencia
 
 \jupynotex[6]{Chapters/modelado_estadistico/code/correlation.ipynb}
 
-Lo que muestra la celda 6 es que, para el registro 1, tanto el peso como la altura tienen el orden más bajo (1). Cuando los valores se repiten se toma el valor promedio del orden (en este caso, el valor de peso 185 ocupa los órdenes desde el 3 hasta el 8:  $(3+4+5+6+7+8)/6=5.5$). Con esta diferencia de orden $d$ se calcula el coeficiente de correlación de Spearman como:
+Lo que muestra la celda 6 es que, para el registro 1, tanto el peso como la altura tienen el orden más bajo (1). Cuando los valores se repiten se toma el valor promedio del orden (en este caso, el valor de altura 185 ocupa los órdenes desde el 3 hasta el 8:  $(3+4+5+6+7+8)/6=5.5$). Con esta diferencia de orden $d$ se calcula el coeficiente de correlación de Spearman como:
 
 \[ \rho = º - \frac{6 \sum\limits_{i=1}^n d_i^2}{n(n^2-1)}  \]
 donde $d_i$ es la diferencia de orden entre los valores de $x$ y $y$. Podemos obtener el coeficiente de correlación de Spearman para el \textit{dataset} completo de los atletas olímipicos invocando nuevamente el método \mip{corr()} de Pandas, pero esta vez indicando que el método que queremos utilizar para el cálculo es \mip{'spearman'}:
