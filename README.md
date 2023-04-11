@@ -39,4 +39,4 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 - [Modelado estadístico](modelado_estadistico.pdf?raw=True): Introducción. Coeficiente de correlación. Definición de modelos estadísticos con patsy. Regresión lineal y discreta. Series temporales.
 
-- [GUIs](guis.pdf?raw=True): Concepto de interfaces gráficas. Qt. PyQt. Documentación. Una aplicación mínima. Widgets. Diseño. Señales. Una aplicación real. La ventana principal. Menús y barra de tareas, acciones. Diálogos. Tablas: vista y modelo. Ejecución en otro hilo para no bloquear la interfaz.
+- [Interfaces gráficas](guis.pdf?raw=True): Concepto de interfaces gráficas. Qt. PyQt. Documentación. Una aplicación mínima. Widgets. Diseño. Señales. Una aplicación real. La ventana principal. Menús y barra de tareas, acciones. Diálogos. Tablas: vista y modelo. Ejecución en otro hilo para no bloquear la interfaz.
