@@ -40,3 +40,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Modelado estadístico](modelado_estadistico.pdf?raw=True): Introducción. Coeficiente de correlación. Definición de modelos estadísticos con patsy. Regresión lineal y discreta. Series temporales.
 
 - [Interfaces gráficas](guis.pdf?raw=True): Concepto de interfaz gráfica. Qt. PyQt. Documentación. Una aplicación mínima. Widgets. Diseño. Señales. Una aplicación real. La ventana principal. Menús y barra de tareas, acciones. Diálogos. Tablas: vista y modelo. Ejecución en otro hilo para no bloquear la interfaz.
+
+- [Optimización](optimizacion.pdf?raw=True): Optimización unidimensional. Optimización multidimensional sin restricciones. Optimización multidimensional con restrcciones. Programación lineal y no lineal. Algoritmo genético.
