@@ -42,3 +42,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Interfaces gráficas](guis.pdf?raw=True): Concepto de interfaz gráfica. Qt. PyQt. Documentación. Una aplicación mínima. Widgets. Diseño. Señales. Una aplicación real. La ventana principal. Menús y barra de tareas, acciones. Diálogos. Tablas: vista y modelo. Ejecución en otro hilo para no bloquear la interfaz.
 
 - [Optimización](optimizacion.pdf?raw=True): Optimización unidimensional. Optimización multidimensional sin restricciones. Optimización multidimensional con restrcciones. Programación lineal y no lineal. Algoritmo genético.
+
+- [Manipulación de datos](manipulacion_datos.pdf?raw=True): Leyendo archivos, formas de apertura. Trabajando con datos en formato textual, tres formatos comunes: CSV, JSON y XML. Trabajando con datos binarios, un formato muy usado: HDF5. Pandas, carga de datos, estructuras básicas, operaciones.
