@@ -46,3 +46,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Manipulación de datos](manipulacion_datos.pdf?raw=True): Leyendo archivos, formas de apertura. Trabajando con datos en formato textual, tres formatos comunes: CSV, JSON y XML. Trabajando con datos binarios, un formato muy usado: HDF5. Pandas, carga de datos, estructuras básicas, operaciones.
 
 - [Machine learning](machine_learning.pdf?raw=True): Introducción. Nodos, pesos y funciones de activación. Aprendizaje. Ejemplo de red usando Numpy. Ejemplo con Keras.
+
+- [Sobre la velocidad de procesamiento](profiling.pdf?raw=True): Introducción. Profiling. Encontrando dónde un programa es lento. Midiendo pequeñas partes de código. Usando Python de forma más eficiente. Planes alternativos cuando Python puro sigue siendo lento: Mypyc, Cythin, Numba, conclusiones. Usando código compilado: extendiendo Python con C o C++, aprovechar código previamente compilado.
