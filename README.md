@@ -1,6 +1,6 @@
 # Python en Ámbitos Científicos
 
-[![Licencia](https://img.shields.io/badge/License-CC%20BY%20NC%20SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es) [![Twitter](https://img.shields.io/twitter/follow/libro_pyciencia.svg?style=social)](https://twitter.com/libro_pyciencia)  
+[![Licencia](https://img.shields.io/badge/License-CC%20BY%20NC%20SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es) [![Twitter](https://img.shields.io/twitter/follow/libro_pyciencia.svg?style=social)](https://twitter.com/libro_pyciencia)
 
 Este proyecto es parte del soporte de construcción del libro "Python en Ámbitos Científicos" de Facundo Batista y Manuel Carlevaro.
 
@@ -29,7 +29,7 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 - [Versionado de código](versionado.pdf?raw=True): Control de versiones, utilidad, necesidad, casos de uso. Ramas. Git. Flujo de traajo, ciclo de vida de una rama, ejemplo práctico. Lecturas recomendadas.
 
-- [Integración numérica](integracion.pdf?raw=True): Integración simbólica. Transformaciones integrales. Integración numérica en una dimensión: métodos de Newton-Cotes, cuadraturas gaussianas, integración Monte Carlo. Integración numérica con SciPy. Integración múltiple. 
+- [Integración numérica](integracion.pdf?raw=True): Integración simbólica. Transformaciones integrales. Integración numérica en una dimensión: métodos de Newton-Cotes, cuadraturas gaussianas, integración Monte Carlo. Integración numérica con SciPy. Integración múltiple.
 
 - [Entornos de ejecución de Python](entornos.pdf?raw=True): Introducción a la problemática. Descripción de la necesidad de múltiples entornos. Repetibilidad y aislamiento. Entornos virtuales, creación y activación, instalación de paquetes. Herramientas: virtualenv, virtualenvwrapper, fades, pipenv. Ejemplos prácticos. Contenedores, conceptos, distinción con imágenes. El Dockerfile. Creando imágenes. Ejecutando contenedores. Copiando resultados desde el contenedor. Valor de los contenedores a nivel sistema. Compartiendo imágenes.
 
@@ -48,3 +48,6 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Machine learning](machine_learning.pdf?raw=True): Introducción. Nodos, pesos y funciones de activación. Aprendizaje. Ejemplo de red usando Numpy. Ejemplo con Keras.
 
 - [Sobre la velocidad de procesamiento](profiling.pdf?raw=True): Introducción. Profiling. Encontrando dónde un programa es lento. Midiendo pequeñas partes de código. Usando Python de forma más eficiente. Planes alternativos cuando Python puro sigue siendo lento: Mypyc, Cythin, Numba, conclusiones. Usando código compilado: extendiendo Python con C o C++, aprovechar código previamente compilado.
+
+- [Python más avanzado](no_tan_intro.pdf?raw=True): Generadores. Administradores de contexto: uso, construcción clásica y abreviada. Acercándonos a la programación funcional: funciones lambda, map, filter y reduce, alternativas. Pruebas de unidad: conceptos, estados de salida, construcción de caso ejemplo. Decoradores: uso y conceptos, construcción.
+
