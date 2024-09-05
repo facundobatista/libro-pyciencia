@@ -1,0 +1,324 @@
+
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Procesamiento en GPU} \label{ch:gpu}
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        NumPy & 1.26.4 \\
+        PyOpenCL & 2024.2.7 \\
+        PyCUDA & 2024.1.2 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/procesamiento_gpu/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+En el ámbito del cálculo científico y tecnológico, la demanda de potencia de cálculo es siempre creciente, dada la necesidad de resolver problemas cada vez más complejos, más grandes, más rápido.
+
+Afortunadamente, la industria ha respondido a tales requerimientos con adelantos tecnológicos formidables, tal como lo muestra la ley empírica de Moore\footnote{Ver su entrada en \href{https://es.wikipedia.org/wiki/Ley\_de\_Moore}{Wikipedia}.}. Hasta el fin del siglo pasado, las computadoras incrementaban su potencia de cálculo principalmente por medio del aumento de la frecuencia del reloj (también mejorando el tamaño de las memorias caché y el conjunto de intrucciones de los procesadores), lo que permitía realizar más operaciones aritméticas o lógicas por segundo. Sin embargo, esto requería disipar cantidades mayores de calor, lo que impone un límite físico a la velocidad de los relojes. Por este motivo, desde mediados de los 2000, se comenzaron a implementar estrategias de paralelismo incoporando más núcleos de cálculo en las computadoras. Esto se evidencia claramente en la Figura \ref{fig:moore}.
+
+\begin{figure}
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Chapters/procesamiento_gpu/figs/50-yrs.pdf}
+    \caption{Evolución de 50 años de microprocesadores. Fuente: \href{https://github.com/karlrupp/microprocessor-trend-data}{Karl Rupp}.}
+    \label{fig:moore}
+\end{center}
+\end{figure}
+
+% https://www.techspot.com/article/650-history-of-the-gpu/
+% https://medium.com/@veersenjadhav/the-history-of-evolution-of-graphics-cards-gpus-89f1d5354d78
+Por otra parte, las placas gráficas fueron desarrolladas inicialmente como \textit{hardware} especializado en acelerar el procesamiento gráfico de aplicaciones científicas o de ingeniería, aunque ya en la última década del siglo pasado se produjeron adelantos tecnológicos significativos traccionados principalmente por la industria de los juegos de video y la demanda creciente de gráficos 3D. En 1999, la empresa NVIDIA\footnote{\url{https://www.nvidia.com/es-la/}.} presentó la GeForce 256 como la primera GPU (\textit{Graphics Processing Unit}) más que una aceleradora de gráficos, y desde entonces los avances en la tecnología de estas placas se han sostenido a un ritmo vertiginoso, liderados por compañias como NVIDIA, AMD\footnote{\url{https://www.amd.com/es.html}.} e Intel\footnote{\url{https://www.intel.la/content/www/xl/es/homepage.html}.}.
+
+Debido a la naturaleza inherentemente paralela del cálculo de grandes cantidades de píxeles, investigadores y desarrolladores extendieron el uso de las GPUs más allá de las aplicaciones gráficas al ámbito del procesamiento general, en los primeros años del siglo XXI. En particular, algunos problemas asociados a operaciones sobre vectores y matrices fueron adaptados fácilmente a su ejecución en GPU \cite{thompson2002, bolz2003, kruger2003}, logrando realizar dichas operaciones en menos tiempo que sobre una CPU. Al desarrollo en el \textit{hardware} lo acompañó la mejora en los lenguajes de programación, lo que facilitó significativamente la representación de estructuras y algoritmos sobre las placas gráficas por medio de abstracciones orientadas hacia el cálculo paralelo masivo, más que hacia los detalles de cálculo gráfico (los primeros desarrollos se hicieron expresando los cómputos como una forma de «pintar» un píxel). El lenguaje de programación sobre GPUs más difundido actualmente es CUDA \cite{cuda}, introducido por NVIDIA en 2006, como una extensión del lenguaje C/C++. Una alternativa que constituye un estándar abierto y multiplataforma es OpenCL\footnote{\url{https://www.khronos.org/opencl/}.} del Kronos Group, desarrollado inicialmente por Apple Inc. en 2009.
+
+Una vez consolidado el desarrollo del \textit{hardware} y los lenguajes para utilizarlos, la comunidad científica y tecnológica adoptó rápidamente la enorme capacidad de cálculo de bajo costo disponible, y el número de aplicaciones ejecutadas sobre GPUs comenzó a crecer sostenidamente. Un ejemplo notable de los primeros esfuerzos por aprovechar el paralelismo masivo provisto por las placas gráficas fue el trabajo de Raina, Madhavan y Ng en 2009 sobre la posibilidad de entrenar redes neuronales profundas con GPUs\cite{raina2009}.
+
+Existen varias herramientas en el ecosistema de  Python que permiten acceder al procesamiento en una placa gráfica, abordando de diversas maneras las formas de delegar en una GPU parte del procesamiento que realizamos en un código. Por ejemplo, podemos mencionar Numba\footnote{\url{https://numba.readthedocs.io/en/stable/cuda/index.html}.}, CuPy\footnote{\url{https://cupy.dev/}.}, PyCUDA\footnote{\url{https://documen.tician.de/pycuda/}.} o PyOpenCL\footnote{\url{https://documen.tician.de/pyopencl/}.}. En este capítulo haremos una breve introducción a las dos últimas, con algo más de detalle sobre PyCUDA.
+
+%https://en.wikipedia.org/wiki/General-purpose_computing_on_graphics_processing_units
+%https://es.wikipedia.org/wiki/GPGPU
+%https://en.wikipedia.org/wiki/CUDA
+
+\section{Arquitectura de una GPU}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.75\textwidth]{Chapters/procesamiento_gpu/figs/cpu-gpu}
+    \caption{Comparación de arquitecturas de CPU y GPU: en verde se representan las unidades de cómputo o núcleos (\textit{cores}), en amarillo las unidades de control y el resto (violeta, celeste y anaranjado) diferentes jerarquías de memoria. Fuente: \href{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html\#from-graphics-processing-to-general-purpose-parallel-computing-gpu-devotes-more-transistors-to-data-processing}{CUDA C++ Programming Guide}.}
+        \label{fig:cpugpu}
+    \end{center}
+\end{figure}
+
+En una CPU actual podemos encontrar varios (decenas) núcleos de cómputo (o \textit{cores}), que son procesadores capaces de realizar tareas secuenciales complejas en tiempos muy cortos gracias a su conjunto de instrucciones. Por ejemplo, con el propósito de optimizar el tiempo de ejecución, una CPU puede ejecutar instrucciones en un orden diferente al establecido por el programa (\textit{out-of-order executions}), o puede predecir las instrucciones  más probables a ejecutar en el futuro próximo cuando se encuentra una bifurcación (\textit{multiple branch prediction}). De este modo puede anticiparse preparando los operandos correspondientes y ejecutando con anticipación tales instrucciones (\textit{speculative execution}).
+
+Por su parte, las GPUs proveen una plataforma especializada en cálculo paralelo de operaciones con números representados en punto flotante. Los núcleos de las GPUs tienen un conjunto de instrucciones más simple, por lo que cada uno puede realizar tareas menos complejas y en forma más lenta que una CPU. Sin embargo, una GPU actual dispone de miles de núcleos\footnote{El modelo GeForce RTX 4090 de NVIDIA dispone de \num{16384} CUDA \textit{cores}.} trabajando simultáneamente con muy poco \textit{overhead}, lo que le permite procesar datos hasta cientos de veces más rápido que una CPU con varios núcleos. Aprovechando el paralelismo masivo que proveen las GPUs, el modelo de programación que utilizan es el SIMT (\textit{Single Instruction, Multiple Threads}) que significa que todos los núcleos ejecutan exactamente la misma operación sobre datos diferentes(SIMD, \textit{Single Instruction, Multiple Data}), combinado con el uso de múltiplos hilos de ejecución. % https://stackoverflow.com/questions/5238743/can-cuda-use-simd-extensions
+
+En el caso de las GPUs de NVIDIA, la arquitectura de una GPU dada depende de la familia de dispositivos a la que pertenece. Cada GPU se caracteriza por su capacidad de cálculo o \textit{compute capability}, que se representa por números de revisión mayor y menor $(X, Y$). Los dispositivos que comparten el mismo número de revisión mayor $X$ pertenecen a la misma arquitectura (Kepler: 3, Maxwell: 5, Pascal: 6, Volta y Turing: 7, Ampere: 8 y Hopper: 9), mientras que el número de revisión menor $Y$ corresponde a mejoras incrementales dentro de la misma arquitectura. Las especificaciones técnicas de cada capacidad de cálculo se pueden ver en las tablas que ofrece NVIDIA (\href{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#features-and-technical-specifications-feature-support-per-compute-capability}{aquí} y \href{https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#features-and-technical-specifications-technical-specifications-per-compute-capability}{aquí}).
+
+Todas estas arquitecturas se basan en un conjunto de \textit{streaming multiprocessors} (SM), cada uno de los cuales controla la ejecución de un número de hilos o \textit{threads}. Para ello, los SM disponen (según su capacidad de cálculo) de un número de CUDA \textit{cores} para operaciones aritméticas con números enteros o de diferentes grados de precisión de punto flotante, unidades de procesamiento para el cálculo de funciones trascendentales con precisión simple, unidades de cálculo tensorial y procesadores para la administración de los hilos, además de una cantidad limitada memoria \textit{on-chip} que es accesible por los \textit{cores} que administra, y un gran número de registros.
+
+Estos SM son capaces de crear, administrar y ejecutar grupos de 32 hilos que se ejecutan simultáneamente denominados \textit{warps}. Cada \textit{warp} ejecuta una instrucción común a los hilos que administra en forma simultánea. Cuando un SM recibe un bloque de hilos para ejecutar, los divide en \textit{warps} que contienen hilos con identificadores (ID) consecutivos.
+
+\section{Kernels y threads en CUDA}
+
+La plataforma de programación provista por NVIDIA denominada CUDA (\textit{Compute Unified Device Architecture}) permite escribir programas para ejecutar en sus GPUs, y consiste en una extensión del lenguaje C/C++ que ofrece un capa de \textit{software} que permite el acceso directo al conjunto de instrucciones y núcleos de cálculo paralelo para la ejecución de funciones denominadas «\textit{kernels}». Estos kernels se ejecutan en la GPU, en forma paralela, utilizando un número $N$ establecido de hilos o \textit{threads}, sobre arreglos (\textit{arrays}) de números que reciben como argumento. Cada thread que ejecuta el kernel tiene un identificador único que es accesible por el kernel a través de variables propias del lenguaje: \mip{threadIDx}. Este identificador puede ser utilizado para calcular y acceder a elementos de los arrays.
+
+El modelo de programación en CUDA para ejecutar código en la GPU consiste, básicamente, en proceder en la ejecución de las siguientes tareas:
+\begin{itemize}
+    \item Definir el código que compone el kernel, proceder a su compilación y generar una función que será invocada desde nuestro programa en la CPU (o \textit{host}).
+    \item Copiar los datos que constituyen los argumentos del kernel desde la memoria del \textit{host} a la memoria de la GPU (o \textit{device}), o transferencia \textit{host} a \textit{device}.
+    \item Lanzar el kernel en la GPU, con una determinada configuración de la división de tareas.
+    \item Copiar los datos resultantes desde la memoria del \textit{device} a la del \textit{host}, o transferencia \textit{device} to \textit{host}.
+
+\end{itemize}
+
+Veamos un ejemplo simple que consiste en la suma de dos arrays, utilizando PyCUDA \cite{pycuda2012}. Primero importamos los módulos necesarios para acceder a la GPU y los inicializamos:
+
+\jupynotex[1]{Chapters/procesamiento_gpu/code/suma-arrays.ipynb}
+
+Los primeros dos módulos permiten establecer la comunicación con la GPU y realizar los pasos necesarios para enviarle kernels para su ejecución. El submódulo \mip{driver} contiene funciones para la administración de la memoria, propiedades del dispositivo, etc., mientras que el submódulo \mip{autoinit} se utiliza para la inicialización de la GPU, creación de contexto y limpieza de memoria. Este submódulo no es obligatorio, ya que estas funciones se pueden hacer en forma explícita. 
+
+En la celda siguiente vamos a generar el código que constituye el \textit{kernel}. Para esto debemos importar módulo \mip{pycuda.compiler}, que es el que crea un módulo ejecutable en la GPU a partir del código fuente que le suministramos en forma de cadena, haciendo uso del compilador de NVIDIA «nvcc». A continuación definimos el \textit{kernel} definiendo una variable \mip{mod} que contiene el módulo con la definición del kernel. Éste se pasa como argumento al constructor de la clase compuesto por una cadena, que define la función a ejecutar sobre los arrays escrita con sintaxis de C/C++: 
+\jupynotex[2]{Chapters/procesamiento_gpu/code/suma-arrays.ipynb}
+
+La definición del \textit{kernel} comienza con la palabra \mip{__global__}, que se utiliza para declarar que la función que sigue a continuación es un kernel que se ejecuta en la GPU, invocable desde el \textit{host} (para arquitecturas con capacidad de cómputo 5.0 o superior, la función también se puede invocar desde el \textit{device}). Una función \mip{__global__} debe devolver un tipo \mip{void}, que es la palabra que precede al nombre de la función (\mip{producto_arrays}). Luego, los tres arrays que constituyen los argumentos se pasan como punteros a datos de tipo \mip{float}.
+
+En el cuerpo de la función, delimitado por llaves, la variable entera \mip{i} contiene el valor de \mip{threadIdx.x}, que es el identificador del hilo que ejecuta el kernel. De este modo, cada hilo accede al elemento $i$-ésimo de cada array \mip{a} y \mip{b}, y almacena la suma de ambos en el elemento $i$-ésimo de \mip{c}, paralelizando de este modo la suma sobre los arrays.
+
+La variable \mip{producto_arrays} recibe un \textit{handler} a la función que contiene el módulo \mip{mod}. En la celda siguiente definimos los tres arrays que utilizaremos: \mip{a} y \mip{b}, de tipo \mip{np.float32}, y que contienen valores aleatorios mientras que \mip{c}, del mismo tipo de \mip{a}, se inicializa con ceros.
+
+\jupynotex[3]{Chapters/procesamiento_gpu/code/suma-arrays.ipynb}
+
+Ahora lanzamos la ejecución de hilos en la GPU utilizando el \textit{handler} \mip{producto_arrays}, al que le pasamos como argumentos los dos arrays que vamos a sumar, y el array en el que almacenamos el resultado. La transferencia de estos arrays desde y hacia el device lo hacemos con los métodos \mip{In}, que transfiere el array al device \textit{antes} de ejecutar el kernel, y \mip{Out}, que indica que el array debe transferirse desde el device \textit{después} de que el kernel finaliza su tarea. Otro parámetro que debemos pasar es \mip{block}, que indica el modo en que se distribuirán las tareas en la GPU  y que describiremos en la sección siguiente. Finalmente, comparamos los valores almacenados en \mip{c} con el cálculo que realiza NumPy para verificar que sean iguales.
+
+\jupynotex[4]{Chapters/procesamiento_gpu/code/suma-arrays.ipynb}
+
+
+\section{Organización de \textit{threads}}
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{Chapters/procesamiento_gpu/figs/jerarquia.pdf}
+        \caption{Jerarquía de hilos en CUDA.}
+        \label{fig:jerarquia}
+    \end{center}
+\end{figure}
+
+
+La unidad de ejecución de kernels es el hilo o \textit{thread}, y lo usual es utilizar un gran número de \textit{threads} que debemos gestionar para aprovechar la cantidad de \textit{cores} que nos provee la GPU. Un grupo de hilos se denomina «bloque», y a su vez un conjunto de bloques define una «grilla», tal como se esquematiza en la Figura \ref{fig:jerarquia}. Cada bloque se ejecuta en un \textit{streaming multiprocessor} (salvo excepciones, un bloque no se puede migrar a otro SM) en forma concurrente, según los requerimientos de recursos que necesita. De esta forma, dado que los hilos de un mismo bloque comparten los recursos que provee el SM, dichos hilos pueden comunicarse entre sí a través de la memoria compartida del SM, por medio de barreras de sincronización u operaciones atómicas.
+
+El número de hilos que pueden agruparse en un bloque está limitado, y por esto es posible agrupar bloques en una grilla para hacer posible la ejecución de una gran cantidad de hilos. La divisón de tareas en un procesamiento en paralelo debe planificarse teniendo en cuenta la cantidad de hilos que puede administrar un bloque, lo que en última instancia depende de la GPU (o múltiples GPUs) que tengamos disponible. En el código siguiente vemos cómo podemos interrogar a la GPU para obtener información sobre los recursos que ofrece:
+
+\jupynotex[1]{Chapters/procesamiento_gpu/code/gpu_info.ipynb} 
+
+La salida de esta celda es extensa, por lo que resumimos aquí algunas líneas:
+\begin{shell}
+1 dispositivo(s) encontrado.
+Modelo de GPU: NVIDIA GeForce GTX 1060 3GB
+  Compute Capability: 6.1
+  Memoria total: 3013 MB
+  ...
+ MAX_BLOCKS_PER_MULTIPROCESSOR: 32
+ MAX_BLOCK_DIM_X: 1024
+ MAX_BLOCK_DIM_Y: 1024
+ MAX_BLOCK_DIM_Z: 64
+ MAX_GRID_DIM_X: 2147483647
+ MAX_GRID_DIM_Y: 65535
+ MAX_GRID_DIM_Z: 65535
+ MAX_THREADS_PER_BLOCK: 1024
+ MAX_THREADS_PER_MULTIPROCESSOR: 2048
+  ...
+ MULTIPROCESSOR_COUNT: 9
+ WARP_SIZE: 32
+\end{shell}
+
+Aquí podemos ver que en la computadora donde se ejecutó este notebook existe solo una placa cuyo modelo es «NVIDIA GeForce GTX 1060 3GB», que soporta una capacidad de cálculo 6.1 y dispone de una memoria total de 3.013 MB. Hacia el final de la salida de la celda, confirmamos que el tamaño de warp es 32 (cantidad que puede cambiar en futuras versiones del \textit{hardware}), y que la GPU dispone de 9 SM. Además, el número máximo de bloques que puede ejecutar cada SM es 32. Si corremos el mismo código en Google Colab, obtenemos la siguiente salida:
+\begin{shell}
+1 dispositivo(s) encontrado.
+Modelo de GPU: Tesla T4
+  Compute Capability: 7.5
+  Memoria total: 15102 MB
+  ...
+ MAX_BLOCKS_PER_MULTIPROCESSOR: 16
+ MAX_BLOCK_DIM_X: 1024
+ MAX_BLOCK_DIM_Y: 1024
+ MAX_BLOCK_DIM_Z: 64
+ MAX_GRID_DIM_X: 2147483647
+ MAX_GRID_DIM_Y: 65535
+ MAX_GRID_DIM_Z: 65535
+ MAX_THREADS_PER_BLOCK: 1024
+ MAX_THREADS_PER_MULTIPROCESSOR: 1024
+ ...
+ MULTIPROCESSOR_COUNT: 40
+ WARP_SIZE: 32
+\end{shell}
+es decir que la plataforma nos asigna una GPU con mayor capacidad de cálculo (7.5), la mitad de bloques por SM (16) pero más de 4 veces la cantidad de streaming multiprocessors (40 SM), y cinco veces la memoria de la placa anterior.
+
+Por otra parte, podemos notar que los máximos valores para las dimensiones de bloques y grilla se dividen en \mip{_X}, \mip{_Y} y \mip{_Z}, lo que sugiere que estas categorías pueden adquirir representaciones tridimensionales. De hecho, la Figura \ref{fig:jerarquia} muestra un arreglo bidimensional de bloques en una grilla, y un arreglo unidimensional de hilos en un bloque.
+
+Efectivamente, la variable \mip{threadIdx} es un vector de tres componentes, de modo que los hilos se pueden identificar utilizando un índice unidimensional, bidimensional o tridimensional, lo que genera un bloque de threads de una, dos o tres dimensiones respectivamente, permitiendo de este modo una representación natural de dominios de cómputo como vectores, matrices o volumen. Podemos acceder a cada componente del vector con \mip{threadIdx.x}, \mip{threadIdx.y} y \mip{threadIdx.z}. La definición de un bloque, entonces, queda determinada por una tupla de tres enteros que indican la cantidad de hilos en cada dimensión. Por ejemplo, un bloque bidimensional de 5 hilos en \mip{x} y 4 hilos en \mip{y} se indica con \mip{block=(5, 4, 1)}.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{Chapters/procesamiento_gpu/figs/2-1-d.pdf}
+        \caption{Identificación del índice de un hilo a partir de su \mip{threadIdx} según el orden por filas.}
+        \label{fig:2to1idx}
+    \end{center}
+\end{figure}
+
+En consecuencia, la lógica para determinar el índice de un hilo a partir de su \mip{threadIdx} en un bloque, se puede realizar como se esquematiza en la Figura \ref{fig:2to1idx}. En ese caso, pasamos de una representación bidimensional a una unidimensional «concatenando» consecutivamente cada fila (orden por fila o \textit{raw-major order}). Específicamente, para un bloque de dimensiones \mip{blockDim.x} en la dirección \mip{x} y \mip{blockDim.y} en la dirección \mip{y}, el índice de cada hilo resulta \mip{threadIdx.x} + \mip{blockDim.x} $\times$ \mip{threadIdx.y} (1 + 4 $\times$ 2 = 9 en el elemento resaltado de la figura).
+
+Esta forma de identificar hilos en un bloque puede generalizarse a una y tres dimensiones:
+\begin{itemize}
+    \item 1D: \mip{threadID} = \mip{threadIdx.x}
+    \item 2D: \mip{threadID} = \mip{threadIdx.x} + \mip{blockDim.x} $\times$ \mip{threadIdx.y}
+    \item 3D: \mip{threadID} = \mip{threadIdx.x} + \mip{blockDim.x} $\times$ \mip{threadIdx.y} + \mip{blockDim.x} $\times$ \mip{blockDim.y} $\times$ \mip{threadIdx.z}
+\end{itemize}
+
+Tal como comentamos anteriormente, existe un límite en la cantidad de hilos que se pueden agrupar en un bloque, dadas las limitaciones de memoria y cantidad de núcleos de cálculo que dispone un SM. Actualmente ese límite es de 1.024 hilos por bloque. Sin embargo, es posible ejecutar un kernel sobre muchos bloques que tengan la misma forma (o dimensiones en cada «eje»), de modo que el número total de hilos en los que se puede desplegar un cálculo es el número de hilos por bloque multiplicado por el número de bloques.
+
+Al igual que los hilos en un bloque, los bloques pueden organizarse en un arreglo unidimensional, bidimensional o tridimensional, formando de este modo una grilla. La cantidad de bloques en la grilla se suele determinar por la cantidad de datos a procesar, que por lo general excede la cantidad de procesadores en la GPU. De la misma forma que para los bloques, la definición de la grilla requiere de una tupla de tres enteros. Durante la ejecución de un kernel, cada bloque de la grilla se puede identificar mediante las variables \mip{blockIDx.x}, \mip{blockIdx.y} y \mip{blockIdx.z}, mientras que las dimensiones de la grilla se pueden acceder mediante \mip{blockDim.x}, \mip{blockDim.y} y \mip{blockDim.z}. Finalmente, se puede asignar un índice a cada hilo a partir de su ubicación dentro de un bloque y la localización del bloque en la grilla. Veamos un ejemplo en el siguiente código:
+
+\jupynotex[1-2]{Chapters/procesamiento_gpu/code/hilos_id.ipynb} 
+
+En la celda 1 importamos los módulos necesarios e inicializamos la comunicación con la GPU. En la segunda celda definimos el kernel que se ejecutará en el \textit{device}. Esta función no recibe argumentos, pues solo realizará operaciones sobre variables internas provistas por la GPU. La primera línea de la función determina un índice que identifica cada hilo dentro de un bloque (\mip{idx}), y la línea siguiente identifica el bloque que se está ejecutando (\mip{block_id}), por último, combinando los índices anteriores, podemos asignar un identificador único al hilo en ejecución (\mip{thread_id}), y la tarea de la función será mostrar los valores de todas estas variables. En la celda siguiente, luego de mostrar en la pantalla un encabezamiento, invocamos al \textit{handler} de nuestro módulo pasándole como argumentos dos parámetros, \mip{block} y \mip{grid} que proveen el contexto en el que se ejecutará el kernel en el \textit{device}. Podemos ahora lanzar un total de 16 hilos organizados en una grilla con un solo bloque, compuesto por un arreglo bidimensional de 4 hilos por dimensión, tal como se muestra en la celda 3:
+
+\jupynotex[3]{Chapters/procesamiento_gpu/code/hilos_id.ipynb}
+
+Claro que según resulte conveniente para el problema que queremos descomponer en múltiples procesos, podemos organizar la misma cantidad de hilos en forma diferente. Por ejemplo, en la siguiente celda vemos cómo lanzamos el mismo kernel pero ahora en una grilla bidimensional de dos bloques por dimensión, conteniendo un arreglo unidimensional de cuatro hilos cada bloque:
+
+\jupynotex[4]{Chapters/procesamiento_gpu/code/hilos_id.ipynb}
+
+Observamos en la última salida, a diferencia de la celda anterior, que los hilos no aparecen en orden, lo que es muy común que ocurra al lanzar procesos en forma concurrente, que es lo que sucede a nivel de bloque. No sabemos de antemano en qué orden se ejecutarán los cuatro bloques que lanzamos. 
+
+%https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#thread-hierarchy
+
+
+\section{Producto de matrices en GPU con PyCUDA}
+
+El producto de matrices, operación ubicua en métodos numéricos, constituye un cálculo muy conveniente para realizar en forma paralela, por lo que implementaremos este cálculo para dar un ejemplo práctico de uso de la GPU.
+
+Nuestro objetivo es calcular el producto:
+\[ \bm{C} = \bm{A} \cdot \bm{B}, \quad \bm{A} \in \mathbb{R}^{m \times l}, \, \bm{B} \in \mathbb{R}^{l \times n} \text{ y } \bm{C} \in \mathbb{R}^{m \times n} \]
+
+Cada elemento $c_{ij}$ de $\bm{C}$ resulta de realizar la operación:
+\[ c_{ij} = \sum_{k = 1}^l a_{ik} \, b_{kj} \]
+Vemos de aquí que el cálculo de $c_{ij}$ es independiente del resto de los valores de los elementos de $\bm{C}$, por lo que es posible paralelizar de una manera muy simple el cálculo asignando a cada hilo el cómputo de $c_{ij}$. Además, considerando la estructura «bidimensional» de las matrices involucradas, la representación natural para los hilos es agruparlos en forma bidimensional en los bloques.
+
+Como mencionamos anteriormente, cada bloque puede contener un número limitado de hilos, que según hemos visto en los ejemplos previos es 1.024. Una posibilidad consiste en organizar nuestros bloques de forma que contengan un arreglo cuadrado de 32 hilos por fila y 32 hilos por columna, lo que nos lleva a considerar la necesidad de utilizar varios bloques de hilos si nuestras matrices superan estas dimensiones. La Figura \ref{fig:matp1} esquematiza esta situación, en la que la matriz $\bm{C}$ es cubierta con un arreglo de bloques cuadrados.
+
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{Chapters/procesamiento_gpu/figs/mat_prod.pdf}
+        \caption{Esquema de procesamiento de hilos en el producto de matrices. En gris, sobre la matriz $\bm{C}$, se representa una grilla de bloques que cubren (en exceso) las dimensiones de $\bm{C}$.}
+        \label{fig:matp1}
+    \end{center}
+\end{figure}
+
+En nuestro ejemplo vamos a multiplicar matrices con $m = 4000, l = 6000$ y $n = 2000$, lo que da un total de 8 millones de hilos para realizar los 48 mil millones de productos y sumas que requiere calcular $\bm{C}$. Vamos a necesitar varios bloques.
+
+Iniciamos nuestro código importando los módulos necesarios para acceder e inicializar el \textit{device}:
+
+\jupynotex[1]{Chapters/procesamiento_gpu/code/matprod.ipynb}
+
+Ahora definimos el kernel. Como argumentos, recibirá los arrays que representan las matrices involucradas, y también las dimensiones de las mismas:
+
+\jupynotex[2]{Chapters/procesamiento_gpu/code/matprod.ipynb} 
+
+Asociamos la fila $i$ con la variable \mip{threaIdx.y}, y la columna $j$ con la variable \mip{threadIdx.x}, dentro del bloque correspondiente. Luego, realizamos el cálculo del elemento $c_{ij}$ verificando previamente que los índices se encuentran dentro de los límites de filas y columnas de las matrices. Esto es necesario debido a que se crearán más hilos que los que ocuparemos para el cálculo de $c_{ij}$, dado que la cantidad de bloques en cada dimensión debe exceder a las filas y columnas que tienen $\bm{A}$ y $\bm{B}$, como veremos en la celda siguiente.
+
+Primero incluimos el módulo \mip{time}, que nos permitirá cuantificar el tiempo de ejecución de algunas líneas de código, para comparar la eficiencia del \textit{host} y del \textit{device}.
+
+Luego ya con Numpy definimos las dimensiones de las matrices $\bm{A}$ y $\bm{B}$, y luego generamos estas matrices con números aleatorios. Como estas matrices son creadas en el \textit{host}, nombramos los arrays con \mip{a_cpu} y \mip{b_cpu} respectivamente. Es necesario mencionar aquí que dichos arrays bidimensionales son representados en memoria como arrays unidimensionales por fila, y hacemos uso de esto en el kernel al recorrer los arrays con los índices \mip{i} y \mip{j}. Con el propósito de validar los resultados que obtendremos con la GPU, realizamos el cálculo en la CPU utilizando el método \mip{dot} de NumPy. Registramos el tiempo que tarda en ejecutarse esta última operación.
+
+\jupynotex[3]{Chapters/procesamiento_gpu/code/matprod.ipynb}
+
+Vemos que el cálculo del producto matricial llevó un poco más de dos décimas de segundo.
+
+Organizaremos nuestros hilos en bloques cuadrados, conteniendo un número de hilos por dimensión que resulta de la raíz cuadrada del máximo número de hilos por bloque que nos informa la GPU. La cantidad de bloques que definen nuestra grilla resulta, en cada dimensión, del entero superior más próximo al cociente entre la cantidad de elementos de matriz y el número de hilos. Al realizar esa cuenta, vemos que necesitamos 125 bloques en la dirección \mip{x} y 63 en la \mip{y}. Recordemos que el número total de elementos de $\bm{C}$ es de 8 millones. Si dividimos este número por la cantidad de hilos por bloque (1.024) nos indica que necesitamos 7812,5 bloques, pero dado que usamos bloques cuadrados sobre matrices que no lo son, el cálculo determina que necesitaremos un total de 7875 bloques para cubrir las filas y columnas de $\bm{C}$, generando de este modo más hilos que los necesarios, y por este motivo debemos verificar que los índices \mip{i} y \mip{j} en el cálculo que realizamos en el kernel no superen los límites de filas y columnas de $\bm{A}$ y $\bm{B}$, respectivamente.
+
+\jupynotex[4]{Chapters/procesamiento_gpu/code/matprod.ipynb}
+
+Lo que nos queda por hacer es compilar el kernel, obtener el \textit{handler} a la función, transferir los arrays a la memoria del \textit{device} (mediante el método \mip{gpuarray.to_gpu()}), crear en el \textit{device} el espacio necesario para almacenar los valores de la matriz $\bm{C}$ (\mip{c_gpu}), y ejecutar el kernel con los datos de las matrices y la organización de hilos en bloques, tal como mostramos en las celdas siguientes.
+
+\jupynotex[5-6]{Chapters/procesamiento_gpu/code/matprod.ipynb}
+
+En estas celdas registramos el tiempo que lleva realizar dos operaciones: la transferencia de los arrays al \textit{device} y la ejecución del kernel en la GPU. Podemos ver que la transferencia es dos órdenes de magnitud más lenta que la ejecución del kernel (al menos en el \textit{hardware} particular en el que fue ejecutado el código), y que el cálculo del producto matricial, realizado en la GPU, es unas 700 veces más rápido que el cálculo en la CPU con NumPy. Observando lo «costoso» que resulta la transferencia de datos hacia y desde el \textit{host}, es de suma importancia un buen diseño del programa de modo de minimizar estas transferencias.
+
+
+Finalmente, comparamos el resultado obtenido en el \textit{host} con el obtenido con la GPU, realizando previamente la transferencia \textit{device} a \textit{host} con el método \mip{get()}:
+
+\jupynotex[7]{Chapters/procesamiento_gpu/code/matprod.ipynb}
+
+Podemos observar que los cálculos en CPU y GPU son aproximados con una tolerancia absoluta de \num{1e-3}. Esto se debe a que utilizamos una representación de punto flotante con precisión simple (32 bits), y que en las sumas acumuladas en bucles se suman también los errores de redondeo.
+
+Este ejemplo sencillo muestra la forma en que podemos utilizar la GPU para realizar cálculos numéricos. Sin embargo, es un código que no explota toda la capacidad del \textit{hardware} para hacer más eficiente la tarea. Para ello es necesario considerar aspectos tales como el ancho de banda y latencia de las memorias global, compartida y registros de la GPU, que condicionan el particionado del problema y la organización de los hilos, y otros detalles que exceden el alcance de este libro. Sin embargo, queremos enfatizar la necesidad de evaluar la conveniencia de utilizar la GPU para nuestros cálculos en función del \textit{hardware} disponible y el «tamaño» del problema a resolver. En este ejemplo concreto, vemos que resulta muy conveniente realizar el producto en la GPU, pero el tiempo que requiere la transferencia de datos casi pone en igualdad de condiciones al cálculo en CPU, lo que indica que una buena planificación de las tareas requiere minimizar la transferencia de los datos y aprovechar la potencia de cálculo paralelo masivo provista por la GPU.
+
+\section{Producto de matrices con PyOpenCL}
+% http://homepages.math.uic.edu/~jan/mcs572f16/mcs572notes/lec29.html
+
+OpenCL (\textit{Open Computing Language}) es un estándar abierto que permite la programación sobre casi cualquier dispositivo disponible en nuestros días: CPUs, GPUs, FPGAs (\textit{Field Programmable Gate Arrays}), aprovechando las ventajas que cada plataforma pueda ofrecer. A diferencia de CUDA, que solo corre programas en los dispositivos de NVIDIA, OpenCL puede correr en cuaquier arquitectura y CPU de múltiples \textit{cores} siempre que el fabricante provea un \textit{driver} OpenCL.
+
+Existen muchas similitudes entre OpenCL y CUDA, debido a las semejanzas del abordaje en paralelo y las jerarquías de memoria. OpenCL asume que la ejecución de un programa ocurre en una plataforma conformada por un \textit{host} (típicamente un CPU) y un número de \textit{devices} conectados. Cada \textit{device} está compuesto por un número de unidades de cómputo (CU, \textit{compute units}) que a su vez contienen unidades de procesamiento (PEs, \textit{processing elements}). En una analogía con el modelo CUDA, los PEs corresponden a los CUDA \textit{cores}, y los CUs a los \textit{streaming processors}.
+
+Un programa OpenCL contiene típicamente dos componentes:
+\begin{itemize}
+  \item Un programa que controla la ejecución del código en el \textit{device} y provee funcionalidades de entrada y salida de datos.
+    \item Uno o más programas que corren en el \textit{device} o \textit{kernels}.
+\end{itemize}
+
+Cuando un \textit{host} lanza un kernel, éste se ejecuta en el \textit{device} en forma de «elemento de trabajo» (equivalente a un \textit{thread} de CUDA). Cada elemento de trabajo corre en un PE, y puede haber múltiples elementos de trabajo que se agrupan en «grupos de trabajo» (equivalentes a los bloques de CUDA). Cada grupo de trabajo es asignado a un CU.
+
+PyOpenCL ofrece un abordaje «pitónico» a OpenCL, del mismo modo que PyCUDA lo hace con CUDA. Mostraremos a continuación el ejemplo del producto de matrices pero ahora con OpenCL. Para comenzar, importamos el módulo \mip{pyopencl} y establecemos el contacto con la GPU. Primero detectamos la plataforma de ejecución (\mip{platform}), y su correspondiente \textit{device} (que asignamos a la variable \mip{device}). Generamos el contexto de ejecución (\mip{context}) y finalmente una cola de comandos (\mip{queue}) que es por donde se envían los comandos al \textit{device} (ejecución del kernel, sincronización y operaciones de transferencia de memoria).
+
+\jupynotex[1]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+En la celda 2 interrogamos al \textit{device} para poder dimensionar el tamaño del grupo de trabajo:
+
+\jupynotex[2]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+Vemos que cada bloque puede administrar 1.024 elementos de trabajo que se pueden organizar en un arreglo tridimensional con un máximo de elementos por cada dimensión de 1.024, 1.024 y 64, respectivamente. Decidimos entonces trabajar con grupos bidimensionales cuadrados.
+
+Tal como hicimos el en ejemplo con PyCUDA, dimensionamos y definimos las matrices, y las transferimos al \textit{device}:
+
+\jupynotex[3]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+En la celda 4 definimos el kernel. A diferencia del ejemplo con pyCUDA, el índice de fila y columna se obtienen a partir de las variables intrínsecas \mip{get_global_id(0)} y \mip{get_global_id(1)}, que ya contienen los identificadores globales de cada hilo, sin tener que hacer el cálculo a partir de su ubicación interna en cada grupo de trabajo. Finalmente, asignamos a la variable \mip{program} al programa compilado listo para su ejecución.
+ 
+
+\jupynotex[4]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+En la celda 5 determinamos el tamaño en cada dimensión de la grilla que agrupa los grupos de trabajo, a partir de la división entera entre la cantidad de hilos necesarios en cada dimensión (que representan las filas y columnas de las matrices) y de la cantidad de hilos que asignamos a cada grupo de trabajo (que recordemos, usaremos un arreglo cuadrado de hilos). Estas dimensiones de la grilla las asignamos a la variable \mip{global_size}, mientras que en \mip{local_size} definimos el tamaño de cada grupo de trabajo. Una vez organizada la descomposición del problema en la agrupación de tareas, lanzamos el kernel con los argumentos correspondientes (dimensiones de las matrices y los arrays que las contienen), y finalmente transferimos el resultado desde la memoria del \textit{device} (\mip{c_buf}) a la memoria del \textit{host} (\mip{c_cpu}).
+
+\jupynotex[5]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+Para finalizar, realizamos el producto de matrices usando el método \mip{dot()} de NumPy, y comparamos los resultados obtenidos. Podemos ver que con una buena tolerancia absoluta, ambos resultados coinciden.
+
+\jupynotex[6]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+
+\jupynotex[7]{Chapters/procesamiento_gpu/code/matprod_pyopencl.ipynb}
+
+Al igual que el caso de PyCUDA, realizamos una paralelización muy simple del producto de matrices, sin aprovechar detalles propios del \textit{hardware} que permiten una optimización de los recursos disponibles, aumentando de este modo en forma significativa la eficiencia del cómputo.
+
+\section{Lecturas recomendadas}
+Una buena introducción a la programación con CUDA: \fullcite{hwu2022}.
+
+La referencia para la programación en CUDA, que permite comprender el modelo de programación es \fullcite{cuda}.
+
+Un libro que permite la entrada a la programación con CUDA y PyCUDA, con aplicación a la visión por computadora: \fullcite{vaidya2018}.
+
