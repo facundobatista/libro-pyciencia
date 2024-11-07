@@ -15,7 +15,13 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 
 ## Capítulos
 
-- [Introducción a Python](intro.pdf?raw=True): Qué es Python. Propiedades del lenguaje, multiparadigma, interpretado. Biblioteca estándar, módulos externos, integrado en Python. Editando y ejecutando, usando módulos. El intérprete interactivo, Jupyter Notebooks, explorando. Tipos de datos: números, cadenas, listas, tuplas. Pensando como un Pythonista. Más tipos: conjuntos y diccionarios. Iteradores. Controles de flujo: if, while, for. Excepciones. Encapsulando código: funciones, espacios de nombres, generadores, clases, módulos. Cómo pedir ayuda.
+- [Introducción a Python](py_intro.pdf?raw=True): Qué es Python. Propiedades del lenguaje, multiparadigma, interpretado. Biblioteca estándar, módulos externos, integrado en Python. Editando y ejecutando, usando módulos. El intérprete interactivo, Jupyter Notebooks, explorando. Cómo pedir ayuda.
+
+- [Python: Tipos de datos](py_tipos_datos.pdf?raw=True): Tipos de datos: números, cadenas, listas, tuplas. Pensando como un Pythonista. Más tipos: conjuntos y diccionarios. Iteradores.
+
+- [Python: Controles de flujo](py_controles_flujo.pdf?raw=True): If, while, for. Excepciones.
+
+- [Python: Encapsulando código](py_encapsulando.pdf?raw=True): Funciones, espacios de nombres, generadores, clases, módulos.
 
 - [Ecuaciones diferenciales ordinarias](ecuaciones_ordinarias.pdf?raw=True): Introducción. Solución analítica. Métodos numéricos. Ecuación diferencial con valores iniciales.
 

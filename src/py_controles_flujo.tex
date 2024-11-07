@@ -1,0 +1,386 @@
+
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Controles de flujo}
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/py_controles_flujo/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+En este capítulo mostraremos las distintas declaraciones de Python que nos permiten controlar el flujo de ejecución de un programa, que hasta ahora veíamos como lineal.
+
+Python tiene pocas estructuras en este sentido (no repitiendo innecesariamente funcionalidad, ``simple es mejor que complejo''), pero las pocas que tiene son poderosas e interesantes.
+
+En este capítulo también incluiremos \textit{excepciones}, que aunque también se utilizan para manejar errores, en realidad es un concepto más amplio (se utilizan para situaciones excepcionales, no sólo errores), y la naturaleza de las mismas hacen que el flujo del programa se modifique.
+
+
+\section{If, elif, else}\label{sec:if}
+
+Comenzamos con el control de flujo más sencillo, el \mip{if}. La estructura básica es muy simple:
+
+\begin{verbatim}
+if <expresión>:
+    <bloque de código>
+\end{verbatim}
+
+Si la expresión es verdadera, se ejecuta el bloque de código; si no, no.
+
+¿Qué es una ``expresión'' en este contexto? Una expresión es una combinación de valores, variables, operadores y llamadas a funciones. Cuando sea evaluada, para el \mip{if} va a terminar siendo falsa o verdadera, no hay otra. 
+
+Más abajo seguiremos hablando de las expresiones, pero ahora centrémonos en el bloque de código que es lo que se ejecuta si la expresión es verdadera. No es más que una secuencia de líneas de código, que puede ser una o más (no cero, y sin límites prácticos en su cantidad). El comienzo y finalización del bloque está marcado por su sangría (que muchas veces llamamos ``indentación'', término que aunque es usado muchísimo es solamente un anglicismo de \textit{indentation}).
+
+Esa sangría puede ser cualquier cantidad de espacios o tabuladores (¡pero no mezclarlos! y se recomienda usar cuatro espacios), con la condición de que sea consistente. Por ejemplo, si un bloque arranca con la linea cuatro espacios a la derecha, siempre estará sangrado igual durante todo el bloque (a menos que haya bloques anidados, claro) y luego terminará volviendo a la columna original.
+
+Ejemplo:
+
+\begin{py}
+if foo == 42:
+    print("foo vale 42")  # arranca el bloque con 4 a la derecha
+    print("segunda linea")  # segunda linea ok
+      print("tercera")  # esta está mal, porque está demasiado a la derecha
+    if bar == 33:
+        print("bar es 33")  # esta está bien, es un bloque nuevo adentro del otro
+    print("muchas líneas")  # ok también: cierra el bloque interior, y vuelve a la columna original
+  print("vamos cerrando")  # mal! si cerramos el bloque debemos volver a la columna original de este
+print("afuera")  # esta está bien, ya afuera del bloque del if
+\end{py}
+
+A la estructura del \mip{if} le podemos agregar una especie de continuación:
+
+\begin{verbatim}
+if <expresión 1>:
+    <bloque de código 1>
+elif <expresión 2>:
+    <bloque de código 2>
+\end{verbatim}
+
+Si la expresión 1 es verdadera, se ejecutará el bloque de código 1 y se ignorará el resto. Pero si la expresión 1 es falsa, se evalúa la expresión 2: si es verdadera se ejecutará el bloque 2, sino termina.
+
+Y finalmente podemos agregarle una especie de salida final:
+
+\begin{verbatim}
+if <expresión 1>:
+    <bloque de código 1>
+elif <expresión 2>:
+    <bloque de código 2>
+else:
+    <bloque de código 3>
+\end{verbatim}
+
+El bloque de código 3 se ejecutará si todas las expresiones de la estructura fueron evaluadas a falso.
+
+El \mip{if} es obviamente obligatorio (arranca la estructura), pero el \mip{elif} es opcional (y se pueden poner cuantos queramos, uno abajo del otro cada uno con su expresión a evaluar), y el \mip{else} es también opcional pero no puede haber más de uno.
+
+Veamos un ejemplo más real:
+
+\jupynotex[1-2]{Chapters/py_controles_flujo/code/flujo-if.ipynb}
+
+Claro que esa estructura se puede extender mucho más. En la actualidad Python no tiene una declaración \texttt{case} como muchos otros lenguajes. Esto se resuelve con estructuras \mip{if/elif} si son relativamente pocos casos, o guardando funciones en un diccionario si son más.
+
+En 2021, en la versión 3.10, Python ganó la posibilidad de realizar \textit{pattern matching}, una característica bastante útil con muchas vueltas interesantes. Con esta nueva funcionalidad, usándola de forma más bien básica, se podría tener algo similar a la declaración \texttt{case}, pero les recomendamos mirar su PEP \cite{pep-0622} para profundizar sobre este tema.
+
+Volvamos sobre algo que prudentemente esquivamos al principio de la sección: las expresiones.
+
+Decíamos que una expresión es una combinación de valores, variables, operadores y llamadas a funciones. Esto es bastante genérico, y hay pocas cosas que no pueden ser incluidas en una expresión, como definiciones de funciones o clases, importar módulos, etc. En la práctica podemos hacer casi todo lo que deseamos, y esto nos permite ser bastante expresivos, por ejemplo como veíamos arriba al comparar un valor con el resultado de la función \mip{date} que estamos llamando ahí mismo.
+
+A esto hay que sumarle que todos los tipos de datos integrados en el lenguaje también son evaluables a verdadero o falso, lo cual podemos revisar sencillamente con la función \mip{bool} (como regla general, el objeto evalúa a False si vale cero o está vacío, sino a True).
+
+\jupynotex[3-7]{Chapters/py_controles_flujo/code/flujo-if.ipynb}
+
+Y además tenemos los operadores de comparación:
+
+\begin{itemize}
+\item \mip{==} igual a
+\item \mip{!=} diferente de
+\item \mip{is} es el mismo objeto que (identidad)
+\item \mip{<} menor que
+\item \mip{<=} menor o igual que
+\item \mip{>} mayor que
+\item \mip{>=} mayor o igual que
+\end{itemize}
+
+Todo esto nos permite ser muy expresivos al armar las estructuras \mip{if}. 
+
+
+\section{While}\label{sec:while}
+
+El \mip{while} es una estructura de control de flujo que nos arma un bucle alrededor de ese bloque de código, repitiendo ese bloque en función de la evaluación de una expresión:
+
+\begin{verbatim}
+while <expresión>:
+    <bloque de código>
+\end{verbatim}
+
+Al arrancar el bucle, Python evalúa la expresión, si es falsa sale y nunca ejecuta el bloque de código. Si es verdadera ejecuta ese bloque de código, y vuelve a evaluar la expresión, si es falsa sale, sino ejecuta el bloque, y así hasta que la expresión de falso o se interrumpa por algo (pero potencialmente durante mucho mucho tiempo, hasta que el Sol se apague, digamos).
+
+Veamos un ejemplo:
+
+\jupynotex[1]{Chapters/py_controles_flujo/code/flujo-while.ipynb}
+
+Ya hablamos al explicar el \mip{if} \ref{sec:if} tanto de la expresión como del bloque de código, no hay mucho para agregar en ese aspecto. Por otro lado, con el \mip{while} vemos que aparecen tres nuevas declaraciones, veámoslas.
+
+El \mip{break} nos permite interrumpir el bucle en la mitad de su ejecución. Si el código toca un \mip{break}, entonces, el bucle se corta y sigue con lo que venía a continuación del mismo, sin terminar el bucle y sin volver a evaluar la expresión.
+
+\jupynotex[2]{Chapters/py_controles_flujo/code/flujo-while.ipynb}
+
+El \mip{continue} nos permite abortar la pasada actual del bucle, volviendo al principio del mismo, lo que incluye volver a evaluar la expresión. Vemos a continuación como el ``3'' no se imprime, porque al tocar el \mip{continue} vuelve a recomenzar el bucle, sin llegar al \mip{print} en ese caso.
+
+\jupynotex[3]{Chapters/py_controles_flujo/code/flujo-while.ipynb}
+
+Si usamos el \mip{else} vamos a poder decidir si el bucle \mip{while} terminó porque su expresión evaluó a falso o fue cortado con un \mip{break}. Lo podemos pensar como en el \mip{if}: si la expresión evalúa a verdadero se ejecuta el bucle, si evalúa a falso se ejecuta el bloque del \mip{else}.
+
+La combinación \mip{while} con el \mip{else} no es muy utilizado, en parte porque no lo vemos en otros lenguajes, pero es muy útil cuando justamente queremos saber si salimos del while en un caso o en el otro (lo que se resuelve en otros lenguajes utilizando otra variable como bandera).
+
+Veamos ambos comportamientos en los siguientes ejemplos:
+
+\jupynotex[4-5]{Chapters/py_controles_flujo/code/flujo-while.ipynb}
+
+
+\section{For}\label{sec:for}
+
+El \mip{for} es una declaración que nos permite recorrer iterables, ejecutando un bloque de código por cada uno de esos iterables (y haciendo referencia al elemento obtenido del iterable en cada momento usando un nombre que nosotros especificamos).
+
+Si entendemos esa definición, la estructura es casi autodescriptiva:
+
+\begin{verbatim}
+for <nombre> in <iterable>:
+    <bloque de código>
+\end{verbatim}
+
+Veamos un ejemplo sencillo:
+
+\jupynotex[1]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+En realidad en lugar del ``nombre'' podemos tener varios nombres, si es que los elementos del iterable que recorremos pueden desempacarse correctamente, y obtendremos el mismo efecto que en la asignación múltiple (más específicamente, tenemos toda la experiencia del desempaquetado de tuplas que explicamos antes \ref{sec:tuplas}):
+
+\jupynotex[2]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Vale la pena que aclaremos que el \mip{for} es más parecido al \texttt{foreach} de otros lenguajes, y diferente al \texttt{for} de C o al \texttt{do} de Fortran, por ejemplo, que sólo cuentan números entre un principio y final (en general para indizar una estructura y obtener los elementos internos de la misma). En verdad la necesidad de trabajar con rangos de números es real, y para eso Python tiene una función integrada \mip{range}, en el que podemos especificar el final del rango (arrancando por default en cero), o inicio y final, e incluso el paso:
+
+\jupynotex[3-6]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Prestemos atención que el ``desde'' es inclusivo, mientras que el ``hasta'' es exclusivo; esto aunque quizás sea sorprendente tiene sentido en la foto más grande del funcionamiento general de Python. Por ejemplo, si queremos los índices para una lista de 4 elementos, haremos \mip{range(4)} y eso nos dará el 0, 1, 2 y 3 que son las posiciones de una lista de 4 elementos. También es muy práctica la propiedad de que si hacemos \mip{range(M, N)} la cantidad de números que obtendremos es \mip{N - M}.
+
+Para el ejemplo utilizamos el \mip{list} porque el \mip{range} es un generador de números, entonces tenemos que consumirlo para ver esos números. Por supuesto que lo podemos iterar directamente con el \mip{for}:
+
+\jupynotex[7]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+El \mip{for} es un bucle, y como con el otro bucle de Python (el \mip{while}, de la Sección \ref{sec:while}) podemos afectar el comportamiento utilizando el \mip{break} (para interrumpir el bucle y salir), el \mip{continue} (para abortar la pasada del bucle y volver al principio, obteniendo un nuevo elemento del iterable), e incluso el \mip{else} (para discernir si el \mip{for} terminó porque se nos acabó el iterable o porque cortamos con un \mip{break}.
+
+Veamos algunos ejemplos usando estas funcionalidades. Arrancamos con el \mip{break} y el \mip{continue}, viendo como corta en un caso y como vuelve al principio en el otro esquivando el resto del bucle:
+
+\jupynotex[8-9]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Y veamos el \mip{else}, para el caso en que terminamos el \mip{for} por consumir totalmente el iterable o porque encontramos un \mip{break}:
+
+\jupynotex[10-11]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Hay un caso de uso típico en los \mip{for} que es arrancar con una lista, realizarle una operación, y terminar con otra lista con los resultados de esa operación. Por ejemplo, podemos tener una lista de números y queremos calcular sus cuadrados:
+
+\jupynotex[12]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Esta construcción es tan usual que Python tiene una sintaxis especial que nos permite escribir lo mismo pero de forma más reducida, con la ventaja que hasta queda más legible; se denomina ``comprensión de listas'' (en inglés \textit{list comprehension}), y se define usando corchetes para delimitar la estructura, con los elementos sintácticos del \mip{for} adentro:
+
+\jupynotex[13]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Podemos leer la segunda linea como ``armamos una lista con ene al cuadrado para cada ene en números'', y hace exactamente eso. Es mucho más fácil de entender que el \mip{for} del ejemplo anterior que hace lo mismo pero a lo largo de varias líneas (entonces lo tenemos que seguir, ir y volver con la vista, entender qué hace con la lista que definimos al principio, etc.); en el caso de la ``comprensión de listas'' al primer vistazo (cuando reconocemos la estructura) ya sabemos que generamos una nueva lista realizando una operación con los elementos de un iterable, y nada más.
+
+En realidad podemos complejizar apenas esa estructura, para el caso en que queramos filtrar algunos elementos del iterable fuente. Veamos los mismos ejemplos que recién pero calculando logaritmos solamente para los valores mayores a cero.
+
+\jupynotex[14-15]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+Una generalización de esta estructura nos permite armar una ``comprensión de conjuntos'' (al delimitar la estructura con llaves) e incluso una ``comprensión de diccionarios'' (al delimitar la estructura con llaves y tener clave y valor separados por dos puntos:
+
+\jupynotex[16-18]{Chapters/py_controles_flujo/code/flujo-for.ipynb}
+
+
+\section{Excepciones}\label{sec:excepciones}
+
+El sistema de manejo de errores de Python es a través de excepciones. 
+
+\subsection{¿Qué son las excepciones?}
+
+Una excepción es un evento que ocurre durante la ejecución normal del programa e interrumpe el flujo normal del programa. En general, cuando un programa en Python encuentra una situación que no puede manejar, levanta una excepción.
+
+Entonces, a diferencia de otros lenguajes que luego de llamar a una función (por ejemplo) tenemos que revisar el resultado para ver si indica que hubo un problema, en Python el resultado será lo que tenga que devolver la función normalmente, si es que la función terminó sin inconvenientes. Pero si hubo un problema, obtendremos una excepción, que podemos manejar o dejar continuar.
+
+Hagamos un pequeño programa para ver eso:
+
+\pyfile{Chapters/py_controles_flujo/code/excep.py}
+
+Al ejecutar ese código, obtendremos:
+
+\begin{verbatim}
+$ python3 excep.py 
+antes
+Traceback (most recent call last):
+  File "x.py", line 2, in <module>
+    1 / 0
+ZeroDivisionError: division by zero
+\end{verbatim}
+
+Vemos que se imprime el ``antes'', pero luego la ejecución se interrumpió al encontrar un error (al intentar dividir por cero). En ese punto, se levantó una excepción, y como no se capturó la terminó agarrando el intérprete de Python, el que interrumpió al programa y mostró un \textit{traceback} por pantalla. Un traceback (término que usamos en inglés, ya que nunca se popularizó decirles ``trazas de rastreo'') es información que nos da el intérprete para entender de dónde viene el problema.
+
+Tiene tres partes, un título que nos indica el comienzo del traceback (linea 3), un contenido cuyo largo dependerá de cuan profundo en la pila de llamadas a funciones haya sucedido el problema (líneas 4 y 5), y una última linea (la 6) mostrando el tipo de excepción y un mensaje (en nuestro caso \mip{ZeroDivisionError}, y el mensaje indicando eso).
+
+Para entender mejor la parte del medio veamos un ejemplo apenas más complejo (usando funciones, aunque nos adelantemos un poco a cuando las expliquemos formalmente en la Sección \ref{sec:funciones}).
+
+Veamos primero que pasaría si todo sale bien y no nos encontramos con ningún problema:
+
+\pyfile{Chapters/py_controles_flujo/code/excep-stacks-ok.py}
+
+Al ejecutar ese código, obtendremos:
+
+\begin{verbatim}
+1. inicio
+2. antes en el módulo
+3. antes en f
+4. en g
+5. después en f
+6. después en el módulo
+7. fin
+\end{verbatim}  
+
+Los números se corresponden al siguiente diagrama donde vemos la secuencia de ejecución de las distintas funciones:
+
+\begin{center}
+    \includegraphics[width=300pt,keepaspectratio=true]{Chapters/py_controles_flujo/imgs/excep-stack-1.pdf}
+\end{center}
+
+Ahora veamos qué pasaría si en la función ``g'' nos encontramos con un problema. Modifiquemos esa función:
+
+\pyfile{Chapters/py_controles_flujo/code/excep-stacks-pumba.py}
+
+Vemos que tenemos los resultados de los primeros prints y luego un traceback, pero no lo que veíamos antes:
+
+\begin{verbatim}
+1. inicio
+2. antes en el módulo
+3. antes en f
+4a. antes en g
+Traceback (most recent call last):
+  File "x.py", line 14, in <module>
+    f()
+  File "x.py", line 10, in f
+    g()
+  File "x.py", line 5, in g
+    print("¿uno sobre cero?", 1 / 0)
+ZeroDivisionError: division by zero
+\end{verbatim}  
+
+Podemos ver mejor el flujo de ejecución en este otro diagrama que representa lo que acabamos de experimentar:
+
+\begin{center}
+    \includegraphics[width=300pt,keepaspectratio=true]{Chapters/py_controles_flujo/imgs/excep-stack-2.pdf}
+\end{center}
+
+Allí vemos que el flujo de ejecución se modifica. Cuando llegamos al punto del problema, el resto de la función ``g'' no se ejecuta, sino que se genera una excepción que vuela hasta el punto donde la función fue llamada (linea roja que llega a ``f''). El resto de esta función tampoco se ejecuta, como la excepción no fue capturada seguirá subiendo por las funciones hasta llegar a nivel de módulo, donde Python interrumpe el proceso mostrando el traceback.
+
+La mejor forma que tenemos para entender lo que está pasando cuando hay un error es leer cuidadosamente el traceback. Recomendamos hacerlo de abajo para arriba. 
+
+Para el ejemplo anterior, vemos que tuvimos una excepción por división por cero en la linea 5 en la función ``g'' (donde hicimos \mip{1 / 0}), lo cual viene de la linea 10 en la función ``f'' (donde hicimos \mip{g()}), que a su vez viene de la linea 14 a nivel del módulo (donde hicimos \mip{f()}).
+
+Como tenemos un stack de largo tres (el cuerpo principal del programa más las dos funciones) tenemos tres pares de líneas en el centro del traceback. 
+
+Entonces, cada par de líneas de ``la parte central'' del traceback corresponde a un nivel del stack, y en cada caso nos muestra dónde se sucedió el problema para ese nivel del stack (en qué archivo, en qué linea y el contexto), y luego la linea en cuestión (que podríamos ver en el archivo/posición indicado, pero así es más cómodo).
+
+\subsection{Capturando y levantando excepciones} 
+
+Podemos capturar las excepciones que se sucedan con un bloque \mip{try}. La construcción típica es usarlo en conjunto al \mip{except}:
+
+\begin{verbatim}
+try:
+    <bloque de código>
+except:
+    <bloque de código>
+\end{verbatim}
+
+El primer bloque de código, correspondiente al \mip{try} es el supervisado, si se sucede alguna excepción en ese bloque, el \mip{except} entra en juego y se ejecutará el segundo bloque de código; si ninguna excepción se levanta en el bloque supervisado, el \mip{except} será ignorado completamente.
+
+Veamos ambas situaciones en un ejemplo mínimo:
+
+\jupynotex[1-2]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+Hay dos reglas de oro para seguir cuando escribimos estas estructuras. La primera es que debemos supervisar el mínimo de código posible (minimizar la cantidad de código dentro del bloque del \mip{try}), la segunda es que debemos capturar solamente las excepciones que estamos esperando que puedan suceder (especificar el \mip{except} lo más posible, no como hasta ahora que está capturando todo).
+
+La primer regla es fácil de entender, pero veamos un ejemplo de cómo es útil especificar el \mip{except} lo más posible. Supongamos el siguiente código, donde obtenemos un valor (supongamos de una medición) y calculamos uno sobre eso; excepcionalmente podemos tener un cero como valor, pero eso sería que el instrumento está descalibrado, entonces lo informamos y listo:
+
+\jupynotex[3-4]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+Sin embargo, supongamos que tenemos un problema más serio, y por un error en nuestro programa terminamos teniendo otra cosa como valor, una cadena:
+
+\jupynotex[5]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+El mensaje que estamos dando es totalmente equivocado. Tengamos en cuenta que mucha veces también en el bloque del \mip{except} se toman acciones para corregir o paliar el problema, y si tomamos las acciones equivocadas podemos estar complicando aún más la situación.
+
+Entonces, tenemos que ser lo más específicos posibles al capturar la excepción. Para el ejemplo que estamos viendo, nosotros sabemos que podemos llegar a tener una \mip{ZeroDivisionError}, ¡entonces capturemos sólo eso! Si le especificamos un tipo de excepción al \mip{except} (o más de uno, entre paréntesis), capturará la excepción y ejecutará el bloque de código sólo si la excepción es de ese tipo (o de algunos de los varios tipos que pusimos entre paréntesis):
+
+\jupynotex[6-7]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+Entonces, en el primer caso tenemos el mensaje que esperábamos, mientras que en el segundo caso la excepción no es capturada, la termina agarrando Python y nos genera el traceback correspondiente, lo cual está perfectamente bien, porque es información útil para encontrar el error en nuestro programa.
+
+Hay situaciones, sin embargo, en que igualmente queremos capturar todo lo que pueda llegar a suceder, lo cual se justifica en procesos que son muy largos y que no queremos que se interrumpan nunca, o siempre tienen que estar levantados, y necesitamos capturar todas las excepciones para poder informarlas y seguir trabajando. 
+
+Pero incluso en estas situaciones no es recomendable poner el \mip{except} ``pelado'', ya que hay excepciones que son internas al funcionamiento de Python y no debemos capturarlas. En estos casos es muy útil que las excepciones en Python estén dispuestas en forma de árbol, y que especificando un tipo de excepción realmente estamos capturando las excepciones de ese tipo y todas las de su rama (este árbol lo podemos ver en la documentación \cite{stdlib_exceptree}. 
+
+Entonces, podemos capturar \mip{Exception} (que como vemos en el árbol de excepciones incluye a casi todas menos tres muy específicas), y obtendremos el efecto deseado. Es más, al especificar el tipo de excepción, podemos incluso ponerle un nombre a la excepción que capturamos y manejarla en el bloque de código. 
+
+Veamos todo esto en el ejemplo que traíamos, aprovechando la flexibilidad del \mip{except} que nos permite especificar varios luego de un \mip{try} (el comportamiento en estos casos es parecido a la cadena/secuencia que teníamos con los \mip{if}/\mip{elif}: se va verificando la excepción en orden en todos los \mip{except}, si la excepción es capturada por uno de ellos se ejecuta su bloque de código y deja de verificarse en el resto.
+
+\jupynotex[8-9]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+En verdad, son más las herramientas que podemos usar con el \mip{try}, no sólo tenemos el \mip{except}, sino también el \mip{else} y el \mip{finally}, los cuales se pueden usar en cualquier combinación. La estructura completa sería:
+
+\begin{verbatim}
+try:
+    <bloque de código>
+except:
+    <bloque de código>
+else:
+    <bloque de código>
+finally:
+    <bloque de código>
+\end{verbatim}
+
+Veamos un resumen mostrando las características de cada una de esas partes:
+
+\begin{itemize}
+ \item \mip{try}: da comienzo al manejo de posibles excepciones, supervisando un bloque de código; es obligatorio incluirlo (da comienzo a la estructura) y puede estar una sola vez.
+ \item \mip{except}: ejecuta un bloque de código si en el código supervisado se levantó una excepción, y esa excepción es del tipo definido en el \mip{except} (o incluida en su rama del árbol, como veíamos arriba); puede haber muchos o ninguno, si hay varios la comprobación de la excepción se hace en orden y se ejecuta el bloque de código solamente de aquel que captura la excepción.
+ \item \mip{else}: ejecuta su bloque de código solamente si en el código supervisado \textit{no} se levantó una excepción; es opcional y puede haber a lo sumo uno.
+ \item \mip{finally}: ejecuta su bloque de código \textit{siempre}, no importa qué haya pasado en el código supervisado; es opcional y puede haber a lo sumo uno.
+\end{itemize}
+
+Además de todo el manejo que podemos hacer sobre excepciones que son levantadas en alguna parte del código o por alguna situación, tenemos la opción de levantar nosotres mismos las excepciones integradas de Python, o incluso crear nuevas excepciones para nuestros programas.
+
+Para levantar una excepción sólo tenemos que usar la declaración \mip{raise} y la excepción y el mensaje que queremos levantar:
+
+\jupynotex[10]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+Vemos en el ejemplo como el tipo de excepción y el mensaje usados son los mostrados en el traceback.
+
+También podemos usar el \mip{raise} sin especificar una excepción, pero solamente en el contexto de manejar alguna excepción que hayamos capturado: en este caso el \mip{raise} lo que hará es ``re-levantar'' la misma excepción. 
+
+Es muy útil para los casos donde capturamos una excepción pero solamente para manejar algunos casos y otros no. Por ejemplo, en las siguientes líneas capturamos un posible error que ignoramos en un caso y en otros no:
+
+\jupynotex[11-12]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+Definir nuestros propios tipos de excepciones es muy simple, aunque para ello necesitamos la sintaxis de clases (que veremos más adelante \ref{sec:clases}). El único requisito es que tenemos que ``heredar'' una excepción integrada de Python; de nuevo, el concepto de ``herencia'' todavía no lo vimos, pero para nuestro propósito es lo que ponemos entre paréntesis en la definición, veamos un ejemplo simple:
+
+\jupynotex[13]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}
+
+Es importante elegir de qué excepción heredamos porque eso es lo que termina armando ``el árbol de excepciones'' que mencionábamos arriba cuando decíamos que \mip{except} captura el tipo de excepción indicado y a toda su rama.
+
+En el caso del ejemplo estamos heredando \mip{Exception}, pero podríamos heredar alguna otra excepción cuya semántica esté más cerca de la excepción que estamos definiendo (para ello es interesante empaparse de los tipos de excepciones que trae Python \cite{stdlib_exceptypes}. Por ejemplo, en nuestro caso probablemente estaríamos mejor heredar de \mip{ValueError}, ya que está relacionada con un valor obtenido.
+
+Una vez definida, la usamos como cualquier otra excepción:
+
+\jupynotex[14]{Chapters/py_controles_flujo/code/flujo-excep.ipynb}

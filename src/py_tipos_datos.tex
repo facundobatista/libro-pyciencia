@@ -1,0 +1,484 @@
+
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Tipos de datos}
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/py_tipos_datos/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+En este capítulo mostraremos los tipos de datos más utilizados en Python.
+
+No incluiremos \textit{todos} los tipos de datos integrados en el lenguaje (ni mucho menos todos los presentes en la Biblioteca Estándar), sólo haremos foco en aquellos más utilizados y que les permitirá comenzar y realizar gran parte de todo lo que harán con Python.
+
+\section{Números}\label{sec:numeros}
+
+Comenzamos con el tipo de datos más básico en todos los lenguajes: los números enteros, cuyo tipo de datos es \mip{int}.
+
+Las operaciones básicas son las mismas que en cualquier otro lenguaje de programación y no tenemos ninguna sorpresa. Los únicos detalles a destacar son que la división de números enteros da como resultado un \mip{float} (el punto flotante binario, que veremos a continuación), y que el operador para la exponenciación es \mip{**}.
+
+\jupynotex[1-5]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Complementando la división, Python incluye un operador para la división con el resultado truncado (celda 6), el módulo (celda 7), e incluso una función integrada que da ambos resultados al mismo tiempo (celda 8):
+
+\jupynotex[6-8]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Más allá de estas operaciones particulares, el rasgo más relevante a destacar en los enteros de Python es que no tienen límite (porque no están atados a ninguna representación en particular), entonces no hace falta que nos preocupemos por ese detalle:
+
+\jupynotex[9]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Los números enteros en Python también funcionan como secuencias de bits, y más allá que usemos la representación decimal para expresarlos, o en binario, o en hexadecimal, simplemente son números enteros. Escribirlos en otras bases es sencillo, y para verlos en esas representaciones tenemos funciones integradas:
+
+\jupynotex[10-13]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Python tiene operadores para trabajar con los enteros como secuencias de bits: el ``and'' (\mip{&}), el ``or'' (\mip{|}), el ``xor'' (\mip{^}), y los ``shift'' a izquierda y derecha (\mip{<<} y \mip{>>}).
+
+\jupynotex[14-18]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+El punto flotante binario (\mip{float}) de Python, por otro lado, es exactamente el punto flotante ejecutado en el procesador, y tiene el mismo comportamiento que en los otros lenguajes:
+
+\jupynotex[19-22]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Así y todo siendo uno de los tipos de datos más utilizados en todos los lenguajes, hay ciertas trampas del punto flotante binario que es imperioso conocer, y a los que les dedicamos un capítulo separado en \ref{ch:puntoflotante}.
+
+Uno de esos detalles es que no debemos utilizar \mip{float} para manejar dinero. De esa limitación nació la implementación del punto flotante decimal, que podemos encontrar en el módulo \mip{decimal} de la Biblioteca Estándar.
+
+\jupynotex[23-25]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+\begin{info}
+La forma \texttt{from ... import ...} nos permite importar el módulo y usar sus objetos directamente, sin tener que luego repetir el nombre del módulo todas las veces. Más detalles en \ref{sec:modulos}.
+\end{info}
+
+Como vemos en el ejemplo, no es lo mismo construir el Decimal a partir de la representación textual de un número ``con coma'' que de un \mip{float}; volvemos a hacer referencia al capítulo \ref{ch:puntoflotante} donde nos adentramos en estos detalles.
+
+Relacionado, tenemos la posibilidad de directamente utilizar fracciones si así fuese necesario, a través del módulo \mip{fractions}:
+
+\jupynotex[26-28]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Finalmente, debemos mencionar el tipo de datos \mip{complex}, integrado en el lenguaje, para manejar números complejos. En verdad tenemos soporte en la sintaxis para números imaginarios (agregándoles una \texttt{j} al final), y con ello armamos los complejos directamente:
+
+\jupynotex[29-33]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+Las clases de cada tipo de dato funcionan como conversores entre un tipo de dato y otro, con un resultado específico en cada caso si las llamamos sin pasarles un valor.
+
+\jupynotex[34-36]{Chapters/py_tipos_datos/code/tipos-nums.ipynb}
+
+
+\section{Cadenas}\label{sec:cadenas}
+
+Las cadenas constituyen otro de los tipos de datos básicos que están presentes en infinidad de lenguajes. En Python no tienen nada de especial a primera vista, pero vamos a ir explorando algunas particularidades más adelante.
+
+Por lo pronto hagamos la definición formal: las cadenas en Python son secuencias de caracteres Unicode delimitadas por comillas dobles o simples indistintamente.
+
+En el siguiente ejemplo vemos casos de uno y otro delimitador, especialmente para el caso donde necesitamos usar uno de ellos como carácter dentro de la cadena:
+
+\jupynotex[1-3]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+También como en tantos otros lenguajes, la barra invertida tiene el propósito de escapar ciertos caracteres especiales (y es un último recurso para usar los delimitadores dentro de la cadena). Hay que tener en cuenta siempre que la barra invertida sirve para escaparse a sí misma, y que los caracteres especiales suelen mostrarse distinto en el modo \mip{str} (representación más humana) que en el modo \mip{repr} (representación más exacta):
+
+\jupynotex[4-9]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Python tiene otro delimitador para cadenas: la triple comilla (ya sea doble o simple), que nos permite escribir una cadena a través de múltiples líneas:
+
+\jupynotex[10-11]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Las operaciones básicas a realizar sobre las cadenas están integradas en el lenguaje: saber el largo, concatenar y repetir:
+
+\jupynotex[12-14]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Las cadenas tienen también muchos métodos para trabajar con las mismas, veamos algunos de ellos (¡sólo ejemplos! les recomendamos revisar todos los métodos en la sección correspondiente de la Referencia de la Biblioteca \cite{stdlib_str}, ya que son muy útiles en el día a día):
+
+\jupynotex[15-19]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+El método \texttt{join} merece una mención especial. Arma una cadena a partir de los elementos que encuentra en otro objeto. Todavía no vimos el concepto de ``iterable'', pero mencionemos que cuando recorremos una cadena vamos encontrando cada uno de sus caracteres. Entonces, el \texttt{join} construirá una nueva cadena separando los caracteres recibidos con la cadena dada.
+
+\jupynotex[20-21]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+El \texttt{join} acepta otros iterables, por supuesto, y podemos pasarle listas, tuplas, y otros tipos de datos que veremos más adelante, siempre y cuando sus elementos sean cadenas.
+
+Un método en particular de gran utilidad es el \mip{format}, que permite armar cadenas reemplazando valores, lo cual es mucho más legible y ofrece más control que andar concatenando cadenas individuales. Más allá de estos ejemplos puntuales que mencionamos a continuación, el sistema de formateo en cuestión es muy poderoso, y vale la pena al menos sobrevolar la documentación \cite{stdlib_format}.
+
+\jupynotex[22-23]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Notablemente, no mencionamos ningún método para acceder a un carácter de la cadena, o a una subcadena de la misma. Esto se debe a que dicha funcionalidad está integrada en el lenguaje y es la misma para todas las secuencias.
+
+La forma de acceder a un carácter de la secuencia es utilizando los corchetes, escribiendo directamente la posición entre ellos:
+
+\jupynotex[24-26]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+En el ejemplo vemos que la primer posición de la secuencia es la número 0, y que si utilizamos números negativos se empieza a contar desde el final (lo cual es muy práctico, porque no hay que calcular la posición que queremos restándole algo al largo de la cadena).
+
+Para obtener subcadenas también podemos usar corchetes, pero entre ellos vamos a escribir dos valores, ``desde'' y ``hasta''. Si no incorporamos alguno de esos números se usará un valor por defecto (``desde el principio'' o ``hasta el final'' respectivamente), y también pueden ser valores negativos:
+
+\jupynotex[27-30]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Esta operación de tomar la subcadena de una cadena en inglés se llama \textit{slicing}, y en general usamos ese término también en castellano (porque ``rebanar'' cadenas nunca terminó prendiendo). 
+
+Entender qué carácter se accede por posición es sencillo (sólo tenemos que acordarnos contar desde 0), pero en el caso de los slices es más difícil, hasta que nos acostumbramos. Una buena regla mnemotécnica es pensar que también arranca desde 0, pero lo que se cuentan son las ``separaciones entre las letras''. Más allá de cómo nos acordemos, la regla que tiene Python para numerar en los slices tiene dos propiedades muy útiles: por un lado si hacemos \mip{cad[x:y]} con valores positivos el largo de la subcadena va a ser \mip{y - x}, y por el otro es sencillo separar una cadena en dos, porque se usa el mismo número, o sea que \mip{cad[:x] + cad[x:]} nos termina dando la misma \mip{cad}.
+
+También como todas las secuencias, si queremos tomar elementos de la misma pero con un determinado paso, podemos utilizar un tercer valor entre los corchetes:
+
+\jupynotex[31]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+En el ejemplo usamos varias propiedades al mismo tiempo. Por un lado el ``desde'' lo dejamos en blanco, para que tome el inicio por default, luego el ``hasta'' lo usamos negativo porque nos interesaba obviar el \textit{newline} del extremo derecho, y finalmente el tercer valor, el paso, en dos, para ir agarrando cada dos caracteres.
+
+Como con los números, podemos usar el constructor \mip{str} de la cadena para convertir desde otros tipos de datos (así como podemos también usar los constructores de números para pasar de cadenas a enteros o flotantes):
+
+\jupynotex[32-35]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Cuando mencionamos que los delimitadores de las cadenas eran la comilla doble, o simple, o sus variantes ``triple'', evitamos mencionar que en todos estos casos se puede poner un prefijo para cambiar el tipo de cadena definida. Por default si no especificamos nada (o si usamos la letra ``u'', por compatibilidad con versiones viejas de Python), la cadena será de tipo Unicode, lo que implica que será una secuencia de caracteres Unicode, con lo cual podemos escribir caracteres con acento, o en otros idiomas:
+
+\jupynotex[36-38]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Tengamos en cuenta que considerar a los caracteres como Unicode, más allá de su posible representación como bytes, nos permite trabajar con herramientas de transformación de texto sin mayor inconveniente:
+
+\jupynotex[39-40]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Si necesitamos trabajar con bytes directamente, podemos tener cadenas de bytes (donde no es más una secuencia de caracteres, sino una secuencia de bytes) si prefijamos la cadena con la letra ``b''. En estos casos es muy útil la notación \mip{\x} para ingresar el valor del byte en hexadecimal, como mostramos en el siguiente ejemplo:
+
+\jupynotex[41-43]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Es importante entender esta distinción no sólo porque las cadenas de bytes eran el default en versiones viejas de Python (y nos podemos cruzar con algún código así) sino también porque eventualmente necesitaremos convertir las cadenas Unicode a cadenas de bytes, ya que es la única manera de mandar cadenas a través de la red o grabarlas en disco.
+
+Estas conversiones las hacemos con los métodos \mip{encode} y \mip{decode}. Aunque en el siguiente ejemplo parece simple, el tema de convertir de un lado para el otro le trae muchos dolores de cabeza a la mayoría de los programadores (más allá del lenguaje en que programen); les recomendamos que si quieren adentrarse en el tema vean esta charla por uno de los autores del libro \cite{entendiendo_unicode}.
+
+\jupynotex[44-46]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Otro tipo de cadena usada frecuentemente es la de tipo \textit{raw} (término que usamos en inglés, porque decir que son ``sin procesar'' o ``crudas'' es raro), donde la diferencia con las cadenas comunes es que la barra invertida NO funciona como carácter de escape (lo cual es especialmente útil al escribir expresiones regulares, tema que por respeto a les lectores NO tocaremos en el libro), sino que es tratada como un carácter normal:
+
+\jupynotex[47-48]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+Finalmente, en las versiones más modernas de Python tenemos un tipo de cadena que se formatea automáticamente con las variables del entorno, sin tener que llamar explícitamente a \mip{format}, permitiendo incluso expresiones y algunos detalles más:
+
+\jupynotex[49-50]{Chapters/py_tipos_datos/code/tipos-cads.ipynb}
+
+
+\section{Listas}
+
+Las listas son secuencias de objetos, se delimitan con corchetes, y cada objeto (sus elementos internos, que pueden ser cualquier cosa) se separan con comas.
+
+Se acceden como cualquier secuencia, exactamente como vimos antes con las cadenas \ref{sec:cadenas}, e incluso tienen la misma forma de repetirlas o concatenarlas:
+
+\jupynotex[1-6]{Chapters/py_tipos_datos/code/tipos-listas.ipynb}
+
+La gran diferencia con las cadenas a nivel comportamiento (más allá que unas son secuencias de caracteres y las otras son secuencias de cualquier objeto Python) es que mientras las cadenas son ``inmutables'', las listas (como muchos otros tipos de datos) son ``mutables'', o sea que pueden cambiar.
+
+El detalle fino de esto se explica un poco más adelante \ref{sec:pensando-pythonista}, pero veamos como para las listas efectivamente tenemos métodos que permiten modificarlas:
+
+\jupynotex[7-9]{Chapters/py_tipos_datos/code/tipos-listas.ipynb}
+
+¡Y no sólo agregarle elementos! También podemos reemplazar algún elemento o toda una parte:
+
+\jupynotex[10-12]{Chapters/py_tipos_datos/code/tipos-listas.ipynb}
+
+También podemos borrar elementos, no sólo con el método que nos permite especificar cual elemento en sí queremos borrar, sino también con la sentencia \mip{del}.
+
+\jupynotex[13-15]{Chapters/py_tipos_datos/code/tipos-listas.ipynb}
+
+\begin{info}
+La sentencia \mip{del} es bastante especial en Python, ya que \textit{borra} elementos, lo cual nunca es trivial en un sistema que administra memoria automáticamente. En parte por eso no es una función (como \mip{len}), sino una sentencia, porque está muy integrada con el funcionamiento base del lenguaje.
+\end{info}
+
+Como en los otros casos, el constructor de las listas nos es bastante útil para crear listas a partir de otros objetos. \mip{list} construye una lista a partir de los elementos del iterable que reciba:
+
+\jupynotex[13-16]{Chapters/py_tipos_datos/code/tipos-listas.ipynb}
+
+\begin{info}
+Un ``iterable'' es cualquier objeto capaz de devolver sus elementos internos uno por vez, lo que nos permite iterarlos en un bucle for o para construir una lista, por ejemplo; una cadena es un iterable que devuelve caracteres, una lista es un iterable que devuelve sus objetos internos, etc.
+\end{info}
+
+
+\section{Tuplas}\label{sec:tuplas}
+
+Las tuplas también son secuencias de objetos, y se definen separando estos elementos con coma (como en la definición de las listas), y opcionalmente rodeándolas con paréntesis, por claridad.
+
+\jupynotex[1-5]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Una diferencia fundamental con las listas es que las tuplas son inmutables, y en general una buena recomendación para decidir su uso en un caso u otro es entender si para los objetos internos es importante su cantidad y posición. Por ejemplo, la lista es mejor para guardar los archivos que hay en un directorio (más allá del orden en sí, el archivo no es más o menos archivo si está antes o después, y en el directorio podemos tener 0, 3, 27, 1000 archivos), en cambio la tupla es mejor para guardar coordenadas (si es en el plano vamos a tener siempre una tupla de dos elementos, ni uno ni tres, y es importante si un número está primero o segundo, ya que son ejes distintos).
+
+En realidad la diferencia es aún más profunda: las tuplas forman parte del núcleo más central del lenguaje, ya que se usa en infinidad de detalles internos. Por ejemplo, si recordamos la función interna \mip{divmod} que explicamos cuando vimos números, veremos que esa función devuelve dos números... en verdad devuelve una tupla, que por otra característica de Python (``desempaquetado de tuplas'', que también tendemos a denominar en inglés como \textit{tuple unpacking}) podemos usar directamente como si fueran dos objetos:
+
+\jupynotex[6-7]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Obviamente necesitamos la misma cantidad de elementos en la izquierda y la derecha del igual, para que el ``desempaquetado'' funcione, aunque tenemos la posibilidad de usar un ``expansor'' para que tome múltiples argumentos:
+
+\jupynotex[8-11]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Una vez más, el constructor es la herramienta principal para convertir entre tipos:
+
+\jupynotex[12-13]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Mencionábamos antes que en las tuplas cada elemento no es uno más sino que su posición es de importancia semántica. El siguiente paso en ese sentido es poder asignarle un nombre a cada posición, y para ello tenemos el tipo \texttt{namedtuple} (en el módulo \href{https://docs.python.org/es/dev/library/collections.html}{collections} de la biblioteca estándar).
+
+Para usarlo necesitamos declarar la estructura, indicando los campos que vamos a tener y un nombre para esa estructura. Como ejemplo armamos una tupla que contiene un ítem de un subtítulo: desde y hasta cuando debería mostrarse en la película, y el texto.
+
+\jupynotex[14]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Por simplicidad, podemos directamente nombrar los campos en una única cadena (incluso separándolos por coma), sin que cambie su significado:
+
+\jupynotex[15]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+La podemos usar igual que una tupla normal, reemplaza a una tupla en todos sus aspectos, pero ya incluso al ver el objeto notamos que nos provee mucha más información que sólo los tres valores entre paréntesis:
+
+\jupynotex[16]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Incluso la creación del objeto puede ser usando los nombres (obviamente sin importar el orden), con lo cual ya es imposible confundirse cuál valor corresponde a cuál posición:
+
+\jupynotex[17]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+A los elementos los podemos acceder por posición (ya dijimos que se comporta como una tupla normal) con lo cual a priori no tenemos modificar el código que usa este elemento si reemplazamos una tupla normal por una \texttt{namedtuple}, pero la gran ventaja aquí es que podemos usar el nombre del atributo:
+
+\jupynotex[18]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Noten en el segundo ítem como al acceder por posición se utiliza la definición de la estructura y no cómo se haya creado el elemento en sí.
+
+Como cualquier nombre puede ser un atributo definido por el usuario, las \texttt{namedtuple} tienen sus propios métodos y atributos prefijados con un guión bajo, aunque no sean privados como a priori indicaría la convención. 
+
+Los más usados son para convertir la tupla en diccionario (usando los nombres como claves), listar los campos, e incluso generar una nueva tupla reemplazando algunos valores (ya que no podemos cambiar la \texttt{namedtuple} en sí, es tan inmutable como una tupla normal).
+
+\jupynotex[19-21]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+A los campos les podemos asignar valores por defecto, de manera que si los omitimos al crear el objeto tomarán esos valores: 
+
+\jupynotex[22]{Chapters/py_tipos_datos/code/tipos-tuplas.ipynb}
+
+Los valores por defecto incluidos en esa lista corresponden a los últimos nombres definidos (ya que no pueden quedar argumentos sin valor por defecto luego de los que sí tienen, igual a lo que sucede con una función).
+
+
+\section{Pensando como un pythonista}\label{sec:pensando-pythonista}
+
+Hay una diferencia fundamental en cómo Python maneja los objetos internamente en la ejecución de un programa con respecto a otros lenguajes, y es imperativo entenderla porque nos explica mucho del funcionamiento del lenguaje.
+
+Python no tiene ``variables'', y en consecuencia esas variables no tienen ``valores''. Estos son términos y conceptos que provienen de otros lenguajes de más bajo nivel (es decir, más cercanos al procesador), y no se aplican en Python. 
+
+Python tiene ``objetos'', y usamos ``nombres'' para hacer referencia a esos objetos. Es verdad que a veces por facilismo o sobresimplificación usamos las palabras ``variable'' y ``valor'' también cuando hablamos de un programa en Python o el funcionamiento del lenguaje, pero eso no nos tiene que confundir sobre el funcionamiento real.
+
+Veamos la diferencia. Otros lenguajes, como C por ejemplo, sí poseen el concepto de ``variable'', como lugar donde se guarda un valor. Ese lugar es en memoria, y el valor que se guarda son los bits en esa posición de memoria.
+
+\begin{center}
+    \includegraphics[width=100pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-00.pdf}
+\end{center}
+
+En estos lenguajes es necesario declarar cómo se interpretan esos bits en esa posición de memoria. Por ejemplo, varios bytes seguidos pueden ser varias letras, o un número entero, e incluso podemos decirle al lenguaje que nos muestre esos bits de una manera u otra:
+
+\begin{verbatim}
+int a = 7303014;
+printf("%i %s", a, (char *)&a);
+
+  -->  7303014 foo
+\end{verbatim}
+
+En cambio, en Python no seguimos esa filosofía.
+
+\begin{center}
+    \includegraphics[width=100pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-01.pdf}
+\end{center}
+
+En Python manejamos directamente objetos. Estos objetos son de un tipo específico, y no pueden cambiar de tipo (``tipado fuerte''). Para referenciar esos objetos en memoria usamos nombres. 
+
+\begin{center}
+    \includegraphics[width=250pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-02.pdf}
+\end{center}
+
+Estos nombres pueden apuntar a uno u otro objeto, y no están asociados al tipo del objeto que vinculan. Entonces, no hace falta decir que el nombre \verb|a| va a ser un entero o una cadena, por ejemplo, porque el tipo pertenece al objeto que es nombrado. Cuando decimos que \mip{a = 3} sólo estamos creando un objeto en memoria de tipo entero (el 3) y a ese objeto lo estamos referenciando usando el nombre \verb|a|. 
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-03.pdf}
+\end{center}
+
+Si luego escribimos que \mip{a = "hola"}, estamos creando otro objeto en memoria, este de tipo cadena, con el valor \verb|"hola"|, y estamos usando el mismo nombre \verb|a| para referenciarlo. No es que \verb|a| haya cambiado de tipo, sólo apunta a otro objeto.
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-04.pdf}
+\end{center}
+
+Obviamente, como \verb|a| apunta al segundo objeto, ya no apunta al primero. Si ese objeto no es accesible desde ningún otro lado, para todo propósito nosotros podemos considerar que ya no existe (eventualmente Python lo eliminará y liberará memoria, pero esto es algo que podemos ignorar tranquilamente ya que Python administra la memoria por nosotros).
+
+En los diagramas mostrados arriba vemos dos áreas diferentes. El grande es el espacio de objetos (a grandes rasgos lo que llamamos ``la memoria'', sin entrar en detalle cual sección de memoria en particular o cómo es manejada por Python). La columna de la izquierda, donde por ahora tenemos el nombre \verb|a|, es llamada ``espacio de nombres'', una sección en particular (de la memoria, obviamente, porque de última todo está en memoria, pero que no se nos mezcle con la otra parte genérica) donde guardamos los nombres, que son simplemente cadenas. En el espacio de nombres no podemos almacenar otra cosa que nombres, y estos nombres siempre apuntan a objetos ``en la memoria'' (no pueden apuntar a otros nombres en el espacio de nombres).
+
+Python tiene un espacio de nombres ``global'', que está siempre disponible durante la ejecución del programa y accesible de cualquier lado, y va creando otros espacios de nombres en diferentes momentos y con una accesibilidad limitada. Por ejemplo, cuando se ejecuta una función esta tiene su propio ``espacio de nombres local'', diferente al global y diferente a los espacios de nombres de otras funciones, que es lo que permite que cada función pueda usar un mismo nombre apuntando a diferentes objetos y no entren en conflicto. 
+
+En los diagramas, además de las dos secciones, y el nombre en una y el objeto en otra, vemos una flecha que va del nombre al objeto. Esta flecha representa justamente que ese nombre referencia a dicho objeto. Por eso cuando en Python escribimos \mip{a = "hola"} estamos realmente \textit{vinculando} el nombre \verb|a| con el ``objeto cadena con valor \verb|"hola"|'' (en inglés el verbo es \textit{bind}).
+
+Retomemos el uso de estos diagramas mostrando los nombres y su vinculación a los objetos, y la diferencia fundamental entre objetos mutables e inmutables, que en conjunto son claves para entender cómo funciona Python internamente (para que eventualmente logremos ``pensar como un Pythonista''). 
+
+Vayamos entonces con un ejemplo más complejo. 
+
+Ahora en los siguientes dos pasos vinculamos primero el nombre \verb|a| a una lista con dos números, y luego \verb|b| a otra lista con los mismos dos números.
+
+\jupynotex[1]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-05.pdf}
+\end{center}
+
+(El diagrama tiene una simplificación, en pos de la legibilidad: en verdad la lista no tiene a los números ``adentro'', sino que los números son otros objetos en la memoria, y desde cada posición de la lista se los referencia; vamos a ver esto mismo en los próximos diagramas cuando la complejidad lo amerite, pero en este caso solamente para los números no vale la pena.)
+
+Vemos que en memoria tenemos dos objetos lista con el mismo contenido. Podemos adivinar que si le preguntamos a Python si ambos nombres apuntan a objetos iguales, nos dirá que sí, pero si le preguntamos si los dos nombres apuntan \textit{al mismo objeto}, nos dirá que no.
+
+\jupynotex[2-3]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+El primer comparador es el de ``igualdad'', mientras que el segundo es de ``identidad''. Vamos a ver más comparadores luego cuando veamos el \mip{if} en \ref{sec:if}.
+
+Modifiquemos ahora una de las listas.
+
+\jupynotex[4-5]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-06.pdf}
+\end{center}
+
+Vemos que la lista \verb|a| ahora tiene un elemento más, mientras que la \verb|b| sigue con su estado anterior, como podíamos esperar.
+
+Intentemos algo nuevo, ahora usemos el \verb|=| entre dos nombres. Acá es importante que recordemos que no podemos vincular un nombre a otro nombre (apuntar con la flechita de un nombre a otro nombre), sino que lo que termina sucediendo es que ese nombre nuevo queda vinculado al objeto que apuntaba el otro nombre.
+
+\jupynotex[6-8]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-07.pdf}
+\end{center}
+
+Es por eso que si ahora comparamos la igualdad y la identidad entre \verb|c| y \verb|b| Python contestará verdadero en ambos casos, porque ambos nombres apuntan al \textit{mismo} objeto.
+
+Si ahora modificamos la lista \verb|c|, vemos que también se modifica \verb|b|. Habiendo escrito eso, hagamos el ejercicio de entender que esa frase es inexacta, y casi tramposa. Porque \verb|c| o \verb|b| no son listas, son nombres que apuntan a una lista, la misma, entonces tampoco tiene sentido decir que ``también se modifica''. Entonces, escrbiendo esa frase correctamente, podríamos decir que ``podemos modificar la lista y ver ese cambio, usando tanto un nombre como el otro'', que es lo que vemos en el siguiente paso.
+
+\jupynotex[9-10]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-08.pdf}
+\end{center}
+
+Arranquemos otro ejemplo. 
+
+Volvemos a tener dos listas con números, y ahora también armamos una tercer lista que incluye las primeras dos. En verdad las dos primeras listas no están ``adentro'' de la primera, sino que son referenciadas en cada posición. Esto es exactamente lo mismo que mencionábamos arriba acerca de que dibujábamos a los números adentro de la lista pero en verdad eran objetos también en la zona de memoria, referenciados desde la lista. 
+
+En este caso en el dibujo seguimos con la simplificación de dibujar a los números adentro de la lista, pero somos más precisos con la tercer lista apuntando a las primeras dos.
+
+\jupynotex[11]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-09.pdf}
+\end{center}
+
+Si ahora modificamos la lista que llamamos \verb|a|, obviamente vamos a ver que esa lista está cambiada, pero también vamos a ver reflejado ese cambio si miramos \verb|c|, ya que estamos hablando en definitiva de la misma lista vista directamente o a través de una posición de la otra lista.
+
+\jupynotex[12-13]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-10.pdf}
+\end{center}
+
+Por otro lado, si hacemos \mip{b = "foo"} tenemos que entender que no estamos modificando el objeto referenciado por \verb|b| sino que realmente estamos revinculando el nombre \verb|b| a otro objeto, y por lo tanto el objeto anterior (el que dejamos de referenciar cuando apuntamos \verb|b| a otro lado) queda intacto. 
+
+\jupynotex[14-15]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+\begin{center}
+    \includegraphics[width=200pt,keepaspectratio=true]{Chapters/py_tipos_datos/imgs/penspyth-11.pdf}
+\end{center}
+
+A diferencia del ejemplo que teníamos al principio de la sección, donde el objeto ``viejo'' quedaba sin uso y decíamos que Python eventualmente lo iba a eliminar para liberar memoria, en este caso el objeto que antes era \verb|b| no queda totalmente desreferenciado, sigue siendo apuntado por \verb|c|, con lo cual permanecerá en memoria sin problemas.
+
+E incluso podríamos volver a asignarle otro nombre, y seguir interactuando con el objeto directamente a través del nuevo nombre:
+
+\jupynotex[16-18]{Chapters/py_tipos_datos/code/tipos-pensando.ipynb}
+
+Como nota final, cabe destacar que el comparador de identidad \mip{is}, con la excepción de cuando preguntamos \mip{is None} o \mip{is not None} (que queda bien en inglés), se usa en contadísimas ocasiones, en general necesitamos comparar por igualdad con el \mip{==}.
+
+
+\section{Conjuntos}
+
+Los conjuntos son contenedores de objetos, se delimitan con llaves, y cada objeto (sus elementos internos) se separan con comas.
+
+A diferencia de otros contenedores que vimos previamente, los conjuntos no son secuencias, ya que los elementos dentro del conjunto no tienen un orden en particular. Es hasta inexacto decir que ``están desordenados'', porque directamente este tipo de dato no tiene el concepto de orden.
+
+Las propiedades más interesantes de los conjuntos son las matemáticas: cada elemento puede estar solamente una vez, y además podemos realizar intersecciones, uniones y diferencias entre ellos.
+
+\jupynotex[1-6]{Chapters/py_tipos_datos/code/tipos-sets.ipynb}
+
+El conjunto es el tipo de dato dejado de lado más injustamente de todo el lenguaje, sospechamos que esto es así porque en otros lenguajes no se encuentra, entonces les programadores no se acostumbran a usarlo. Sin embargo, es muy poderoso y una vez que aprendamos a expresar nuestros algoritmos utilizando las capacidades de los conjuntos, evitaremos hacer un montón de bucles y comparaciones innecesarias en nuestros programas.
+
+Sus elementos internos pueden ser solamente objetos inmutables (en verdad, podemos tener objetos que hagamos nosotros que siendo mutables, se les pueda calcular el \mip{hash} en función de propiedades que no cambien, pero por simplicidad pensemos en objetos inmutables). Esto es porque para decidir si un elemento pertenece a un conjunto se usa su hash (de forma similar a los diccionarios que veremos luego). Una implicancia de esta propiedad es que es extremadamente rápido verificar si un elemento pertenece a un determinado conjunto, aunque este sea muy grande (porque se calcula su hash, y listo), en contraposición con lo que sucede con una lista o una tupla (porque en estos casos hay que comparar todos los objetos, algo potencialmente prohibitivo dependiendo del tamaño del contenedor).
+
+\begin{info}
+En este contexto, un hash es un número entero calculado a partir de los atributos del objeto. Aquellos objetos iguales tendrán el mismo hash. Los conjuntos y diccionarios usan este hash como referencia en su funcionamiento, de ahí la restricción de que los objetos no cambien (para que sigan teniendo siempre el mismo hash).
+\end{info}
+
+Los conjuntos son objetos mutables, y como tales tienen métodos para agregar y eliminar elementos internos. 
+
+En el siguiente ejemplo vemos como podemos agregar objetos de a uno, o muchos simultáneamente (usando un iterable que los contiene). En ambos casos, tenemos que recordar la propiedad de los conjuntos de que no pueden tener objetos repetidos.
+
+\jupynotex[7-11]{Chapters/py_tipos_datos/code/tipos-sets.ipynb}
+
+Tenemos varias formas de remover elementos de los conjuntos, una que saca el elemento indicado pero falla si no está, otra que saca el elemento indicado (sin fallar si no está), y otra que saca un elemento de forma arbitraria (fallando si el conjunto estaba ya vacío):
+
+\jupynotex[12-17]{Chapters/py_tipos_datos/code/tipos-sets.ipynb}
+
+Como con el resto de los tipos, podemos usar el constructor para convertir entre ellos; en este caso el constructor toma cualquier iterable y se queda con los elementos que recibe:
+
+\jupynotex[18-19]{Chapters/py_tipos_datos/code/tipos-sets.ipynb}
+
+
+\section{Diccionarios}
+
+Los diccionarios también se delimitan con llaves, como los conjuntos, pero en este caso lo que se separan por comas son pares de objetos, cada par siendo una clave y un valor (separados entre sí por dos puntos).
+
+Es que los diccionarios, a diferencia de los otros contenedores que vimos hasta ahora (listas, conjuntos, etc) guardan objetos identificados cada uno por una determinada clave. Los valores guardados pueden ser cualquier objeto de Python, mientras que las claves pueden ser objetos que se les puede calcular el hash.
+
+La forma más directa de acceder a los valores guardados es a través de sus respectivas claves, pero también podemos listar todas las claves, todos los valores, e incluso todos los ítems (pares clave/valor).
+
+\jupynotex[1-5]{Chapters/py_tipos_datos/code/tipos-dicts.ipynb}
+
+Cada clave puede estar una sola vez en el diccionario (porque se accede a través del hash de las claves, de forma similar a lo que veíamos con los conjuntos), entonces si asignamos un nuevo valor a una clave ya presente, estaremos pisando el valor anterior. Si la clave no estaba, estaremos creando un nuevo ítem en el diccionario.
+
+\jupynotex[6-8]{Chapters/py_tipos_datos/code/tipos-dicts.ipynb}
+
+Tengamos en cuenta que desde Python 3.6 los diccionarios recuerdan el orden de inserción de sus claves (antes no tenían un orden en particular).
+
+Si accedemos a una clave que no está presente en el diccionario, se genera una excepción de tipo \mip{KeyError}. A veces es útil usar el método \mip{get} que accede al diccionario y devuelve el valor correspondiente a la clave si es que la clave existe, pero en caso de que la clave no exista devolverá un valor que podemos especificar (o \mip{None} si no indicamos nada).
+
+\jupynotex[9-14]{Chapters/py_tipos_datos/code/tipos-dicts.ipynb}
+
+Podemos borrar elementos del diccionario con la declaración \mip{del}, pero también a veces es útil extraer el valor correspondiente a la clave que estamos borrando, y para eso tenemos el método \mip{pop}, al que si le pasamos un valor por default soportará no encontrar a la clave indicada.
+
+\jupynotex[15-20]{Chapters/py_tipos_datos/code/tipos-dicts.ipynb}
+
+Podemos crear diccionarios a partir de otras estructuras, cualquier iterable en verdad, pero tendrán que ser de pares de valores, donde cada par será clave/valor. También podemos crear diccionarios tomando como fuente las claves, usando el método \mip{fromkeys}, pero en este caso las claves tendrán siempre el mismo valor inicial. Y como detalle especial con este tipo de datos podemos usar una forma de pasar parámetros a las funciones que en este caso es particularmente útil (aunque sólo para el caso donde las claves son cadenas).
+
+\jupynotex[21-24]{Chapters/py_tipos_datos/code/tipos-dicts.ipynb}
+
+
+\section{Iteradores}
+
+Antes de irnos de la Sección de Tipos de datos, mencionemos un concepto importante en Python: los iteradores.
+
+A nivel de definición general, un iterador se refiere al objeto que permite al programador recorrer un contenedor. Prestemos atención a la diferencia entre el contenedor en sí (como colección de elementos) del iterador (que nos permite recorrer esos elementos).
+
+Esta característica se expresa en muchos rincones del lenguaje. Tenemos la declaración \mip{for}, que veremos más adelante en la Sección \ref{sec:for}, que nos permite construir un bucle alrededor de iterar un objeto, pero también podemos hacerlo a mano, aunque de esta manera tenemos que pedirle al objeto iterable que nos de un iterador:
+
+\jupynotex[1-6]{Chapters/py_tipos_datos/code/tipos-iters.ipynb}
+
+Esa excepción que vemos ahí es perfectamente normal, es el mecanismo que tienen los iteradores para indicar que no hay más elementos para entregar.
+
+Una forma útil en el intérprete interactivo de iterar un objeto y ver el resultado es a través del constructor \mip{list}. Usémoslo y veamos como en Python muchos tipos integrados en el lenguaje soportan el protocolo de iteración (decimos que son ``iterables''):
+
+\jupynotex[7-11]{Chapters/py_tipos_datos/code/tipos-iters.ipynb}
+
+No todos los tipos soportan este protocolo, claro. Por ejemplo, no se puede iterar un número entero, ya que no es un contenedor, no tiene elementos para entregar.
+
+También tengamos en cuenta que normalmente cada vez que pidamos un iterador vamos a tener uno ``fresco'', que arrancará desde el principio (aunque nosotros podríamos cambiar este comportamiento si hacemos nuestros propios tipos de datos). Pero si trabajamos sobre el iterador puntualmente, podemos pedirle elementos de diversas maneras sin tener que volver a comenzar.
+
+\jupynotex[12-16]{Chapters/py_tipos_datos/code/tipos-iters.ipynb}
+
+Finalmente, prestemos atención cuando estamos iterando un objeto, ya que el mismo puede potencialmente entregar una cantidad muy grande de elementos, lo cual no tiene sentido tener en memoria simultáneamente. Mostremos un ejemplo de esto con la función integrada \mip{range}, que entrega números en un determinado rango, ahí vemos como para un rango chico podemos iterarlo completamente con una lista, pero para uno muy grande, aunque podamos iterarlo a mano, realmente no tiene sentido hacerlo hasta el final.
+
+\jupynotex[17-19]{Chapters/py_tipos_datos/code/tipos-iters.ipynb}
+
+Así y todo \mip{range} en algún momento va a terminar. Pero podemos tener generadores que sean infinitos, ya veremos como construirlos cuando hablemos de Funciones \ref{sec:funciones}.
