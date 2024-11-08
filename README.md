@@ -58,3 +58,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Python más avanzado](no_tan_intro.pdf?raw=True): Generadores. Administradores de contexto: uso, construcción clásica y abreviada. Acercándonos a la programación funcional: funciones lambda, map, filter y reduce, alternativas. Pruebas de unidad: conceptos, estados de salida, construcción de caso ejemplo. Decoradores: uso y conceptos, construcción.
 
 - [Procesamiento en GPU](procesamiento_gpu.pdf?raw=True): Introducción. Arquitectura de una GPU. Kernels y threads en CUDA. Organización de threads. Producto de matrices en GPU con PyCUDA y PyOpenCL.
+
+- [Python: Clases](pyclases.pdf?raw=True): Atributos de instancia y de clase. Métodos de clase y estáticos. Herencia: concepto y ejemplos. Simple y no lineal. Propiedades. Creando tipos de datos: conceptos y métodos con nombres especiales.

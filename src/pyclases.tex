@@ -1,0 +1,281 @@
+
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Clases}\label{ch:clasesavanz}
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/pyclases/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+En este capítulo exploraremos algunos conceptos más avanzados sobre Clases, complementando la introducción que hicimos sobre este tema en Introducción a Python \ref{sec:clases}.
+
+Entraremos en detalle en distintos aspectos de la definición y comportamiento de clases e instancias. Es importante revisar este capítulo incluso si se tiene experiencia con Programación Orientada a Objetos en otros lenguajes, porque algunos términos son muy parecidos (o iguales) pero su comportamiento puede no ser exactamente el mismo.
+
+
+\section{De instancia o de clase}
+
+En Python podemos definir atributos que serán de instancia o de clase, haciéndose referencia al espacio de nombres en el que está definido dicho atributo.
+
+Para el caso de la instancia, el atributo ``vive'' dentro de la instancia, y normalmente desde adentro de la instancia los accedemos usando el argumento \texttt{self} que se incluye automáticamente en los métodos de instancia:
+
+\jupynotex[1]{Chapters/pyclases/code/clases.ipynb}
+
+Desde afuera podemos acceder a ese atributo trabajando con la instancia, y como está definido en el espacio de nombres de cada instancia, si lo modificamos en una, sólo lo modificamos en esa:
+
+\jupynotex[2]{Chapters/pyclases/code/clases.ipynb}
+
+Noten que no podemos acceder a ese atributo desde la clase, porque no tiene ninguna referencia a sus instancias:
+
+\jupynotex[3]{Chapters/pyclases/code/clases.ipynb}
+
+Por otro lado, los atributos de clase ``viven'' dentro de la clase (están definidos en su espacio de nombre), de la misma manera que los métodos; presten atención a cómo el atributo y el método están definidos en el mismo ``lugar'':
+
+\jupynotex[4]{Chapters/pyclases/code/clases.ipynb}
+
+Más allá que esté definido en la clase, cuando se ejecuta el método el valor se puede obtener de la misma forma que antes; esto es porque en el caso de las instancias cuando se buscan en la misma y no se encuentra, la búsqueda continúa en la clase de esa instancia.
+
+Desde afuera podemos acceder al atributo tanto usando la instancia (por el comportamiento antes mencionado) como usando la clase (porque ahora sí está definido allí):
+
+\jupynotex[5]{Chapters/pyclases/code/clases.ipynb}
+
+La característica de que el atributo viva en un sólo lugar (la clase) y no en todas las instancias tiene dos propiedades interesantes: por un lado nos permite ahorrar memoria si la estructura es muy pesada, y por el otro nos permite ``compartirla'' entre todas las instancias; en otras palabras, si modificamos el atributo desde la clase vamos a ver desde todas las instancias que se modificó:
+
+\jupynotex[6-7]{Chapters/pyclases/code/clases.ipynb}
+
+El efecto de buscar el atributo en la clase cuando no está en la instancia se anula, justamente, cuando se crea el mismo atributo en la instancia. Entonces, vemos que si creamos el \texttt{exp} en la primer instancia, esa instancia siempre accederá a ese nuevo valor sin llegar al de la clase:
+
+\jupynotex[8-9]{Chapters/pyclases/code/clases.ipynb}
+
+Pasamos de hablar de atributos a métodos. Aunque la terminología ``de clase o de instancia'' es similar, el comportamiento es distinto.
+
+Es más, indicar que un método es ``de instancia'' es un poco confuso: los métodos siempre ``viven'' en la clase. En este caso, entonces, tenemos que pensar que ese término hace referencia a cómo están vinculada la función definida con la clase, y qué parámetro se incluirá automáticamente al ejecutarla.
+
+Entonces, en el caso de un ``método de instancia'' cuando es invocado desde la instancia recibirá automáticamente un puntero a la instancia misma, que por convención llamamos \textit{self} (``si mismo'' en inglés) en el código:
+
+\jupynotex[10]{Chapters/pyclases/code/clases.ipynb}
+
+Tengamos en cuenta que si al método ``de instancia'' lo llamamos desde la clase misma, no habrá ningún parámetro incluido automáticamente, es nuestra responsabilidad pasar explícitamente la instancia que recibirá el método:
+
+\jupynotex[11]{Chapters/pyclases/code/clases.ipynb}
+
+Alternativamente tenemos los métodos de clase, que recibirán automáticamente un puntero a la clase misma, y métodos estáticos, que no recibirán automáticamente nada extra. En estos casos no importa si son llamados desde la instancia o desde la clase.
+
+Se definen usando los decoradores apropiados:
+
+\jupynotex[12]{Chapters/pyclases/code/clases.ipynb}
+
+Los métodos de clase son muy utilizados para implementar métodos alternativos para crear una instancia de la clase. Por ejemplo, en el módulo \texttt{datetime} tenemos la clase \texttt{date} que al instanciarla normalmente debe recibir el año, mes y día...
+
+\jupynotex[13]{Chapters/pyclases/code/clases.ipynb}
+
+...y alternativamente podemos crear una instancia llamando al método de clase \texttt{fromtimestamp} desde la clase misma:
+
+\jupynotex[14]{Chapters/pyclases/code/clases.ipynb}
+
+Copiamos aquí el código real para dicho método (sin el \textit{docstring} y sin el resto de la clase, por cuestiones de espacio) para ayudar a entender cómo trabaja:
+
+\begin{py}
+class date:
+    
+    @classmethod
+    def fromtimestamp(cls, t):
+        y, m, d, hh, mm, ss, weekday, jday, dst = _time.localtime(t)
+        return cls(y, m, d)
+\end{py}
+
+Vemos que el método recibe la clase como primer parámetro, automáticamente, y luego el \textit{timestamp} que le pasamos. Separa ese valor en año, mes, día, hora, etc, y luego utiliza la misma clase recibida para construir la instancia (usando los valores correspondientes a la fecha), devolviendo justamente eso.
+
+Por otro lado, los métodos estáticos no reciben automáticamente nada (ni cuando se los llama desde la clase ni cuando se los llama desde la instancia). No tienen diferencia con una función ``común''. Entonces, ¿por qué definirlos como un método estático y no como una función fuera de la clase? En este caso entra en juego una de las características de la programación orientada a objetos que es la responsabilidad: es tarea de esa clase (esos objetos) realizar el cómputo implementado en ese código, entonces es mejor que quede adentro de la clase (como método estático) a que esté ``suelto'' como función separada.
+
+        
+\section{Heredando o no}
+
+Pasemos a otro concepto que visitamos brevemente en la parte introductoria: la herencia. 
+
+Genéricamente hablando, la herencia es un mecanismo de la programación orientada a objetos para reutilizar parte de la implementación del modelado de la realidad. Como las clases hijas adquieren propiedades y comportamientos de las clases ancestras (los ``heredan''), también nos referimos a que las clases hijas ``especializan'' a las ancestras.
+
+Veamos un ejemplo muy sencillo de eso:
+
+\begin{center}
+    \includegraphics[width=250pt,keepaspectratio=true]{Chapters/pyclases/imgs/clases-modelo.pdf}
+\end{center}
+
+En el modelado de la realidad que hicimos para un supuesto sistema de inventario de una oficina, tenemos la clase \texttt{Mueble} que tiene atributos genéricos como el número de inventario o la fecha de compra. Elementos más específicos, como el \texttt{Escritorio} o la \texttt{Silla} tendrán cada uno sus atributos en particular, pero además heredan los que posee su clase ancestra (ya que los escritorios y las sillas son muebles).
+
+En Python, el concepto clave a entender cuando tenemos una estructura de herencia es que los métodos y atributos no se ``pisan'' en tiempo de compilación sino que todo se resuelve durante la ejecución del programa.
+
+El siguiente ejemplo nos muestra distintas características que pasaremos a explicar luego, pero básicamente tenemos una clase \texttt{Persona} que recibe la fecha de nacimiento (y la guarda como atributo) y tiene un método para calcular la edad, y una clase \texttt{Empleado} que hereda de la anterior, que además posee el sueldo y una forma de calcularlo para todo el año.
+
+\jupynotex[15]{Chapters/pyclases/code/clases.ipynb}
+
+El uso de estas clases es bastante intuitivo:
+
+\jupynotex[16]{Chapters/pyclases/code/clases.ipynb}
+
+Notemos como usamos el método \texttt{edad} en el objeto tipo \texttt{Empleado}, ya que esa clase lo ``hereda'' de \texttt{Persona}. Como mencionamos recién, ese método no se ``trae'' o ``copia'' de una clase a la otra, sino que es una cuestión de cómo se ``resuelve una búsqueda''. Cuando hacemos \texttt{e.edad} se trata de resolver el atributo \texttt{edad} en la instancia y en su clase, y al no encontrarse se empieza a recorrer sus ``ancestras'' (en este caso de forma trivial ya que hereda de una sola clase).
+
+Por otro lado, el método \texttt{\_\_init\_\_} en \texttt{Empleado} ``pisa'' u ``oculta'' al método con el mismo nombre en \texttt{Persona}. Entonces cuando hacemos instanciamos \texttt{Empleado} se ejecutará el método de inicialización de Empleado, y no hay ningún mecanismo automático que ejecute otro método con el mismo nombre en sus ancestras; si queremos que eso suceda debemos hacerlo de forma explícita (como es el caso de nuestro ejemplo, donde inicializamos \texttt{Empleado} guardando el sueldo y luego queremos que se termine de inicializar \texttt{Persona} con la fecha de nacimiento. Por otro lado, si queremos que el método de la clase hija reemplace o substituya completamente el método de las ancestras, no hace falta realizar ninguna acción, ya que es el comportamiento por defecto.
+
+Como \texttt{Empleado} hereda de \texttt{Persona}, si queríamos ejecutar el método de inicialización de esta última era suficiente hacer \texttt{Persona.\_\_init\_\_(self, nacimiento)} (notar como debemos incluir explícitamente el \texttt{self}, puntero a la instancia, porque estamos usando el método directamente desde la clase, como ya vimos en esta sección). Sin embargo es buena costumbre no hacerlo así directamente, ya que esta estructura de dos clases podría crecer y complicarse a futuro y ya no ser tan evidente cual es el próximo ancestro que le corresponde ejecutar el mismo método. 
+
+Entonces Python nos provee de una función integrada, \texttt{super}, que nos saca el trabajo de determinar cual es la próxima clase ancestra, más allá de como vaya cambiando la estructura (y además nos evitamos tener que pasar el \texttt{self} explícitamente). \texttt{super} devuelve un objeto intermediario que busca en las clases del camino de herencia, pero en realidad la determinación de cuales son esas clases no depende de \texttt{super} mismo sino que está especificado en el atributo \texttt{\_\_mro\_\_} de las clases (por \textit{method resolution order}, orden de resolución de métodos).
+
+Debemos entender que no siempre es sencillo darnos cuenta del camino correcto para ir recorriendo las clases ancestras, especialmente cuando dejamos de tener herencia ``lineal'' y empezamos a encontrar ``rombos``. 
+
+Veamos cómo es el orden en los siguientes dos casos:
+
+\begin{center}
+    \includegraphics[width=250pt,keepaspectratio=true]{Chapters/pyclases/imgs/clases-herencia-limpio.pdf}
+\end{center}
+
+El código correspondiente para el primer caso es el siguiente:
+
+\jupynotex[17]{Chapters/pyclases/code/clases.ipynb}
+
+Vemos que el contenido del atributo \texttt{\_\_mro\_\_} nos indica que luego de \texttt{M} tenemos a \texttt{J} (primera clase ancestra), luego \texttt{C} y \texttt{K}, y finalmente \texttt{object} (que es el tipo especial de la cual derivan todos los objetos en Python).
+
+Para ir al segundo caso modificamos a la clase \texttt{K} (para que también herede de \texttt{C}):
+
+\jupynotex[18]{Chapters/pyclases/code/clases.ipynb}
+
+Vemos que aunque no modificamos \texttt{M}, ¡cambió el orden de resolución de la búsqueda! Los dos caminos son:
+
+\begin{center}
+    \includegraphics[width=250pt,keepaspectratio=true]{Chapters/pyclases/imgs/clases-herencia-caminos.pdf}
+\end{center}
+
+Corolario: siempre usemos \texttt{super}.
+
+
+\section{Usando propiedades}
+
+A nivel de la interfaz que se usan en las clases a la hora de construir objetos modelando la realidad, Python difiere un poco de otros lenguajes más rígidos. Por ejemplo, en otros ámbitos es normal tener los atributos protegidos dentro de la instancia (no se los puede acceder ni modificar directamente) e implementer \textit{getters} y \textit{setters} para ello.
+
+Emulando esta misma modalidad tendríamos:
+
+\jupynotex[19-20]{Chapters/pyclases/code/clases.ipynb}
+
+Si en lugar de dos atributos tenemos cinco o diez ya se pueden dar una idea de la cantidad de código ``inútil'' a la que nos enfrentamos. 
+
+En realidad, este código con todos los \textit{getters} y \textit{setters} tiene su motivo de ser. Tenemos que pensar qué pasa si luego de construir la clase y empezarla a usar en nuestros sistemas, de repente entendemos que debemos ejecutar código al leer o escribir algún atributo. Pueden haber mil razones para esto, adaptaciones de valores, validaciones de formatos, cambios de estructuras, etc. Por ejemplo, lo siguiente no queremos que sea posible, ¡debemos validar que la fecha de nacimiento esté en el pasado!
+
+\jupynotex[21]{Chapters/pyclases/code/clases.ipynb}
+
+Como tenemos los \textit{getters} y \textit{setters}, agregar la validación es trivial, y no tenemos que tocar nada de todo el código que usa nuestra clase:
+
+\jupynotex[22-23]{Chapters/pyclases/code/clases.ipynb}
+
+La forma pythonica de armar una clase como esa es exponiendo los atributos internos, que se acceden directamente desde afuera:
+
+\jupynotex[24-25]{Chapters/pyclases/code/clases.ipynb}
+
+Notemos como tanto la definición como el uso de esa clase son más limpios y breves. Pero claro, es evidente ahora la situación de querer agregar la validación que necesitamos (o, en forma genérica, ejecutar código específico en el momento de leer o escribir un atributo). ¿Cómo hacemos eso sin modificar todo el código que usa la clase? Para ello Python tiene las ``propiedades''.
+
+A través de \texttt{property}, integrada en el intérprete, podemos definir propiedades en las clases: declaraciones que podemos utilizar para ejecutar métodos al momento de (en vez de) leer o escribir un atributo, o incluso borrarlo.
+
+La forma clásica de hacerlo es escribir el \textit{getter} y el \textit{setter} para el atributo, métodos que se ejecutarán cuando lo leamos y escribamos y que internamente van a utilizar otro nombre (normalmente el nombre original con un guión bajo al principio), y luego definir al nombre original del atributo como una propiedad indicando los métodos recién definidos:
+
+\jupynotex[26]{Chapters/pyclases/code/clases.ipynb}
+
+Vemos que ahora el ``resto del código'' queda igual que antes, usando los atributos directamente, y tenemos toda la funcionalidad que deseábamos:
+
+\jupynotex[27]{Chapters/pyclases/code/clases.ipynb}
+
+Mediante \texttt{property} también podemos definir un método a ejecutar en caso de querer borrar el atributo, e incluso una cadena de documentación (\textit{docstring}).
+
+Una ventaja de las propiedades es que ese método que ejecuta automáticamente también se dispara cuando se hace la asignación en el método de inicialización. De esta manera tenemos ``gratis'' también la validación en tiempo de instanciación:
+
+\jupynotex[28]{Chapters/pyclases/code/clases.ipynb}
+
+Entonces no hace falta modificar ninguna parte del sistema que usa nuestra clase, y tenemos la funcionalidad deseada, sin tener que pagar el costo de llenar todo de \textit{getters} y \textit{setters} de forma anticipada por las dudas.
+
+Alternativamente, una forma de utilizar \texttt{property} es mediante decoradores; la funcionalidad obtenida es la misma, es sólo una cuestión de gustos. Notar la diferencia entre el decorador para la lectura del atributo, que usa \texttt{property}, y el otro para su escritura, que usa el nombre recién definido; ambos métodos usan el nombre del atributo que queremos trabajar (en el primer caso es necesario, en el segundo es por convención):
+
+\jupynotex[29]{Chapters/pyclases/code/clases.ipynb}
+
+Las propiedades también pueden usarse para bloquear el acceso a un atributo. Por ejemplo en el siguiente caso al no definir un método \textit{setter} hacemos que el atributo no se pueda escribir desde afuera:
+
+\jupynotex[30-32]{Chapters/pyclases/code/clases.ipynb}
+
+Es trivial esconderlo totalmente, al no pasarle ningún método a \texttt{property}.
+
+En realidad muy pocas veces hacemos esto en Python, ya que tenemos la fuerte convención de usar nombres que comienzan con guión bajo para indicar aquellos métodos o atributos que son privados de un objeto y nunca deberían usarse ``desde afuera'' (con excepciones, claro, por ejemplo al realizar pruebas de unidad para esos objetos).
+
+
+\section{Creando tipos de datos}
+
+Cuando necesitamos crear nuevos tipos de datos para utilizar en nuestros programas, lo ideal es que se integren lo mejor posible al lenguaje.
+
+Por ejemplo, supongamos que para nuestro sistema de gestión de centros de datos tenemos una estructura llamada Rack que adentro puede tener uno o más equipos informáticos, entonces podríamos hacer:
+
+\jupynotex[34]{Chapters/pyclases/code/clases.ipynb}
+
+Aunque esos métodos tienen sentido, son parte de una interfaz que hay que aprender al usar esa clase. En Python hacemos siempre foco en hacer las cosas lo más simple posible y la legibilidad importa, entonces si tenemos la funcionalidad de ``obtener el largo'' o de ``obtener un item de una determinada posición'', ¿por qué no proveer los mecanismos para que esas acciones se realicen de la misma manera que es natural en Python?
+
+Entonces, idealmente si nuestro tipo de datos es (por ejemplo) una ``colección'' de otras cosas, sería natural para los programadores hacer lo siguiente:
+
+\jupynotex[36]{Chapters/pyclases/code/clases.ipynb}
+
+Por supuesto, no todos los métodos tienen un equivalente en el uso de Python, como es el caso en esta clase cuando devuelve las fuentes de alimentación. 
+
+Pero en los casos donde la funcionalidad es equivalente, podemos aprovechar que Python ofrece una especie de protocolo entre la sintaxis usada y la definición de una clase. La idea es más sencilla de lo que parece: Python resuelve las distintas estructuras sintácticas y funcionalidades específicas llamando a determinados métodos en los objetos.
+
+Entonces podemos obtener la misma interfaz que ofrece Python usando esos métodos, llamados métodos con nombres especiales. Son muchos, y en este texto mencionaremos sólo algunos, pero pueden profundizar en \href{https://docs.python.org/es/dev/reference/datamodel.html#basic-customization}{su documentación}.
+
+Para mostrarlo en el ejemplo, cuando nosotros hacemos \texttt{rack[1]} Python ejecuta un método especial (indicándole que buscamos el item en la posición 1), y similar cuando hacemos \texttt{len(rack)}.
+
+Veamos la definición de la clase con la integración que buscamos:
+
+\jupynotex[35]{Chapters/pyclases/code/clases.ipynb}
+
+Vemos que estos métodos especiales tienen un nombre... especial. Es por eso que hay una cierta ambivalencia con su denominación, a veces se los llama ``métodos especiales'', otras ``métodos de nombre especial'', e incluso ``métodos mágicos'' (pero no hay nada de magia en los mismos, es sólo ese protocolo de Python que antes mencionamos).
+
+\begin{info}
+Todos estos métodos comienzan con un doble guión bajo y terminan también de esa manera. Por comodidad, se los terminó nombrando con la palabra ``\textit{dunder}'' (pronunciada ``dander''), por \textit{double underscore}. Entonces es normal escuchar ``dunder init'' por \texttt{\_\_init\_\_}, ``dunder len'' por \texttt{\_\_len\_\_}, etc.
+\end{info}
+
+Nada evita que los usemos directamente, pero es claramente más elegante lo primero que lo segundo en el siguiente ejemplo:
+
+\jupynotex[37]{Chapters/pyclases/code/clases.ipynb}
+
+Más allá de la utilización de estos métodos cuando queremos que nuestros objetos se integren a la sintáxis de Python, tambien necesitamos a veces proveer funcionalidad más específica y eso implica la utilización de más de uno de estos elementos.
+
+Para visualizar mejor eso veamos un ejemplo donde tenemos una clase Empleado que queremos guardar luego como clave en un diccionario. Esto, a priori, lo podemos hacer:
+
+\jupynotex[38-39]{Chapters/pyclases/code/clases.ipynb}
+
+Sin embargo es un poco oscuro qué elemento o valor usó el diccionario para poder guardarlo como clave... como el objeto en sí no indicaba nada, usa el identificador del objeto (lo que devuelve la función integrada \mip{id} al aplicarla al objeto). Entonces, si luego construimos otro objeto Empleado en otra parte del código (algo que sucede todo el tiempo, por ejemplo cuando construimos los objetos al momento de necesitarlos con valores que traemos de una base de datos) encontramos que sorpresivamente parecería no estar en la estructura que definimos:
+
+\jupynotex[40]{Chapters/pyclases/code/clases.ipynb}
+
+Para lograr ese comportamiento nuestro objeto tiene que definir dos métodos especiales: el \texttt{\_\_hash\_\_} para cuando se hace \texttt{hash} del objeto y el \texttt{\_\_eq\_\_} para cuando se lo compara por igualdad (ambas acciones son realizadas por el diccionario para poder guardar el objeto como clave en su estructura interna).
+
+Justamente ese es un punto que tenemos que pensar y analizar de nuestro objeto, ¿qué atributo queremos que sea una clave unívoca? Para el caso del ejemplo es sencillo: usaremos el DNI del empleado. Es trivial agregar entonces los dos métodos en cuestión:
+
+\jupynotex[41-42]{Chapters/pyclases/code/clases.ipynb}
+
+Por otro lado, si lo que queremos es que nuestro objeto se comporte completamente como uno de los tipos integrados de Python, tenemos que aprovechar el módulo \texttt{collections.abc} donde tenemos clases abstractas que funcionan como base de nuestros objetos y nos permiten, definiendo sólo algunos métodos, cumplir con todo el ``protocolo estándar'' de cada tipo.
+
+Mostremos como ejemplo lo que podríamos denominar un ``diccionario con claves en minúscula''. Para ello heredamos de \texttt{Mapping} (la clase abstracta para ``mapas'' de sólo lectura) y definimos los tres métodos mínimos necesarios:
+
+\jupynotex[43]{Chapters/pyclases/code/clases.ipynb}
+
+Debemos prestar atención en esa definición como siempre llevamos a mínúscula cada clave antes de trabajar el diccionario interno que tenemos. Entonces, luego accedemos a nuestra estructura sin importar la forma de la clave:
+
+\jupynotex[44]{Chapters/pyclases/code/clases.ipynb}
+
+Lo importante de haber heredado \texttt{Mapping} es que nuestro objeto se comporta ``en general'' como un diccionario de Python aunque no hayamos definido el resto de los métodos:
+
+\jupynotex[45]{Chapters/pyclases/code/clases.ipynb}
+
+Como mencionamos arriba, esto sería para un diccionario de sólo lectura. Para el comportamiento completo debemos trabajar con \texttt{MutableMapping} y escribir nosotros un método más (el \texttt{\_\_setitem\_\_}, como indica \href{https://docs.python.org/es/dev/library/collections.abc.html#collections-abstract-base-classes}{esta tabla resumen}.
+
+Recomendamos analicen \href{https://docs.python.org/es/dev/library/collections.abc.html}{la documentación de este módulo} ya que es una buena forma de aprender también las distintas interfaces de los tipos de datos incluidos en Python.
