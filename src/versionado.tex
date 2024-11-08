@@ -1,5 +1,5 @@
 
-% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -148,7 +148,7 @@ $ git init -b trunk
 
 En este procedimiento apareció una nueva palabra: ``repositorio''. Un repositorio es el lugar donde el sistema de control de versiones almacena todos nuestros archivos más un montón de información extra para poder darnos las funcionalidades intrínsecas al control de versiones.
 
-También cuando creamos el repositorio en nuestra máquina le dijimos a \texttt{git} que la rama principal se va a llamar \texttt{trunk}. Históricamente las ramas principales de Git se llamaron siempre \texttt{master}, pero en los últimos años surgieron y se afianzaron una serie de movimientos en el mundo que apuntan a evitar referenciar desigualdades históricas, principalmente raciales, reflejadas en muchos términos que se usan en la informática en el día a día, y en función de esto Github por ejemplo empezó a llamar \texttt{main} a la rama principal de un nuevo proyecto. Tanto ``main'' (\emph{principal}) como ``trunk'' (\emph{tronco}) son alternativas interesantes, porque en un caso hace referencia a que es la rama principal, y en el otro es de donde salen las otras ramas.
+También cuando creamos el repositorio en nuestra máquina le dijimos a \texttt{git} que la rama principal se va a llamar \texttt{trunk}. Históricamente las ramas principales de Git se llamaron siempre \texttt{master}, pero en los últimos años surgieron y se afianzaron una serie de movimientos en el mundo que apuntan a evitar referenciar desigualdades históricas, principalmente raciales, reflejadas en muchos términos que se usan en la informática en el día a día, y en función de esto Github por ejemplo empezó a llamar \texttt{main} a la rama principal de un nuevo proyecto. Tanto \textit{main} (``principal'') como \textit{trunk} (``tronco'') son alternativas interesantes, porque en un caso hace referencia a que es la rama principal, y en el otro es de donde salen las otras ramas.
 
 Sólo para arrancar, creemos un archivo en nuestro nuevo proyecto. Con algún editor de texto grabemos un archivo \texttt{saludo.txt} con algún contenido. Luego de eso, si hacemos \texttt{git status} veremos que Git nos reporta que ese archivo está ``sin seguimiento'', o sea que no está siendo administrado/controlado por el sistema de versionado.
 
@@ -212,7 +212,7 @@ Como vemos, tenemos un bloque de información por cada \emph{commit} que hicimos
 
 Ese encabezado también tiene varias partes. El autor y la fecha son obvios, enfoquémosnos en la primer linea: vemos que arranca con \verb|commit| y luego hay una serie de letras y números: ese es el \emph{hash} del commit, un identificador único que nos permite trabajar sobre ese commit o hacer referencia al mismo.
 
-Finalmente, tenemos entre paréntesis el dato sobre las ramas y donde estamos parados. Vemos que el primer commit que hicimos originalmente en ``trunk'' menciona esa rama entre paréntesis: esto es porque la rama en la que estamos parados ahora ``salió desde ese punto'' de la rama de donde nació (en este caso, justamente, ``trunk'', pero piensen que se puede sacar una rama desde cualquier otra rama). En el último commit, además de la indicación de que es el último commit de la rama \verb|cambio-1|, vemos que dice \verb|HEAD|: es la indicación de que estamos viendo el estado del proyecto en ese commit.
+Finalmente, tenemos entre paréntesis el dato sobre las ramas y donde estamos parados. Vemos que el primer commit que hicimos originalmente en \textit{trunk} menciona esa rama entre paréntesis: esto es porque la rama en la que estamos parados ahora ``salió desde ese punto'' de la rama de donde nació (en este caso, justamente, \textit{trunk}, pero piensen que se puede sacar una rama desde cualquier otra rama). En el último commit, además de la indicación de que es el último commit de la rama \verb|cambio-1|, vemos que dice \verb|HEAD|: es la indicación de que estamos viendo el estado del proyecto en ese commit.
 
 Hagamos la prueba de movernos de commit para explorar el pasado:
 
@@ -220,7 +220,7 @@ Hagamos la prueba de movernos de commit para explorar el pasado:
 $ git checkout 4804a799ddaa714e1f9e4f301f2a668364e4e908
 \end{shell}
 
-Al ejecutar eso recibimos un mensaje de Git diciéndonos que estamos en modo ``detached HEAD'' (HEAD desacoplada), que significa que no estamos actualmente dentro de ninguna rama, sino en ese commit específico. Podemos ver eso mismo haciendo \texttt{git log}, e incluso revisar el archivo de nuestro proyecto y ver que su contenido es el que ``pertenece al pasado''.
+Al ejecutar eso recibimos un mensaje de Git diciéndonos que estamos en modo \textit{detached HEAD} (HEAD desacoplada), que significa que no estamos actualmente dentro de ninguna rama, sino en ese commit específico. Podemos ver eso mismo haciendo \texttt{git log}, e incluso revisar el archivo de nuestro proyecto y ver que su contenido es el que ``pertenece al pasado''.
 
 Podemos volver a la rama en que estábamos haciendo \texttt{git checkout cambio-1}.
 
@@ -317,7 +317,7 @@ $ git checkout trunk
 $ git merge cambio-2
 \end{shell}
 
-Listo, tenemos todos los commits de \verb|cambio-2| también en \verb|trunk|. Debemos mencionar que no siempre el ``merge'' funciona tan limpio, porque podemos tener conflictos, que aparecen cuando en distintas ramas se modificaron zonas similares de algún archivo.
+Listo, tenemos todos los commits de \verb|cambio-2| también en \verb|trunk|. Debemos mencionar que no siempre el \textit{merge} funciona tan limpio, porque podemos tener conflictos, que aparecen cuando en distintas ramas se modificaron zonas similares de algún archivo.
 
 Si en una rama tocamos un archivo y en la otra rama tocamos otro archivo, no hay problema. Incluso si tocamos el mismo archivo en las dos ramas, pero en zonas lo suficientemente separadas, tampoco es un inconveniente. Pero si en las distintas ramas modificamos las mismas lineas del mismo archivo, Git no podrá combinar ese archivo, y tendremos un conflicto que habrá que resolver. 
 

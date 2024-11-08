@@ -1,5 +1,5 @@
 
-% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -14,10 +14,10 @@
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Matplotlib & 3.3.4 \\
-        NumPy & 1.19.5 \\
-        SciPy & 1.6.0 \\
-        Sympy & 1.7.1 \\
+        Matplotlib & 3.9.2 \\
+        NumPy & 1.26.4 \\
+        SciPy & 1.14.1 \\
+        Sympy & 1.13.3 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
@@ -92,7 +92,7 @@ Por otro lado, particularmente cuando el número $n$ es muy grande, los errores 
 
 \subsection{Condicionamiento}\label{sec:condic}
 
-Aún cuando $\rg(\mathbb{A}) = n$ y por consiguiente la solución existe, puede no ser posible obtener dicha solución en forma precisa. En efecto, el número de condición de la matriz, $\cond(\mathbb{A})$ determina si la matriz está bien o mal condicionada. Cuando $\cond(\mathbb{A}) \approx 1$, la matriz está \textit{bien condicionada}, pero cuando $\cond(\mathbb{A}) \gg 1$ se dice que está \textit{mal condicionada}. En este último caso, la solución del sistema de ecuaciones puede tener errores de gran magnitud. Una forma de interpretar cómo afecta el número de condición a los errores consiste en realizar un análisis del error. Supongamos que tenemos un sistema de ecuaciones lineales de la forma $\mathbb{A} \bm{x} = \bm{b}$ donde $\bm{x}$ es el vector solución. A una pequeña variación en $\bm{b}$, $\delta \bm{b}$, le corresponderá un cambio en la solución, $\delta \bm{x}$ dado por $\mathbb{A} (\bm{x} + \delta \bm{x}) = \bm{b} + \delta \bm{b}$, y dado que el sistema es lineal, resulta que $\mathbb{A} \delta \bm{x} = \delta \bm{b}$. Entonces, podemos determinar cuán grande es el cambio relativo en $\bm{x}$ comparado con el cambio relativo en $\bm{b}$ haciendo uso de los cocientes de las normas de estos vectores. Específicamente, comparamos $\lVert \delta \bm{x} \rVert / \lVert \bm{x} \rVert$ y $\lVert \delta \bm{b} \rVert / \lVert \bm{b} \rVert$, donde $\lVert \bm{x} \rVert$ denota la norma del vector $\bm{x}$. Usando la relación $\lVert \mathbb{A} \bm{x} \rVert \leq \lVert \mathbb{A} \rVert \lVert \bm{x} \rVert$, podemos escribir
+Aún cuando $\rg(\mathbb{A}) = n$ y por consiguiente la solución existe, puede no ser posible obtener dicha solución en forma precisa. En efecto, el número de condición de la matriz, $\cond(\mathbb{A})$ determina si la matriz está bien o mal condicionada. Cuando $\cond(\mathbb{A}) \approx 1$, la matriz está ``bien condicionada'', pero cuando $\cond(\mathbb{A}) \gg 1$ se dice que está ``mal condicionada''. En este último caso, la solución del sistema de ecuaciones puede tener errores de gran magnitud. Una forma de interpretar cómo afecta el número de condición a los errores consiste en realizar un análisis del error. Supongamos que tenemos un sistema de ecuaciones lineales de la forma $\mathbb{A} \bm{x} = \bm{b}$ donde $\bm{x}$ es el vector solución. A una pequeña variación en $\bm{b}$, $\delta \bm{b}$, le corresponderá un cambio en la solución, $\delta \bm{x}$ dado por $\mathbb{A} (\bm{x} + \delta \bm{x}) = \bm{b} + \delta \bm{b}$, y dado que el sistema es lineal, resulta que $\mathbb{A} \delta \bm{x} = \delta \bm{b}$. Entonces, podemos determinar cuán grande es el cambio relativo en $\bm{x}$ comparado con el cambio relativo en $\bm{b}$ haciendo uso de los cocientes de las normas de estos vectores. Específicamente, comparamos $\lVert \delta \bm{x} \rVert / \lVert \bm{x} \rVert$ y $\lVert \delta \bm{b} \rVert / \lVert \bm{b} \rVert$, donde $\lVert \bm{x} \rVert$ denota la norma del vector $\bm{x}$. Usando la relación $\lVert \mathbb{A} \bm{x} \rVert \leq \lVert \mathbb{A} \rVert \lVert \bm{x} \rVert$, podemos escribir
 
 \[ \frac{\lVert \delta \bm{x} \rVert}{\lVert \bm{x} \rVert} = \frac{\lVert \mathbb{A}^{-1} \delta \bm{b} \rVert}{\lVert \bm{x} \rVert} \leq \frac{\lVert \mathbb{A}^{-1} \rVert \lVert \delta \bm{b} \rVert}{\lVert \bm{x} \rVert} = \frac{\lVert \mathbb{A}^{-1} \rVert \lVert \bm{b} \rVert}{\lVert  \bm{x} \rVert} \frac{\lVert \delta \bm{b} \rVert}{\lVert \bm{b}\rVert} \leq \lVert \mathbb{A}^{-1} \rVert \lVert \mathbb{A} \rVert \frac{\lVert \delta \bm{b} \rVert}{\lVert \bm{b}\rVert} \]
 
@@ -100,17 +100,16 @@ Dado que la definición del número de condición es $\cond(\mathbb{A}) = \lVert
 
 En el caso en que estemos tratando simbólicamente con una matriz, el rango, el número de condición y la norma se pueden obtener con los métodos \mip{rank}, \mip{condition_number} y \mip{norm} del objeto \mip{Matrix} de SimPy, mientras que si solo trabajamos en forma numérica, las mismas magnitudes se obtienen de las funciones del submódulo \mip{linalg} de NumPy: \mip{matrix_rank}, y \mip{cond} y \mip{norm} (SciPy solo tiene implementada la función \mip{norm} en el submódulo \mip{linalg}).
 
-Como ejemplo veremos cómo calcular estas cantidades en una matriz de Hilbert de $2 \times 2$, que se conoce como ejemplo de matriz mal condicionada. Los elementos de esta matriz son $H_{ij} = 1 / (i+j-1)$. Primero importamos los módulos que vamos a usar:
+Como ejemplo veremos cómo calcular estas cantidades en una matriz de Hilbert de $2 \times 2$, que se conoce como ejemplo de matriz mal condicionada. Los elementos de esta matriz son $H_{ij} = 1 / (i+j-1)$. 
+
+Definimos la matriz de Hilbert, utilizando el método \mip{Rational} de SimPy para manter la expresión de los elementos de la matriz como fracciones (la llamamos \mip{H_s} para destacar que es un objeto \mip{Matrix} de SimPy):
 \jupynotex[1]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
-Luego definimos la matriz de Hilbert, utilizando el método \mip{Rational} de SimPy para manter la expresión de los elementos de la matriz como fracciones (la llamamos \mip{H_s} para destacar que es un objeto \mip{Matrix} de SimPy):
-\jupynotex[2]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
-
 A continuación obtenemos el rango, el número de condición exacto y aproximado, y la norma de $H$
-\jupynotex[3-6]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[2-5]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 Ahora pasamos a la representación en punto flotante de $H$, utilizando las rutinas de NumPy y SciPy para definirla (SciPy permite definir esta matriz indicando el rango de la misma) y para calcular su rango, número de condición y norma:
-\jupynotex[7-11]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[6-10]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 \subsection{Descomposición LU}
 
@@ -158,18 +157,18 @@ y luego resolvemos
 Este procedimiento de dividir el problema dado por la ecuación \eqref{eq:lufull} en dos ecuaciones sucesivas resulta eficiente debido a que obtener la solución de sistemas triangulares es trivial: la ecuación \eqref{eq:lb} se resuelve con sustitución hacia adelante mientras que la \eqref{eq:uy} se resuelve con sustitución hacia atrás. De este modo, en el caso de resolver nuestro sistema original para múltiples términos independientes $\bm{b}_i$, solo una vez hay que obtener la factorización LU y luego simplemente se resuelve para cada caso mediante las sustituciones de las ecuaciones \eqref{eq:lb} y \eqref{eq:uy}.
 
 Tanto Sympy como SciPy poseen rutinas que realizan la factorización LU, veamos ejemplos de aplicación de esos métodos. En las celdas siguientes utilizamos el método \mip{LUdecomposition()} aplicado a la matriz de Hilbert:
-\jupynotex[12-14]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[11-13]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 Podemos ver que la matriz \mip{L} posee unos en su diagonal, lo que indica que Sympy realiza una descomposición de Doolittle. En general es posible realizar la factorización de muchas formas, en el caso en que los unos forman la diagonal de la matriz \mip{U}, por ejemplo, estaríamos ante una descomposición de Crout. Tanto Sympy como SciPy tienen implmentada la descomposición de Doolittle.
 
 Vemos además que el método devuelve también la matriz \mip{P}, que está compuesta por filas con pares de índices de intercambio. Esto resulta de intercambiar el orden de las filas de modo eliminar el mal condicionamiento que puede ocurrir cuando un elemento $a_{ij}$ de la matriz es mucho menor que uno. Las estrategias de pivoteo exceden el alcance de este capítulo, pero están implementadas en estos métodos para ofrecer soluciones robustas.
 
-Por último, en la celda 14 podemos ver que el producto de \mip{L} y \mip{U} reconstruye la matriz de Hilbert, tal como establece su factorización.
+Por último, en la celda 13 podemos ver que el producto de \mip{L} y \mip{U} reconstruye la matriz de Hilbert, tal como establece su factorización.
 
 En el caso de la factorización numérica con SciPy, la función \mip{lu} del submódulo \mip{linalg} devuelve las tres matrices anteriores pero en distinto orden, tal como se puede ver en las celdas siguientes:
-\jupynotex[15-17]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[14-16]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
-En la celda 17 comparamos elemento por elemento los valores de \mip{H - P @ L @ U} con un array $2 \times 2$ con elementos nulos, lo que nos devuelve \mip{True} comprobando de este modo que la descomposición LU recupera la matriz de Hilbert original al realizar el producto de las matrices que lo factorizan. Debemos notar en la celda 17 que denotamos el producto de matrices con el operador \mip{@} que es un alias de la función \mip{np.matmul} sobre arrays.
+En la celda 16 comparamos elemento por elemento los valores de \mip{H - P @ L @ U} con un array $2 \times 2$ con elementos nulos, lo que nos devuelve \mip{True} comprobando de este modo que la descomposición LU recupera la matriz de Hilbert original al realizar el producto de las matrices que lo factorizan. Debemos notar en la celda 16 que denotamos el producto de matrices con el operador \mip{@} que es un alias de la función \mip{np.matmul} sobre arrays.
 
 Utilizando la descomposición LU mostraremos ahora un ejemplo de resolución de un sistema lineal de ecuaciones en forma analítica con Sympy y numérica con SciPy, y evaluaremos el efecto del condicionamiento en la precisión de la solución numérica. Por lo general, la solución analítica solo es útil para matrices muy pequeñas, ya que al aumentar el rango de la matriz las expresiones pueden resultar muy difíciles de leer, y finalmente se evalúan numéricamente. 
 
@@ -183,24 +182,24 @@ Nuestro sistema de ejemplo será la matriz:
 \]
 
 Podemos ver que cuando $p = 1$, $\mathbb{A}$ se convierte en la matriz de Hilbert $2 \times 2$. En la siguiente celda definimos esta matriz en forma simbólica con Sympy:
-\jupynotex[18]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[17]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 y también calculamos el número de condición \mip{A_cond}. Definimos a continuación el vector de términos independientes y obtenemos la solución del sistema, que obviamente es función del parámetro $p$:
-\jupynotex[19]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[18]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 A continuación definimos el problema numérico haciendo uso de funciones \mip{lambda} de modo de poder resolver el problema especificando cada vez el valor del parámetro \mip{p}.
-\jupynotex[20]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[19]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 Para el caso en que $p=1$ podemos obtener las soluciones del sistema determinado por la matriz de Hilbert tanto en forma exacta como numérica:
-\jupynotex[21-22]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[20-21]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 También podemos encontrar la solución haciendo uso de la descomposición LU, lo que sería muy eficiente si quisiéramos resolver el sistema para múltiples términos independientes. En primer lugar realizamos la factorización de la matriz \mip{A} para $p = 1$, luego obtenemos la solución numérica \mip{x_lu} y finalmente verificamos que al reemplazar la solución obtenida en el sistema se verifica cada una de las ecuaciones (es decir, que $\mathbb{A}(1) \bm{x} - \bm{b} = 0$):
-\jupynotex[23]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[22]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 Para finalizar exploraremos el efecto que tiene el condicionamiento de la matriz $\mathbb{A}(p)$ en la precisión de los resultados obtenidos. Para ello notemos que el número de condición diverge para $p = (\sqrt{5} - 1)/2$ (dejamos la verificación de esto para la lectora o el lector). En consecuencia, construiremos un array de valores de \mip{p} para los que resolveremos el sistema tanto en forma exacta como numérica, y evaluaremos el error relativo de la solución numérica. 
 
-En la celda 24 graficamos a la izquierda este error relativo para cada una de las componentes del vector solución, mientras que el el panel de la derecha mostramos el número de condición. Podemos apreciar que donde diverge el número de condición ($p \approx 0.618$), el error relativo de la solución numérica aumenta significativamente. Pese a que el método de solución es muy robusto para este caso, dado que el error relativo es del orden de $4 \times 10^{-13}$, este valor es tres órdenes de magnitud mayor que el épsilon de la máquina donde ejecutamos el ejemplo (ver Sección \ref{sec:pfbin}), como muestra la celda 25, con lo cual es un error apreciable que puede magnificarse al resolver sistemas grandes de ecuaciones (o al resolver sucesivamente sistemas lineales de ecuaciones en un algoritmo).
+En la celda 23 graficamos a la izquierda este error relativo para cada una de las componentes del vector solución, mientras que el el panel de la derecha mostramos el número de condición. Podemos apreciar que donde diverge el número de condición ($p \approx 0.618$), el error relativo de la solución numérica aumenta significativamente. Pese a que el método de solución es muy robusto para este caso, dado que el error relativo es del orden de $4 \times 10^{-13}$, este valor es tres órdenes de magnitud mayor que el épsilon de la máquina donde ejecutamos el ejemplo (ver Sección \ref{sec:pfbin}), como muestra la celda 24, con lo cual es un error apreciable que puede magnificarse al resolver sistemas grandes de ecuaciones (o al resolver sucesivamente sistemas lineales de ecuaciones en un algoritmo).
 
-\jupynotex[24-25]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
+\jupynotex[23-24]{Chapters/ecuaciones_algebraicas/code/sistemas_lineales.ipynb}
 
 
 \section{Problema de autovalores}
@@ -211,7 +210,7 @@ Si $\mathbb{A}$ es una matriz cuadrada $n \times n$, el problema de autovalores 
 \begin{equation}\label{eq:avdef}
  \mathbb{A} \cdot \bm{x} = \lambda \bm{x}
 \end{equation} 
-donde $\lambda$ un escalar denominado \textit{autovalor} y $\bm{x}$ es el \textit{autovector} correspondiente, ambos desconocidos. Obviamente, cualquier múltiplo de un autovector es también un autovector, por lo que no se consideran autovectores distintos (el autovector cero no se considera un autovector). Resolver el problema de autovalores \eqref{eq:avdef} consiste en determinar este par autovalor/autovector.
+donde $\lambda$ un escalar denominado ``autovalor'' y $\bm{x}$ es el ``autovector'' correspondiente, ambos desconocidos. Obviamente, cualquier múltiplo de un autovector es también un autovector, por lo que no se consideran autovectores distintos (el autovector cero no se considera un autovector). Resolver el problema de autovalores \eqref{eq:avdef} consiste en determinar este par autovalor/autovector.
 
 Para abordar el problema, podemos introducir la matriz identidad $\mathbb{I}$ (matriz cuyos elementos diagonales son unos y el resto son ceros), y reescribir la ecuación \eqref{eq:avdef} como
 \begin{equation}\label{eq:av1}
@@ -222,7 +221,7 @@ Esta expresión nos dice que la matriz $\mathbb{A} - \lambda \mathbb{I}$ multipl
 \begin{equation}\label{eq:avcaract}
  \det(\mathbb{A} - \lambda \mathbb{I}) = 0
 \end{equation} 
-que da origen a una ecuación polinómica en $\lambda$ denominada \textit{ecuación característica} de grado $n$. El Teorema Fundamental del Álgebra asegura que la matriz $\mathbb{A}$, de $n \times n$ elementos, siempre tiene $n$ autovalores, aunque éstos pueden no ser reales ni tampoco todos distintos (autovalores iguales que provienen de raíces múltiples se denominan \textit{degenerados}). Los autovalores complejos de una matriz real siempre ocurren en pares conjugados, esto es, si $\alpha + i \beta$ es un autovalor de una matriz real, también lo es $\alpha - i \beta$, siendo $i = \sqrt{-1}$ la unidad imaginaria. Una vez determinados los autovalores se pueden obtener los autovectores resolviendo la ecuación \eqref{eq:av1}.
+que da origen a una ecuación polinómica en $\lambda$ denominada ``ecuación característica'' de grado $n$. El Teorema Fundamental del Álgebra asegura que la matriz $\mathbb{A}$, de $n \times n$ elementos, siempre tiene $n$ autovalores, aunque éstos pueden no ser reales ni tampoco todos distintos (autovalores iguales que provienen de raíces múltiples se denominan ``degenerados''). Los autovalores complejos de una matriz real siempre ocurren en pares conjugados, esto es, si $\alpha + i \beta$ es un autovalor de una matriz real, también lo es $\alpha - i \beta$, siendo $i = \sqrt{-1}$ la unidad imaginaria. Una vez determinados los autovalores se pueden obtener los autovectores resolviendo la ecuación \eqref{eq:av1}.
 
 Tanto Sympy como SciPy tienen rutinas para calcular autovalores y autovectores. En el caso de Sympy podemos resolver un problema de autovalores con elementos simbólicos en la matriz $\mathbb{A}$. Por ejemplo, para la siguiente matriz simétrica:
 
@@ -277,7 +276,7 @@ La forma general del problema puede enunciarse simplemente como
 \begin{equation}\label{eq:nolin}
  f(x) = 0
 \end{equation} 
-donde $f$ es una función no lineal de $x$. Cuando hay solo una variable dependiente, el problema es unidimensional o univariado, y resolver el problema consiste en hallar la \textit{raíz} o \textit{raíces} de la función. Un conjunto de $n$ ecuaciones no lineales puede representarse en notación vectorial, y se trata de encontrar uno o más vectores solución $\bm{x}$ (de dimensión $n$) tal que
+donde $f$ es una función no lineal de $x$. Cuando hay solo una variable dependiente, el problema es unidimensional o univariado, y resolver el problema consiste en hallar la raíz o raíces de la función. Un conjunto de $n$ ecuaciones no lineales puede representarse en notación vectorial, y se trata de encontrar uno o más vectores solución $\bm{x}$ (de dimensión $n$) tal que
 \begin{equation}\label{eq:sisnolin}
  \bm{f}(\bm{x}) = \bm{0}
 \end{equation} 
@@ -291,12 +290,12 @@ en donde usamos $\delta x^* = \tilde{x}^* - x^*$. Al asumir que $\delta x^*$ es 
 \begin{equation}
  \delta x^* = \tilde{x}^* - x^* \approx \frac{1}{f'(x^*)} \left[ f(\tilde{x}^*) - f(x^*) \right]
 \end{equation} 
-lo que nos permite definir el \textit{número de condición} de nuestro problema:
+lo que nos permite definir el ``número de condición'' de nuestro problema:
 \begin{equation}\label{eq:sisnolincond}
  \kappa_f = \frac{1}{f'(x^*)}
 \end{equation} 
 
-Esta magnitud cuantifica el efecto de un pequeño cambio en el valor de la función sobre la evaluación de la raíz. En efecto, una función que cruza ``rápidamente'' el eje $x$ tiene un valor grande de $f'(x^*)$, y por lo tanto un número de condición $\kappa_f$ pequeño, lo que define un problema \textit{bien condicionado}. Por otra parte, si la función es bastante ``plana'' alrededor de $x^*$, cruzando el eje $x$ suavemente, esto corresponde a un valor pequeño de $f'(x^*)$ y en consecuencia a un valor grande de $\kappa_f$, lo que caracteriza a un problema \textit{mal condicionado}. Este condicionamiento afecta a la dificultad de encontrar la raíz de $f$, ya que puede ser difícil distinguirla de valores vecinos. 
+Esta magnitud cuantifica el efecto de un pequeño cambio en el valor de la función sobre la evaluación de la raíz. En efecto, una función que cruza ``rápidamente'' el eje $x$ tiene un valor grande de $f'(x^*)$, y por lo tanto un número de condición $\kappa_f$ pequeño, lo que define un problema \textit{bien condicionado}. Por otra parte, si la función es bastante ``plana'' alrededor de $x^*$, cruzando el eje $x$ suavemente, esto corresponde a un valor pequeño de $f'(x^*)$ y en consecuencia a un valor grande de $\kappa_f$, lo que caracteriza a un problema ``mal condicionado''. Este condicionamiento afecta a la dificultad de encontrar la raíz de $f$, ya que puede ser difícil distinguirla de valores vecinos. 
 
 \subsection{Ecuaciones no lineales unidimensionales} \label{sec:nolinunidimensional}
 Para abordar estos problemas siempre es conveniente ``encerrar'' la raíz en un intervalo y para ello es útil visualizar el comportamiento de la función. Los métodos cerrados, o de \textit{bracketing}, consisten en determinar un intervalo inicial donde la función cambia de signo, y si dicha función es continua en el intervalo entonces los algoritmos de \textit{bracketing} garantizan la convergencia sobre la raíz (aunque pueden hacerlo con diferente velocidad). 
@@ -398,3 +397,4 @@ Tal como muestra la última línea de la salida anterior mostrada, al ejecutar e
  \item Se puede ver una lista detallada de métodos de resolución de sistemas de ecuaciones lineales en \fullcite{gupta2019}.
  \item El libro de Burden, Faires y Burden tiene una excelente introducción a los métodos de resolución de ecuaciones en una y varias variables: \fullcite{burden2016}.
 \end{itemize}
+

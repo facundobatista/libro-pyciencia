@@ -38,6 +38,6 @@ print("Resultados:")
 for number, result in zip(inputs, all_results):
     print(f"{number:16d}: {result}")
 
-# Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

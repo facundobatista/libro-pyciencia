@@ -1,5 +1,5 @@
 
-% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -15,10 +15,10 @@ Las ecuaciones diferenciales ordinarias (EDOs) constituyen una de las herramient
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Matplotlib & 3.3.4 \\
-        NumPy & 1.19.5 \\
-        SciPy & 1.6.0 \\
-        Sympy & 1.7.1 \\
+        Matplotlib & 3.9.2 \\
+        NumPy & 1.26.4 \\
+        SciPy & 1.14.1 \\
+        Sympy & 1.13.3 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
@@ -31,7 +31,7 @@ Las ecuaciones diferenciales ordinarias (EDOs) constituyen una de las herramient
 
 Para representar un sistema dinámico necesitamos expresar las reglas matemáticas que gobiernan su evolución en el tiempo, y para ello podemos usar las leyes de la física, o simplemente la intuición. Estas reglas, cuando las variables que representan el estado del sistema son continuas, toman la forma de ecuaciones diferenciales.
 
-En las ecuaciones diferenciales la incógnita es una función, y para determinarla es necesario resolver dicha ecuación que contiene sus derivadas. Una función diferencial \textit{ordinaria} es un caso especial en cual esta función desconocida tiene una sola variable independiente con respecto de la cual se deriva la función. Si por el contrario, la ecuación contiene derivadas de más de una variable, entonces es una ecuación en \textit{derivadas parciales}, y esto se trata en el capítulo \ref{ch:parciales}.
+En las ecuaciones diferenciales la incógnita es una función, y para determinarla es necesario resolver dicha ecuación que contiene sus derivadas. Una función diferencial ``ordinaria'' es un caso especial en cual esta función desconocida tiene una sola variable independiente con respecto de la cual se deriva la función. Si por el contrario, la ecuación contiene derivadas de más de una variable, entonces es una ecuación en ``derivadas parciales'', y esto se trata en el capítulo \ref{ch:parciales}.
 
 Por lo general, no existen soluciones analíticas de las EDOs excepto en algunos pocos casos, en los cuales se puede determinar la función desconocida utilizando métodos simbólicos. Si esto no es posible, existen diversos métodos numéricos que permiten obtener soluciones prácticas. En este capítulo exploraremos ambos abordajes para resolver EDOs.
 
@@ -42,11 +42,11 @@ La forma más simple de una EDO es
  \frac{dy(x)}{dx} = f(x, y(x))
 \end{equation}
 
-donde $y(x)$ es la función desconocida y $f(x, y(x))$ se conoce. Esta ecuación es de primer orden porque solo aparece la derivada primera de $f$ (omitiremos por comodidad la dependencia de la variable independiente en las expresiones de las derivadas).  Más generalmente, una EDO de orden $n$ se puede representar en forma \textit{explícita} como
+donde $y(x)$ es la función desconocida y $f(x, y(x))$ se conoce. Esta ecuación es de primer orden porque solo aparece la derivada primera de $f$ (omitiremos por comodidad la dependencia de la variable independiente en las expresiones de las derivadas).  Más generalmente, una EDO de orden $n$ se puede representar en forma ``explícita'' como
 \begin{equation}
  \frac{d^ny}{dx^n} = f \left( x, y, \frac{dy}{dx}, \ldots, \frac{d^{n-1}y}{dx^{n-1}} \right)
 \end{equation} 
-o en forma \textit{implícita} como
+o en forma ``implícita'' como
 \begin{equation}
  F \left( x, y, \frac{dy}{dx}, \ldots, \frac{d^{n-1}y}{dx^{n-1}} \right) = 0
 \end{equation} 
@@ -152,7 +152,7 @@ donde por simplicidad de la notación hemos considerado que $y(x)$ es una funci�
 \begin{equation}
  y(x+h) \approx y(x) + f(x, y(x)) h
 \end{equation} 
-que es precisa hasta el primer orden en el paso $h$. Esta ecuación se puede transformar en una fórmula iterativa discretizando la variable $x$ en el intervalo de interés: $x_0, x_1, \ldots, x_n$, eligiendo el paso $h = x_{k+1} -x_{k}$ y denotando $y_k = y(x_k)$, lo que da origen a la fórmula del método de Euler \textit{hacia adelante}:
+que es precisa hasta el primer orden en el paso $h$. Esta ecuación se puede transformar en una fórmula iterativa discretizando la variable $x$ en el intervalo de interés: $x_0, x_1, \ldots, x_n$, eligiendo el paso $h = x_{k+1} -x_{k}$ y denotando $y_k = y(x_k)$, lo que da origen a la fórmula del método de Euler ``hacia adelante'':
  \begin{equation} \label{eq:euler}
   y_{k+1} = y_k + hf(x_k, y_k)
  \end{equation} 
@@ -160,11 +160,11 @@ que avanza una solución desde $x_k$ hasta $x_{k+1} \equiv x_k + h$. Esta fórmu
  
 El objetivo de obtener la solución numérica de un problema con valores iniciales es el de calcular $y(x)$ en un conjunto de puntos $x_n$ dada la condición inicial $Y(x_0) = y_0$. La fórmula del método de Euler hacia adelante permite calcular los valores sucesivos de $y_k$ comenzando en $y_0$. Sin embargo, este método no es recomendado para su uso práctico por dos razones: (a) el método no es preciso comparado con otros métodos más elegantes con el mismo paso, y (b) no es muy estable.
  
- Una fórmula alternativa que puede derivarse en forma similar es el método de Euler \textit{hacia atrás}, dado por la iteración
+ Una fórmula alternativa que puede derivarse en forma similar es el método de Euler ``hacia atrás'', dado por la iteración
  \begin{equation}
   y_{k+1} = y_k + f(x_{k+1}, y_{k+1})
  \end{equation} 
-que resulta en un método \textit{implícito} debido a que $y_{k+1}$ aparece en ambos lados de la ecuación y por lo tanto es necesario resolver una ecuación algebraica, que generalmente es no lineal. Los métodos implícitos resultan más complicados de implementar que los explícitos, y cada iteración requiere un mayor esfuerzo computacional. Sin embargo, tienen la ventaja de tener mejor precisión y una mayor región de estabilidad. La eficacia de cada abordaje (implícito o explícito) depende en definitiva de cada problema, aunque en términos generales los métodos implícitos son útiles en problemas \textit{rígidos}, esto es, en los cuales existen dinámicas con tiempos característicos muy dispares (por ejemplo, dinámicas que incluyen oscilaciones rápidas y lentas).
+que resulta en un método ``implícito'' debido a que $y_{k+1}$ aparece en ambos lados de la ecuación y por lo tanto es necesario resolver una ecuación algebraica, que generalmente es no lineal. Los métodos implícitos resultan más complicados de implementar que los explícitos, y cada iteración requiere un mayor esfuerzo computacional. Sin embargo, tienen la ventaja de tener mejor precisión y una mayor región de estabilidad. La eficacia de cada abordaje (implícito o explícito) depende en definitiva de cada problema, aunque en términos generales los métodos implícitos son útiles en problemas ``rígidos'', esto es, en los cuales existen dinámicas con tiempos característicos muy dispares (por ejemplo, dinámicas que incluyen oscilaciones rápidas y lentas).
  
 Existen varios métodos que permiten mejorar los métodos de pimer orden de Euler hacia adelante y hacia atrás. Por ejemplo, podemos mantener términos de mayor orden en la expansión en serie de Taylor dada por la ecuación \ref{eq:taylor} que brindan fórmulas iterativas de mayor orden, y que por lo tanto tienen mayor precisión. No obstante, estos métodos requieren evaluar derivadas superiores de $y(x)$, lo que puede ser un problema si $f(x, y(x))$ no se conoce de antemano (y no está dada en forma simbólica). 
  
@@ -183,7 +183,7 @@ Un método alternativo consiste en usar más de un valor previo $y_{n-k}$ para c
 \begin{equation}
  y_{n} = \sum_{j=1}^{k}{a_j y_{n-j}} + h \sum_{j=0}^{k}{b_j f(x_{n-j}, y_{n-j})}
 \end{equation} 
- De este modo, para calcular $y_n$ se utilizan $s$ valores previos de $y_{n-j}$ y $f(x_{n-j}, y_{n-j})$. A partir de esta fórmula general se derivan diferentes esquemas según la elección de los coeficientes $a_j$ y $b_j$. Por ejemplo, los métodos multipaso más importantes para problemas \textit{no rígidos} son los del tipo Adams, que consisten en la elección de los coeficientes para la solución en $x_n$ tomando $a_1 = 1$ y $a_2 = a_3 = \ldots = a_k = 0$. Aquí, las constantes $b_j$ se elijen de forma tal que se obtiene el máximo orden posible. Debe notarse que si $b_0 = 0$ el método es explícito y se conoce como métodos de Adams-Bashforth, mientras que si $b_0 \neq 0$ los métodos resultan implícitos y se denominan Adams-Moulton. Por ejemplo, los métodos de un paso Adams-Bashforth y Adams-Moulton se reducen a los métodos de Euler hacia adelante y hacia atrás, respectivamente. 
+ De este modo, para calcular $y_n$ se utilizan $s$ valores previos de $y_{n-j}$ y $f(x_{n-j}, y_{n-j})$. A partir de esta fórmula general se derivan diferentes esquemas según la elección de los coeficientes $a_j$ y $b_j$. Por ejemplo, los métodos multipaso más importantes para problemas ``no rígidos'' son los del tipo Adams, que consisten en la elección de los coeficientes para la solución en $x_n$ tomando $a_1 = 1$ y $a_2 = a_3 = \ldots = a_k = 0$. Aquí, las constantes $b_j$ se elijen de forma tal que se obtiene el máximo orden posible. Debe notarse que si $b_0 = 0$ el método es explícito y se conoce como métodos de Adams-Bashforth, mientras que si $b_0 \neq 0$ los métodos resultan implícitos y se denominan Adams-Moulton. Por ejemplo, los métodos de un paso Adams-Bashforth y Adams-Moulton se reducen a los métodos de Euler hacia adelante y hacia atrás, respectivamente. 
  
  Los métodos de Adams se implementan, generalmente, en la forma ``predictor-corrector''. En este esquema se realiza un cálculo preliminar usando la forma Bashforth del método (explícito). Esta solución aproximada en $x_n$ se utiliza para evaluar una aproximación al valor de la derivada en este nuevo punto, que luego es utilizada en la fórmula de Moulton como valor inicial para resolver el método implícito. 
  

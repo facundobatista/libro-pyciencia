@@ -44,6 +44,6 @@ if len(sys.argv) != 2 or sys.argv[1] not in ["1", "2", "3"]:
 
 asyncio.run(main(sys.argv[1]))
 
-# Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

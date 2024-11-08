@@ -1,6 +1,6 @@
 import asyncio
 
-import aiohttp  # fades
+import aiohttp
 
 BASE = "https://raw.githubusercontent.com/facundobatista/libro-pyciencia/main/src/"
 TEX_NAMES = ["integracion.tex", "intro.tex", "numpy.tex", "ordinarias.tex", "parciales.tex"]
@@ -34,6 +34,6 @@ async def main():
 
 asyncio.run(main())
 
-# Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

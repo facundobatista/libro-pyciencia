@@ -1,5 +1,5 @@
 
-% Copyright 2020-2023 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -15,13 +15,13 @@ Las interfaces que nos ofrecen los programas en un sistema informático se divid
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Matplotlib & 3.6.1 \\
-        PyQt6 & 6.4.0 \\
-        Scipy & 1.9.0 \\
+        matplotlib & 3.9.2 \\
+        PyQt6 & 6.7.1 \\
+        scipy & 1.14.1 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
-    
+
     \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/guis/}{Código disponible}
 }
 \end{center}
@@ -43,7 +43,7 @@ Al ser una sigla vale la pena la aclaración con respecto a su pronunciación: e
 
 En realidad no vamos a usar Qt directamente, porque tendríamos que programar en C++, sino que vamos a usar PyQt, un \textit{wrapper} alrededor del framework base. Mencionaremos luego algunas diferencias, pero para todos los efectos prácticos, seguiremos hablando de Qt o PyQt indistintamente en el resto del capítulo.
 
-Qt, como la mayoría de los frameworks de interfaces gráficas, es un sistema asincrónico (si todavía no leyeron la sección sobre Async\ref{sec:async} es un buen momento, pero no es estrictamente necesario para entender el resto de este capítulo). Por eso podemos decir que un programa de interfaz gráfica está basado en eventos: una vez que arrancó y terminó de armar todos los elementos en una ventana el sistema no estará realmente haciendo nada hasta que reciba eventos y los procese. 
+Qt, como la mayoría de los frameworks de interfaces gráficas, es un sistema asincrónico (si todavía no leyeron la sección sobre Async\ref{sec:async} es un buen momento, pero no es estrictamente necesario para entender el resto de este capítulo). Por eso podemos decir que un programa de interfaz gráfica está basado en eventos: una vez que arrancó y terminó de armar todos los elementos en una ventana el sistema no estará realmente haciendo nada hasta que reciba eventos y los procese.
 
 Estos eventos pueden venir de distintas fuentes: entrada del usuario (vía el teclado o el mouse, por ejemplo) o del sistema (alarmas luego que pasó determinado tiempo, escritura o lectura en distintas entradas/salidas, etc). Cuando sucede el evento el reactor que maneja el sistema asincrónico (Qt mismo) ejecutará la función correspondiente para manejarlo.
 
@@ -51,7 +51,7 @@ Tengamos en cuenta que no todos los eventos nos interesan en una aplicación de 
 
 Por otro lado, hay muchas veces que sí queremos reaccionar a los distintos eventos. Por ejemplo, ponemos un botón en nuestra aplicación y queremos ejecutar una función ``nuestra'' cuando se presiona ese botón. Ya veremos cómo se hace esto.
 
-Estos componentes de la interfaz gráfica se llaman \textit{widgets} (la traducción al castellano es ``artilugio'' pero en realidad siempre usamos ``widget'') y permiten hacer uso de la aplicación y los servicios que esta provee. Como ejemplo, mencionamos aquí algunos widgets utilizando su nombre en Qt y la funcionalidad que ofrecen (estos son widgets bien simples, en la mayoría de otras interfaces gráficas encontraremos widgets similares a estos con nombres parecidos o casi iguales):
+Estos componentes de la interfaz gráfica se llaman \textit{widgets} (la traducción al castellano es ``artilugio'' pero en realidad siempre usamos \textit{widget}) y permiten hacer uso de la aplicación y los servicios que esta provee. Como ejemplo, mencionamos aquí algunos widgets utilizando su nombre en Qt y la funcionalidad que ofrecen (estos son widgets bien simples, en la mayoría de otras interfaces gráficas encontraremos widgets similares a estos con nombres parecidos o casi iguales):
 
 \begin{itemize}
 \item QLabel: muestra un texto o imagen
@@ -74,7 +74,7 @@ Si buscamos documentación online sobre PyQt encontraremos muchos tutoriales y e
 
 Esto sucede porque PyQt es una capa arriba de la biblioteca de Qt en C++, permitiendo (más allá de proveer alguna simplicidad extra) poder usarla desde Python. Reescribir toda la documentación para hacerla en PyQt sería un esfuerzo mayúsculo, por el tamaño de la misma y por el hecho de que cambia continuamente (especialmente entre las versiones principales de la librería, de Qt 4 a Qt 5, por ejemplo). Esto, sumado a que entender la documentación en C++ (aunque usemos PyQt) es bastante sencillo, hace que nunca se encare ese esfuerzo.
 
-Un buen punto de entrada a la documentación de referencia es \href{https://doc.qt.io/qt-6/classes.html}{la lista de todas las clases disponibles}, porque en general nos va a suceder que sabemos que tenemos que usar un determinado widget, pero no sabemos cómo explotarlo al máximo o queremos aprender de sus distintas funcionalidades. Desde allí podremos ir a cualquiera de las clases que usaremos cuando programamos en (Py)Qt. 
+Un buen punto de entrada a la documentación de referencia es \href{https://doc.qt.io/qt-6/classes.html}{la lista de todas las clases disponibles}, porque en general nos va a suceder que sabemos que tenemos que usar un determinado widget, pero no sabemos cómo explotarlo al máximo o queremos aprender de sus distintas funcionalidades. Desde allí podremos ir a cualquiera de las clases que usaremos cuando programamos en (Py)Qt.
 
 Entonces la idea es transmitirles que intenten usar la documentación escrita en C++, que a priori parecerá muy críptica pero es cuestión de acostumbrarse a leerla para poder aprovecharla. Para facilitarles este proceso les recomendamos en hacer foco en las siguientes secciones cuando vayan a la documentación de referencia de alguno de los widgets:
 
@@ -95,7 +95,7 @@ Para empezar a entender las distintas funcionalidades que podemos encontrarnos e
 
 Este mínimo de código que presentaremos en esta sección nos permitirá charlar sobre distintos conceptos fundamentales, y luego podremos encarar una aplicación más real.
 
-Arranquemos con la \textit{cáscara} mínima que necesitaremos siempre (el código en \texttt{01.empty.py}).
+Arranquemos con la ``cáscara'' mínima que necesitaremos siempre (el código en \texttt{01.empty.py}).
 
 \pyfile{Chapters/guis/code/01.empty.py}
 
@@ -105,13 +105,13 @@ Para ejecutar este ejemplo (y todos los de este capítulo) sigan las instruccion
 
 Aquí ya vemos las tres secciones que se repetirán en todos los programas. Primero, una secuencia de \textit{imports} (líneas 1 a 4), que irá creciendo a medida que vayamos necesitando más widgets y funcionalidades. Luego, todas las clases que compondrán la estructura de nuestra aplicación; en este caso tenemos sólo una (líneas 7 a 12), que explicaremos luego. Y finalmente una serie de instrucciones para que arranque el sistema (líneas 15 a 18).
 
-Estas últimas líneas no cambiarán para nada en todo nuestro ejemplo, y en aplicaciones más reales sólo se verán afectadas según alguna necesidad de procesamiento de opciones de línea de comando (que en aplicaciones de interfaz gráfica no es normal tener). Lo más importante de esta secuencia es la inicialización de \texttt{QApplication}, la cual maneja la configuración a nivel QT y el flujo de control de la aplicación; contiene el ``event loop'' principal que procesará y despachará todos los eventos, tanto los generados por los elementos de las ventanas como de otras fuentes.
+Estas últimas líneas no cambiarán para nada en todo nuestro ejemplo, y en aplicaciones más reales sólo se verán afectadas según alguna necesidad de procesamiento de opciones de línea de comando (que en aplicaciones de interfaz gráfica no es normal tener). Lo más importante de esta secuencia es la inicialización de \texttt{QApplication}, la cual maneja la configuración a nivel QT y el flujo de control de la aplicación; contiene el \textit{event loop} principal que procesará y despachará todos los eventos, tanto los generados por los elementos de las ventanas como de otras fuentes.
 
-Luego de inicializar \texttt{QApplication} (línea 15) instanciamos nuestra ventana y la mostramos (líneas 16 y 17), lo cual no podemos hacer antes (necesitan tener el sistema ya inicializado). Pero si terminamos ahí, nuestro programa no hará nada. Es que recién al ejecutar el \texttt{app.exec()} estamos dandole el control a ``event loop'' de Qt, que se quedará manejando el sistema hasta que nuestra aplicación termine (devolviendo un código final que lo pasamos directamente a \texttt{sys.exit()} para que sea el código de retorno del proceso).
+Luego de inicializar \texttt{QApplication} (línea 15) instanciamos nuestra ventana y la mostramos (líneas 16 y 17), lo cual no podemos hacer antes (necesitan tener el sistema ya inicializado). Pero si terminamos ahí, nuestro programa no hará nada. Es que recién al ejecutar el \texttt{app.exec()} estamos dandole el control a \textit{event loop} de Qt, que se quedará manejando el sistema hasta que nuestra aplicación termine (devolviendo un código final que lo pasamos directamente a \texttt{sys.exit()} para que sea el código de retorno del proceso).
 
-Enfoquémosnos entonces en la parte del medio de nuestro programa.
+Enfoquémonos entonces en la parte del medio de nuestro programa.
 
-La clase \texttt{Window}} hereda de \texttt{QWidget}, y lo único que hacemos es ajustar tres detalles en tiempo de inicialización (luego de primero inicializar la clase padre en la línea 9: recordemos que cuando redefinimos un método que ya posee la clase de la que derivamos, al llamarse al método sólo se ejecutará el de la clase hija, y si queremos que también se ejecute el método de la clase ancestra debemos llamarlo explícitamente). Las tres líneas donde configuramos el \textit{widget} son bastante autoexplicativas: cambiamos el tamaño de la ventana, le ponemos un título, y le configuramos un icono.
+La clase \texttt{Window} hereda de \texttt{QWidget}, y lo único que hacemos es ajustar tres detalles en tiempo de inicialización (luego de primero inicializar la clase padre en la línea 9: recordemos que cuando redefinimos un método que ya posee la clase de la que derivamos, al llamarse al método sólo se ejecutará el de la clase hija, y si queremos que también se ejecute el método de la clase ancestra debemos llamarlo explícitamente). Las tres líneas donde configuramos el \textit{widget} son bastante autoexplicativas: cambiamos el tamaño de la ventana, le ponemos un título, y le configuramos un icono.
 
 En general construiremos toda nuestra aplicación gráfica heredando de determinados widgets y agregándole la funcionalidad particular que necesitamos en cada caso. Esta estructura no es obligatoria, pero al ser PyQt un framework fuertemente estructurado alrededor de un árbol de clases, si continuamos con esa metodología nos quedará un código prolijo y fácil de entender.
 
@@ -168,7 +168,7 @@ Es por esto último que pensamos en una aplicación que bien podría ser típica
 
 Por razones pedagógicas partiremos del ejemplo mínimo que traemos de la sección anterior e iremos agregando gradualmente nuevas funcionalidades, explicándolas en cada caso. Pero si no les importa el \textit{spoiler}, pueden arrancar por el final y ejecutar el código \texttt{09.complete.py} para ver la aplicación terminada.
 
-Pero, decíamos, vayamos por partes. El primer gran cambio con respecto a lo que teníamos antes es que no queremos una ventana así no más, sino una ventana \textit{principal} a la que le podamos agregar menú, barra de tareas, e incluso una barra de estado. Tenemos todo esto implementado en \texttt{03.app.py}, del que mostramos sólo la clase principal:
+Pero, decíamos, vayamos por partes. El primer gran cambio con respecto a lo que teníamos antes es que no queremos una ventana así no más, sino una ventana ``principal'' a la que le podamos agregar menú, barra de tareas, e incluso una barra de estado. Tenemos todo esto implementado en \texttt{03.app.py}, del que mostramos sólo la clase principal:
 
 \pyfile[firstline=14, lastline=60]{Chapters/guis/code/03.app.py}
 
@@ -197,7 +197,7 @@ El próximo paso en la aplicación es permitir abrir un archivo y cargar los dat
 
 \pyfile[firstline=59, lastline=101]{Chapters/guis/code/04.load.py}
 
-Podemos separar este código en estas partes conceptuales: 
+Podemos separar este código en estas partes conceptuales:
 
 \begin{itemize}
     \item mostramos un mensaje en la barra de estado informando que estamos abriendo el archivo de datos (línea 61)
@@ -209,10 +209,10 @@ Podemos separar este código en estas partes conceptuales:
 
 Esa gran cantidad de líneas, de la 71 a la 93, es donde procesamos el archivo de datos, validando en cada uno de los pasos que la estructura y el contenido estén como esperamos (reportando un error y abortando la carga si no). Primero abrimos el archivo y lo leemos completamente con el módulo \texttt{csv}, para abortar si no se pudo abrir o está corrupto a nivel estructura (líneas 70 a 77). Luego procesamos cada línea validando que tenga dos columnas, y convirtiendo a número cada uno de los valores con \texttt{float} (líneas 79 a 94). Al final tenemos en \texttt{data} a toda la información correctamente convertida.
 
-Este procesamiento puede parecer demasiado detallado, pero es importante considerar todos los casos de error e informar correctamente cuando algo sale mal: es la diferencia entre un programa que es fácil de usar y nos guía ante cualquier problema, y un programa que falla por ``razones misteriosas''. Es verdad que la forma de mostrar cada error parece repetitiva y un poco oscura (sólo un mensaje en la barra de estado), pero vamos a mejorar esto en próximas iteraciones del código. 
+Este procesamiento puede parecer demasiado detallado, pero es importante considerar todos los casos de error e informar correctamente cuando algo sale mal: es la diferencia entre un programa que es fácil de usar y nos guía ante cualquier problema, y un programa que falla por ``razones misteriosas''. Es verdad que la forma de mostrar cada error parece repetitiva y un poco oscura (sólo un mensaje en la barra de estado), pero vamos a mejorar esto en próximas iteraciones del código.
 
 Vemos en la imagen cómo quedaría el error informado cuando abrimos un archivo malformado:
-\
+
 \begin{center}
     \includegraphics[scale=0.50]{Chapters/guis/imgs/sshot-04-1.png}
 \end{center}
@@ -225,7 +225,7 @@ Antes de continuar hablemos sobre el widget que usamos para abrir el archivo. Un
 
 Como regla general, los diálogos son modales. Una ventana es modal cuando bloquea la utilización de otras ventanas de la misma aplicación hasta que esa ventana se cierre, lo cual es muy útil para los diálogos, justamente, como en el caso de nuestro ejemplo donde no tiene sentido continuar a menos que se elija un archivo o se cancele el diálogo porque no se quiere elegir uno. Por otro lado, es normal tener ventanas no modales cuando la aplicación es de ventanas múltiples, donde se tienen simultáneamente varias ventanas abiertas de la misma aplicación y se puede usar cualquiera indistintamente.
 
-En la próxima iteración de nuestro código, a continuación (en \texttt{05.messages.py}), nos ocuparemos de los mensajes. 
+En la próxima iteración de nuestro código, a continuación (en \texttt{05.messages.py}), nos ocuparemos de los mensajes.
 
 Para simplificar el código de toda la aplicación creamos dos métodos, uno que muestre un mensaje en la barra de estado (y reemplazamos todas las llamadas a \texttt{self.\_status\_bar.showMessage} en las que había que poner siempre la misma duración), y otro para informar errores de forma genérica (al que llamamos en todos los casos de error al abrir y procesar el archivo fuente de datos).
 
@@ -267,7 +267,7 @@ Lo primero que hacemos al inicializar \texttt{MainPanel} es inicializar a su vez
 
 Luego armamos el layout principal, horizontal, el cual tendrá dos layouts verticales en lo que llamaremos ``izquierda'' y ``derecha'', y lo ponemos como layout del widget. Notar que al layout de la derecha (que tendrá el gráfico o un símbolo de espera si el cálculo tarda mucho), le indicamos que tome todo el espacio disponible con \texttt{stretch=1} al agregarlo al layout principal y le configuramos su alineación para que el contenido salga centrado. Esto no lo hacemos con el layout de la izquierda porque queremos que tenga el tamaño ajustado a su contenido.
 
-Del layout de la izquierda, justamente, nos ocupamos ahora: le agregamos el nombre del archivo que abrimos, una tabla con los datos, y una serie de ``radiobuttons'' para permitir elegir la función de ajuste. Poner el nombre del archivo es sencillo (líneas 78 a 81); ya usamos \texttt{QLabel} anteriormente, el único detalle es que le seteamos un flag para que el texto quede centrado. Poner los radiobuttons es apenas más complicado (líneas 92 a 97): agregamos los tres que necesitamos directamente en un layout vertical, sin necesitar hacer más nada porque como tenemos un sólo grupo de radiobuttons podemos usar el default (recordemos que los radiobuttons trabajan en grupo porque al habilitar uno se deshabilita el resto); notemos que por ahora no conectamos estos botones a ninguna acción.
+Del layout de la izquierda, justamente, nos ocupamos ahora: le agregamos el nombre del archivo que abrimos, una tabla con los datos, y una serie de \textit{radiobuttons} para permitir elegir la función de ajuste. Poner el nombre del archivo es sencillo (líneas 78 a 81); ya usamos \texttt{QLabel} anteriormente, el único detalle es que le seteamos un flag para que el texto quede centrado. Poner los radiobuttons es apenas más complicado (líneas 92 a 97): agregamos los tres que necesitamos directamente en un layout vertical, sin necesitar hacer más nada porque como tenemos un sólo grupo de radiobuttons podemos usar el default (recordemos que los radiobuttons trabajan en grupo porque al habilitar uno se deshabilita el resto); notemos que por ahora no conectamos estos botones a ninguna acción.
 
 \begin{center}
     \includegraphics[scale=0.50]{Chapters/guis/imgs/sshot-06-1.png}
@@ -286,12 +286,12 @@ Nuestro modelo es una clase que hereda de \texttt{QAbstractTableModel} y su func
 Cada uno de estos métodos están bien definidos en la documentación: para qué sirve cada uno, qué información reciben al ser ejecutados y qué tienen que devolver. No vamos a explicar todo lo que podría proveer \texttt{QAbstractTableModel} porque sería demasiado largo, pero entremos en detalle al menos con los que usamos en nuestro modelo para ayudarles a entender el código de nuestro ejemplo y facilitarles la entrada a la documentación más compleja cuando la tengan que usar.
 
 \begin{itemize}
-    \item \texttt{headerData}: este método devuelve información relacionada con las cabeceras; en nuestro caso sólo nos interesa proveer los ``títulos'' de cada columna, por eso sólo contestamos información para el caso de la cabecera horizontal (\texttt{orientation == Qt.Orientation.Horizontal}) y con respecto a cómo se muestran (\texttt{role == Qt.ItemDataRole.DisplayRole}), devolviendo \texttt{X} para la primer columna e \texttt{Y} para la segunda. 
+    \item \texttt{headerData}: este método devuelve información relacionada con las cabeceras; en nuestro caso sólo nos interesa proveer los ``títulos'' de cada columna, por eso sólo contestamos información para el caso de la cabecera horizontal (\texttt{orientation == Qt.Orientation.Horizontal}) y con respecto a cómo se muestran (\texttt{role == Qt.ItemDataRole.DisplayRole}), devolviendo \texttt{X} para la primer columna e \texttt{Y} para la segunda.
     \item \texttt{data}: este método es el que usa la vista para obtener los datos de cada celda; implementamos dos roles, \texttt{DisplayRole} donde devolvemos cada dato (formateado) según fila y columna, y \texttt{TextAlignmentRole} para la alineación, mucho más sencillo porque todas las celdas están alineadas igual (al centro en lo vertical y a la derecha en lo horizontal).
     \item \texttt{rowCount} y  \texttt{columnCount}: devuelven la cantidad de filas y de columnas, dato que se obtiene fácilmente de la tabla fuente más allá de por qué indice hayan sido consultados (ya que la tabla es rectangular).
 \end{itemize}
 
-El próximo paso es usar una función para ajustar los datos a una función polinómica, generar el gráfico y mostrarlo. Para ello, ya en el código \textit{07.fitgraph.py}, tenemos una función \texttt{fit} que recibe los datos y el grado de la función a utilizar.
+El próximo paso es usar una función para ajustar los datos a una función polinómica, generar el gráfico y mostrarlo. Para ello, ya en el código \texttt{07.fitgraph.py}, tenemos una función \texttt{fit} que recibe los datos y el grado de la función a utilizar.
 
 \pyfile[firstline=37, lastline=70]{Chapters/guis/code/07.fitgraph.py}
 
@@ -305,9 +305,9 @@ Vemos en la línea 170 que conectamos la señal \texttt{clicked} de cada radiobu
 
 \pyfile[firstline=176, lastline=208]{Chapters/guis/code/07.fitgraph.py}
 
-Este método \texttt{calculate} es el que ejecutará la función \texttt{fit}. En caso de error llamará a otro método que mostrará el error utilizando nuestro método de la ventana principal, más todo el \textit{traceback} por la terminal. 
+Este método \texttt{calculate} es el que ejecutará la función \texttt{fit}. En caso de error llamará a otro método que mostrará el error utilizando nuestro método de la ventana principal, más todo el \textit{traceback} por la terminal.
 
-En caso de que haya salido todo bien pasará ese resultado a otro método, \texttt{show\_result}, cuya responsabilidad es crear un panel de resultados (que veremos a continuación) y agregarlo al layout de la derecha, o en caso de tener otro panel de antes, cerrar el viejo y reemplazarlo. 
+En caso de que haya salido todo bien pasará ese resultado a otro método, \texttt{show\_result}, cuya responsabilidad es crear un panel de resultados (que veremos a continuación) y agregarlo al layout de la derecha, o en caso de tener otro panel de antes, cerrar el viejo y reemplazarlo.
 
 Veamos entonces \texttt{ResultPanel} que es el que se encarga de mostrar la info resultado. Recibe la instancia del panel principal, los parámetros de la función, y la figura de matplotlib:
 
@@ -321,13 +321,13 @@ Para el gráfico usaremos funcionalidad que \texttt{matplotlib} misma provee par
     \includegraphics[scale=0.50]{Chapters/guis/imgs/sshot-07-1.png}
 \end{center}
 
-La próxima iteración de código, en \textit{08.notblocking.py}, está pensada para ejemplificar cómo podemos soportar aquellas situaciones donde algo tarda demasiado. Como Qt es un sistema asincrónico en realidad no podemos bloquearlo con ninguna operación que tarde más que algunas decenas de milisegundos, porque mientras el sistema está bloqueado no va a poder procesar ningún evento, y esto a nivel de experiencia de usabilidad se traduce en que la ventana se ``congela'', no responde al teclado o el mouse, e incluso puede aparecer a medio dibujar en la pantalla (recordemos que Qt no sólo procesa eventos nuestros sino también del sistema operativo, y si no puede procesar nada porque está bloqueado no se va a comportar correctamente).
+La próxima iteración de código, en \texttt{08.notblocking.py}, está pensada para ejemplificar cómo podemos soportar aquellas situaciones donde algo tarda demasiado. Como Qt es un sistema asincrónico en realidad no podemos bloquearlo con ninguna operación que tarde más que algunas decenas de milisegundos, porque mientras el sistema está bloqueado no va a poder procesar ningún evento, y esto a nivel de experiencia de usabilidad se traduce en que la ventana se ``congela'', no responde al teclado o el mouse, e incluso puede aparecer a medio dibujar en la pantalla (recordemos que Qt no sólo procesa eventos nuestros sino también del sistema operativo, y si no puede procesar nada porque está bloqueado no se va a comportar correctamente).
 
 En nuestro ejemplo el \textit{cálculo científico} que hacemos es bastante rápido, ya que es un simple ajuste de datos, pero simulemos un potencial cálculo más costoso agregando una demora artificial de cinco segundos en la función \texttt{fit}:
 
 \pyfile[firstline=72, lastline=74]{Chapters/guis/code/08.notblocking.py}
 
-Para soportar casos de funciones que tardan mucho en ejecutarse y no bloquear la interfaz gráfica debemos ejecutar esa función en otro hilo o ``thread'', para lo cual creamos una clase auxiliar, \texttt{ThreadedTask}:
+Para soportar casos de funciones que tardan mucho en ejecutarse y no bloquear la interfaz gráfica debemos ejecutar esa función en otro hilo o \textit{thread}, para lo cual creamos una clase auxiliar, \texttt{ThreadedTask}:
 
 \pyfile[firstline=115, lastline=141]{Chapters/guis/code/08.notblocking.py}
 
@@ -343,7 +343,7 @@ Ahora, además de poner el estado en ``Calculando'', inicializamos \texttt{Threa
 
 Todo este trabajo que hicimos no tiene un impacto directo en la interfaz del usuario (no hay un botón nuevo, o se muestra distinta alguna información), pero es fundamental a la hora de tener una aplicación que no se congele y que no de la sensación al usuario de que ``algo salió mal''.
 
-Por otro lado, aunque ahora la aplicación se mantiene responsiva, en realidad no nos está dando ninguna indicación que nos ayude a darnos cuenta que está haciendo un cálculo que lleva tiempo y que tenemos que esperar. Implementamos esto en la próxima iteración del código, \textit{09.complete.py}, que es la versión final de nuestra aplicación.
+Por otro lado, aunque ahora la aplicación se mantiene responsiva, en realidad no nos está dando ninguna indicación que nos ayude a darnos cuenta que está haciendo un cálculo que lleva tiempo y que tenemos que esperar. Implementamos esto en la próxima iteración del código, \texttt{09.complete.py}, que es la versión final de nuestra aplicación.
 
 Históricamente la forma de las interfaces gráficas de mostrar que ``se está realizando alguna tarea y hay que esperar'' es mediante un \texttt{throbber} (un término sin traducción al castellano para esta acepción), que es una imagen animada, en general circular, que va ``girando'' mientras tenemos que esperar.
 
@@ -353,7 +353,7 @@ En el método \texttt{MainPanel.calculate} tenemos entonces que poner el throbbe
 
 \pyfile[firstline=216, lastline=227]{Chapters/guis/code/09.complete.py}
 
-Crear el throbber es sencillo (líneas 216 a 219) porque nos basamos en tener un GIF animado en un archivo \textit{throbber.gif} que cargamos con \texttt{QMovie} (un widget para mostrar animaciones simples sin sonido), que para insertarlo en la interfaz ponemos dentro de un \texttt{QLabel} (como haríamos con un texto o una imagen).
+Crear el throbber es sencillo (líneas 216 a 219) porque nos basamos en tener un GIF animado en un archivo \texttt{throbber.gif} que cargamos con \texttt{QMovie} (un widget para mostrar animaciones simples sin sonido), que para insertarlo en la interfaz ponemos dentro de un \texttt{QLabel} (como haríamos con un texto o una imagen).
 
 Inmediatamente después en las líneas 221 a 227 agregamos el throbber al layout derecho, directamente si no había un panel de antes, o reemplazando un panel anterior (y cerrándolo).
 
@@ -371,6 +371,6 @@ Luego de agregarlo, tenemos que considerar cuando sacarlo. Esto sucede en los m�
 
 Llegamos entonces al final de nuestro recorrido, con una interfaz completa y funcional.
 
-Vuestras necesidades de interfaz van a ser distintas, obviamente, pero siempre serán en mayor o menor medida alguna variación de lo que ya vimos en este capítulo, usando también otros widgets más o menos complejos. 
+Vuestras necesidades de interfaz van a ser distintas, obviamente, pero siempre serán en mayor o menor medida alguna variación de lo que ya vimos en este capítulo, usando también otros widgets más o menos complejos.
 
 Lo importante es que ya saben cómo arrancar.

@@ -1,5 +1,5 @@
 
-% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -54,7 +54,7 @@ Esto es lo que se llama ``error de representación'' en los números de punto fl
 
 También tenemos errores de cálculo cuando llegamos al límite del exponente. Por ejemplo si en nuestra estructura ficticia determinamos que tenemos (además de los cinco para la mantisa) dos dígitos para el exponente, el número más grande que soportará la estructura es el \texttt{99999\texttimes 10\textsuperscript{99}} y el número más chico el \texttt{00001\texttimes 10\textsuperscript{-99}}. Si el número es mayor al máximo seguramente tengamos un error de \emph{overflow}, y si el número es menor al mínimo lo más probable es que redondee a cero (aunque los sistemas de manejo de punto flotante permiten mostrar que sucedió un \emph{underflow} e incluso se pueden configurar para que eso sea un error, no un redondeo).
 
-Además, en punto flotante, tenemos los valores especiales ``infinito'' (positivo y negativo, resultado por ejemplo de dividir algún número por cero), y el valor especial \verb|NaN|, que significa que no es un número (por el inglés ``not a number'') sino el resultado de una operación indefinida (como multiplicar cero por infinito). Tengamos en cuenta que como mencionaba arriba, muchos de estos casos por default generan un error, pero puede configurarse el sistema para manejarlos.
+Además, en punto flotante, tenemos los valores especiales ``infinito'' (positivo y negativo, resultado por ejemplo de dividir algún número por cero), y el valor especial \verb|NaN|, que significa que no es un número (por el inglés \textit{not a number}) sino el resultado de una operación indefinida (como multiplicar cero por infinito). Tengamos en cuenta que como mencionaba arriba, muchos de estos casos por default generan un error, pero puede configurarse el sistema para manejarlos.
 
 El tema da para mucho más, se nos escapa del alcance del libro. Para profundizar pueden explorar la página de Wikipedia al respecto \cite{wikipedia-floating-point} o la especificación de aritmética para punto flotante decimal \cite{aritmetica-punto-flotante-decimal}, que detalla toda la implementación de un punto flotante de forma genérica sin entrar en la complicación de hacerlo súper optimizado en binario pensado para hardware, como lo hace la norma IEEE 754 \cite{ieee-754}, para punto flotante binario, que veremos a continuación.
 
@@ -67,7 +67,7 @@ Aunque la base puede ser cualquiera, en la práctica se manejan dos grupos, los 
 
 El punto flotante binario es el punto flotante nativo en todos los lenguajes modernos, debido a que su aritmética está incluida en los procesadores de las computadoras desde hace más de medio siglo, y desde la década de 1990 la mayoría de las implementaciones se basan en el estándar IEEE 754. El punto flotante decimal, aunque hubieron algunos procesadores que lo traian nativo, en la mayoría de los lenguajes está implementado en software, y normalmente siguiendo todos el mismo estándar \cite{decimal-spec}. 
 
-En Python al punto flotante binario lo tenemos como tipo de dato integrado en el lenguaje, es el \mip{float}, mientras que al punto flotante decimal lo tenemos implementado en el módulo \mip{decimal}, como ya mencionamos en la subsección de Números \ref{sub:numeros}.
+En Python al punto flotante binario lo tenemos como tipo de dato integrado en el lenguaje, es el \mip{float}, mientras que al punto flotante decimal lo tenemos implementado en el módulo \mip{decimal}, como ya mencionamos en la subsección de Números \ref{sec:numeros}.
 
 Ojo, que el punto flotante binario que usa Python, aunque se llame \emph{float}, corresponde en precisión al que en otros lenguajes (como C) se denomina \emph{double} (por ``doble precisión'', que usa 8 bytes por número), mientras que allí el \emph{float} usa precisión simple, ocupando 4 bytes por número. Mientras que el \emph{float} integrado en Python está bien que sea de doble precisión (porque eso minimiza todo lo posible los errores), en NumPy podemos indicar explícitamente cual queremos utilizar:
 
@@ -133,4 +133,4 @@ Veamos un ejemplo de esto, mostrando como no es lo mismo el orden cuando sumamos
 
 Cuantas más operaciones se realice en un cálculo más atención hay que darle a este problema (especialmente con los métodos iterativos de resolución de algoritmos), por eso es que siempre es recomendable utilizar algoritmos diseñados específicamente para minimizar estos errores (particularmente, en lo posible, siempre que se puede utilicemos las bibliotecas de NumPy y SciPy en vez de escribir los algoritmos nosotros).
 
-Para profundizar en el control de error en operaciones aritméticas usando punto flotante les recomendamos el documento ``What Every Computer Scientist Should Know About Floating-Point Arithmetic'', de David Goldberg \cite{compscientist-floatingpoint}.
+Para profundizar en el control de error en operaciones aritméticas usando punto flotante les recomendamos el documento \textit{What Every Computer Scientist Should Know About Floating-Point Arithmetic}, de David Goldberg \cite{compscientist-floatingpoint}.

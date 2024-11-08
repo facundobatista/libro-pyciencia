@@ -24,6 +24,6 @@ for tex_name in TEX_NAMES:
     downloader(tex_name, adder)
 print("Done:", adder.total)
 
-# Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

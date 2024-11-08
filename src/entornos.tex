@@ -1,5 +1,5 @@
 
-% Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -36,14 +36,14 @@ Otra situación con la que nos encontramos es que para un determinado proyecto n
 
 En este caso lo que estamos buscando es ``aislamiento'': que las bibliotecas que usa nuestro programa sean distintas que las que tenga el sistema (en verdad, sin importarnos qué versiones tiene el sistema, o incluso si tiene esas bibliotecas). De esta manera cada proyecto indicará cuales bibliotecas y en qué versiones las necesita, y al estar aislado del sistema base tendremos el mismo comportamiento más allá de cual sea ese sistema.
 
-Entonces, la idea de tener distintos entornos de ejecución es, a priori, lograr estas dos grandes ventajas, \textit{repetibilidad} y \textit{aislamiento}. A continuación veremos dos formas de lograr estos entornos, con mayor o menor cumplimiento de estas dos ventajas y más características, que iremos explicando en cada caso. 
+Entonces, la idea de tener distintos entornos de ejecución es, a priori, lograr estas dos grandes ventajas, repetibilidad y aislamiento. A continuación veremos dos formas de lograr estos entornos, con mayor o menor cumplimiento de estas dos ventajas y más características, que iremos explicando en cada caso. 
 
 Para hacer los ejemplos más prácticos, ejecutaremos un programa real (el \texttt{oscilador.py} que armamos en el capítulo de Ecuaciones Diferenciales Ordinarias \ref{ch:ordinarias}) utilizando cada una de las herramientas mostradas.
 
 
 \section{Entornos virtuales} \label{sec:virtualenvs}
 
-Un ``entorno virtual'' (que muchas veces denominamos directamente usando su nombre en inglés, ``virtualenv'') es la solución de \textit{virtualización} de entornos nativa a Python, y por ende es la más popular. Hay muchas herramientas para trabajar con este concepto, algunas incluso en la biblioteca estándar; veremos las principales más adelante en la subsección de Herramientas \ref{sub:venvs-herramientas}.
+Un ``entorno virtual'' (que muchas veces denominamos directamente usando su nombre en inglés, \textit{virtualenv}) es la solución de \textit{virtualización} de entornos nativa a Python, y por ende es la más popular. Hay muchas herramientas para trabajar con este concepto, algunas incluso en la biblioteca estándar; veremos las principales más adelante en la subsección de Herramientas \ref{sub:venvs-herramientas}.
 
 El uso de un entorno virtual es la forma más sencilla y liviana de conseguir las características que presentamos en las secciones anteriores, aunque sólo nos las ofrece para las bibliotecas que utilizaremos (sólo trabaja a nivel de dependencias de Python). Estamos atados al Python instalado en el sistema para cada entorno, y tendremos que recrear ese entorno en todos aquellos sistemas donde lo necesitemos (no es trasladable). 
 
@@ -68,9 +68,9 @@ drwxrwxr-x 3 facundo facundo 4096 jun  8 16:02 share
 
 Tengamos en cuenta que esta estructura puede variar segun el sistema donde estemos creando el entorno, porque justamente sigue la estructura de ese sistema. Si exploramos el contenido de este directorio veremos que tiene algunos ejecutables y bibliotecas preinstaladas (notoriamente Python mismo y \texttt{pip}, la herramienta para instalar otras bibliotecas). Un detalle importante con este directorio es que no podemos moverlo a otro lugar, ya que depende de su posición al ser creado. Y no deja de ser un directorio normal, así que si queremos ``limpiar'' el entorno, borrando ese directorio eliminará todo vestigio del mismo.
 
-Cuando ejecutemos el Python de ese directorio, el mismo tendrá acceso a la biblioteca estándar del Python utilizado más las bibliotecas que instalemos en ese entorno virtual, y no podrá acceder a las del sistema. A nivel de sistema nada se modifica cuando instalamos bibliotecas en el entorno virtual, con lo que no hay riesgo de desestabilizarlo, y un buen efecto secundario al usar los entornos virtuales es que no dependemos de tener permisos especiales de \textit{root} o \textit{administrador} para instalar las bibliotecas que necesitemos.
+Cuando ejecutemos el Python de ese directorio, el mismo tendrá acceso a la biblioteca estándar del Python utilizado más las bibliotecas que instalemos en ese entorno virtual, y no podrá acceder a las del sistema. A nivel de sistema nada se modifica cuando instalamos bibliotecas en el entorno virtual, con lo que no hay riesgo de desestabilizarlo, y un buen efecto secundario al usar los entornos virtuales es que no dependemos de tener permisos especiales de \textit{root} o ``administrador'' para instalar las bibliotecas que necesitemos.
 
-Habiendo dicho eso, hay una manera de crear el entorno virtual rompiendo un poco la aislación natural que nos provee. Si usamos el parámetro \texttt{--system-site-packages} al momento de creación, Python buscará en el sistema las bibliotecas que no encuentre en el entorno. Esto es raramente utilizado, pero muy necesario en caso de bibliotecas muy dificiles de instalar (pensemos el caso donde el proceso de instalar una biblioteca en particular lleva mucho tiempo, y no queremos pagar ese costo en cada entorno virtual que generemos). Hay otras opciones más para explorar, les recomendamos profundizar en \href{https://docs.python.org/dev/library/venv.html}{la documentación del módulo}, o pedir de forma rápida la ayuda con \texttt{python3 -m venv --help}.
+Habiendo dicho eso, hay una manera de crear el entorno virtual rompiendo un poco la aislación natural que nos provee. Si usamos el parámetro \texttt{--system-site-packages} al momento de creación, Python buscará en el sistema las bibliotecas que no encuentre en el entorno. Esto es raramente utilizado, pero muy necesario en caso de bibliotecas muy dificiles de instalar (pensemos el caso donde el proceso de instalar una biblioteca en particular lleva mucho tiempo, y no queremos pagar ese costo en cada entorno virtual que generemos). Hay otras opciones más para explorar, les recomendamos profundizar en \href{https://docs.python.org/es/dev/library/venv.html}{la documentación del módulo}, o pedir de forma rápida la ayuda con \texttt{python3 -m venv --help}.
 
 La forma habitual de usar los entornos virtuales es activándolos primero, lo que se hace de forma muy parecida (pero no igual) en los distintos sistemas.
 
@@ -94,7 +94,7 @@ Una vez dentro del entorno podremos proceder a instalar las bibliotecas que dese
 
 \texttt{pip} es el administrador de paquetes estándar de Python para manejar todas las bibliotecas (por fuera de la biblioteca estándar, claro), y no sólo instalará la biblioteca que le indiquemos, sino que automáticamente instalará sus dependencias (de ser necesario, ya que podrían estar instaladas de antes).
 
-Aunque podemos indicar distintos repositorios o incluso indicarle que la fuente sea local, el procedimiento natural es que \texttt{pip} descargue e instale las bibliotecas desde el \textit{Índice de Paquetes de Python}, más bien conocido como PyPI (por su sigla en inglés, \textit{Python Package Index}).
+Aunque podemos indicar distintos repositorios o incluso indicarle que la fuente sea local, el procedimiento natural es que \texttt{pip} descargue e instale las bibliotecas desde el ``Índice de Paquetes de Python'', más bien conocido como PyPI (por su sigla en inglés, \textit{Python Package Index}).
 
 En el siguiente ejemplo mostramos cómo instalar una biblioteca que usamos extensivamente en todo el libro:
 
@@ -340,7 +340,7 @@ Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
 \end{shell}
 
 
-\subsubsection{fades}
+\subsubsection{fades}\label{subsub:fades}
 
 Hasta ahora vimos el manejo de entornos virtuales como un proceso con beneficios, pero también con un costo de administración: debemos recordar cómo se llaman los virtualenvs que creamos, y (a menos que usemos virtualenvwrapper) donde los tenemos. Esto no es mayor problema si usamos el entorno para desarrollo de un proyecto: normalmente el lugar es en ese proyecto y el directorio tendrá un nombre conocido como \texttt{env} o \texttt{venv}. Así y todo, debemos recordar de activarlo antes de empezar a trabajar con el proyecto, y desactivarlo luego.
 
@@ -542,9 +542,9 @@ Finalmente, también para esta herramienta, recomendamos explorar sus opciones h
 
 \section{Contenedores} \label{sec:contenedores}
 
-Un \textit{contenedor} es una forma de empaquetar software: el código que necesitamos para ejecutar una aplicación más todas las dependencias que necesite, incluídas las que provee el sistema operativo en la que se basa el contenedor.
+Un ``contenedor'' es una forma de empaquetar software: el código que necesitamos para ejecutar una aplicación más todas las dependencias que necesite, incluídas las que provee el sistema operativo en la que se basa el contenedor.
 
-Estos contenedores nos proveen el \textit{aislamiento} y la \textit{repetibilidad} que buscamos, pero no sólo a nivel de código Python, sino a nivel de sistema, ya que está bien separado lo que se ejecuta adentro del contenedor, del sistema donde ese contenedor corre (al que llamamos ``host'' o ``anfitrión''). Podemos ejecutar muchos contenedores simultáneamente en el mismo anfitrión, ya que cada uno tiene todo lo que se necesita para ejecutar una determinada aplicación. Más aún, podemos compartir facilmente estos contenedores, de manera que otras personas pueden ejecutar el mismo contenedor en otros anfitriones, con idénticos resultados.
+Estos contenedores nos proveen el aislamiento y la repetibilidad que buscamos, pero no sólo a nivel de código Python, sino a nivel de sistema, ya que está bien separado lo que se ejecuta adentro del contenedor, del sistema donde ese contenedor corre (al que llamamos ``\textit{host}'' o ``anfitrión''). Podemos ejecutar muchos contenedores simultáneamente en el mismo anfitrión, ya que cada uno tiene todo lo que se necesita para ejecutar una determinada aplicación. Más aún, podemos compartir facilmente estos contenedores, de manera que otras personas pueden ejecutar el mismo contenedor en otros anfitriones, con idénticos resultados.
 
 Hay un estándar para la creación y manejo de contenedores, la \href{https://opencontainers.org/}{Open Container Initiative}, pero hay que reconocer que la herramienta pionera en este concepto es \href{https://www.docker.com/}{Docker} (y sobre la cual está fuertemente basada el estándar). Docker es un administrador de ``contenedores'', entonces, y es la herramienta que vamos a utilizar en este texto. Tengan en cuenta que lo más probable es que Docker todavía no esté en vuestro sistema, pueden instalarlo siguiendo \href{https://docs.docker.com/get-started/#download-and-install-docker}{las instrucciones oficiales}.
 
@@ -675,7 +675,7 @@ CONTAINER ID   IMAGE          COMMAND                  CREATED       STATUS     
 6c3589d2933d   app-ejemplo    "python3 oscilador.p…"   An hour ago   Exited a minute ago  ...
 \end{shell}
 
-Luego, copiamos el archivo en cuestión. El comando \texttt{cp} (como otros comandos similares para copiar) necesita que le especifiquemos \textit{desde} y \textit{hasta}, con el detalle que tenemos que indicar el \textit{ID} del contenedor separado por dos puntos:
+Luego, copiamos el archivo en cuestión. El comando \texttt{cp} (como otros comandos similares para copiar) necesita que le especifiquemos desde dónde y hasta dónde, con el detalle que tenemos que indicar el \textit{ID} del contenedor separado por dos puntos:
 
 \begin{shell}
 $ docker cp 6c3589d2933d:/oscilador/imagen.pdf .
@@ -683,7 +683,7 @@ $ ls imagen.pdf
 imagen.pdf
 \end{shell}
 
-Si quisieramos dejar la imagen resultado en un archivo con otro formato, podemos aprovechar la flexibilidad que incluimos en el Dockerfile, donde el ``entrypoint'' está separado de los argumentos que recibe por default. Entonces, si especificamos parámetros al ejecutar el contenedor, estos reemplazarán ese default, lo cual podemos ver de forma sencilla para nuestro ejemplo porque el mismo muestra las opciones que recibió:
+Si quisieramos dejar la imagen resultado en un archivo con otro formato, podemos aprovechar la flexibilidad que incluimos en el Dockerfile, donde el \textit{entrypoint} está separado de los argumentos que recibe por default. Entonces, si especificamos parámetros al ejecutar el contenedor, estos reemplazarán ese default, lo cual podemos ver de forma sencilla para nuestro ejemplo porque el mismo muestra las opciones que recibió:
 
 \begin{shell}
 $ docker run app-ejemplo --archivo=imagen.png

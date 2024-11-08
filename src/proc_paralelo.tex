@@ -1,11 +1,34 @@
 
-% Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
 \chapter{Procesamiento en paralelo} \label{ch:proc_paralelo}
 
-Desde la invención de la computadora nos hemos acostumbrado a procesar más y más información a través de las mismas. Este procesamiento no sólo fue aumentando en cantidad, sino también en complejidad. 
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        aiohttp & 3.10.5 \\
+        matplotlib & 3.9.2 \\
+        numpy & 1.26.4 \\
+        scipy & 1.14.1 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/proc_paralelo/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+
+Desde la invención de la computadora nos hemos acostumbrado a procesar más y más información a través de las mismas. Este procesamiento no sólo fue aumentando en cantidad, sino también en complejidad.
 
 Hay dos formas de poder aumentar la capacidad de procesamiento, de forma ``vertical'' u ``horizontal'', términos que son simples metáforas para expresar en el primer caso el aumento de capacidad del procesador en sí (por ejemplo, aumentando su frecuencia de reloj, o memoria \textit{cache} interna), o en el segundo caso hacer referencia a poner varios procesadores uno al lado del otro y distribuir el procesamiento entre ellos.
 
@@ -13,16 +36,16 @@ A esto último lo llamamos ``procesamiento en paralelo'', y puede hacer referenc
 
 Cuando el procesamiento de la información implica esperar eventos fuera del procesador (de forma genérica ``entrada o salida'', que puede ser escribir en disco, consultar un dato a través de la red, etc.) es útil otro concepto que implica repartir el mismo \textit{core} o procesador en distintos procesamientos, aprovechando los ``tiempos muertos'' de ellos. Aunque con este método logramos concurrencia, no es realmente procesamiento en paralelo.
 
-En las siguientes secciones nos adentraremos en estos conceptos, primero definiremos más extensivamente qué es la concurrencia y mostraremos dos formas de lograrla (a través de \textit{hilos} (o \textit{threads}) y de procesamiento \textit{asincrónico}. La segunda sección versa sobre el procesamiento paralelo real, mostrando distintas técnicas y formas de lograrlo.
+En las siguientes secciones nos adentraremos en estos conceptos, primero definiremos más extensivamente qué es la concurrencia y mostraremos dos formas de lograrla (a través de ``hilos'' (o \textit{threads}) y de procesamiento ``asincrónico''. La segunda sección versa sobre el procesamiento paralelo real, mostrando distintas técnicas y formas de lograrlo.
 
 
 \section{¿Qué es la concurrencia?}\label{sec:concurrencia}
 
-La \textit{concurrencia} es la composición de procesos ejecutados independientemente, logrando un efecto similar a que esos procesos se sucedan al mismo tiempo sin que realmente eso suceda. La concurrencia \textbf{no es paralelismo} (que sería la ejecución simultánea real).
+La ``concurrencia'' es la composición de procesos ejecutados independientemente, logrando un efecto similar a que esos procesos se sucedan al mismo tiempo sin que realmente eso suceda. La concurrencia \textbf{no es paralelismo} (que sería la ejecución simultánea real).
 
 ¿Hay un recurso que se agota? Necesitamos paralelismo. ¿Pero podemos manejar distintos recursos con un mismo controlador? En este caso podemos usar concurrencia.
 
-Pongamos un ejemplo para diferenciar mejor un caso del otro. Supongamos una cocina de un restaurant. 
+Pongamos un ejemplo para diferenciar mejor un caso del otro. Supongamos una cocina de un restaurant.
 
 Hay que lavar muchísimos platos por hora, y un lavaplatos no alcanza, aunque esté lavando todo el tiempo. No nos queda otra que poner varios lavaplatos en paralelo, muchas personas lavando platos simultáneamente, una al lado de la otra. Esto es paralelismo.
 
@@ -36,7 +59,7 @@ En Python la única forma de usar paralelismo real es con múltiples procesos (v
 Antes de seguir, es momento de aclarar que en todo este contexto, cuando decimos procesador más bien nos referimos a ``unidad de ejecución''. Los primeros procesadores tenían una sola unidad de ejecución \footnote{Si vamos a ser estrictos, también hay distintas partes que ejecutan distintas cosas en los procesadores no tan modernos, como la unidad aritmético-lógica, pero la idea es hablar del procesador genéricamente.}, mientras que los procesadores más modernos ofrecen distintos núcleos o \textit{cores}. Para todo lo que estamos hablando es más fácil pensarlo como unidades de ejecución distintas, ya sean uno o varios procesadores, uno o varios cores.
 \end{info}
 
-Entonces, ¿cómo logramos concurrencia? Si tenemos un sólo procesador o unidad de ejecución, ¿quién se encarga de administrar qué proceso debe ejecutarse en cada momento? 
+Entonces, ¿cómo logramos concurrencia? Si tenemos un sólo procesador o unidad de ejecución, ¿quién se encarga de administrar qué proceso debe ejecutarse en cada momento?
 
 En el modelo clásico de múltiples procesos (o hilos, que son una versión especial de procesos, como veremos más adelante \ref{sec:multithreading}), hay una combinación de funcionalidad entre el procesador y el sistema operativo específicamente diseñada para lograr este efecto. Los procesadores tienen implementados\footnote{No todos, claro, por ejemplo en la linea x86 de Intel esta funcionalidad recién apareció en el modelo 80386 (año 1985).} mecanismos que el sistema operativo aprovecha, entonces, de manera que si un proceso necesita servicios del sistema operativo porque tiene que realizar entrada o salida, o pedir o liberar memoria, o cualquier llamada al sistema (o \textit{syscall}), el procesador mismo dejará de ejecutar dicho proceso y pasará a ejecutar al sistema operativo, para que sirva esa llamada.
 
@@ -44,13 +67,13 @@ Esta no es la única manera en que un proceso puede ser ``sacado'' del procesado
 
 En ambos casos hay un costo muy importante a considerar, que es el de cambio de contexto (en inglés \textit{context switch}), ya que se deben adecuar muchas estructuras dentro del procesador para que entre o salga un proceso cualquiera o el sistema operativo, lo cual puede implicar accesos a memoria o incluso a disco. El otro costo en este modelo es que los procesos o hilos ocupan memoria en mayor o menor medida. La suma de ambos hace que un sistema no escale en cantidad de procesos o hilos como quisiéramos: está bien cuando hay 10 trabajando, o 100, pero al crecer en cantidad en algún momento los cambios de contexto y la ocupación de memoria van a hacer que el sistema se vuelva ineficiente.
 
-El otro modelo para lograr concurrencia, totalmente distinto al anterior, es el asincrónico. En este caso no tenemos múltiples procesos o hilos para lograr el efecto deseado, sino algo que se llama \textit{corrutina}, que no es más que una función del programa, pero con la diferencia conceptual que sabemos que estas funciones/corrutinas van a estar ejecutándose de forma concurrente en el mismo proceso (alguna en un momento, otra luego, otra o la anterior más adelante). Todo esto está manejado por otra sección del código que se llama \textit{reactor} o \textit{event loop}, el cual normalmente no necesitamos implementar sino que usamos algún \textit{framework asincrónico} que nos lo provea.
+El otro modelo para lograr concurrencia, totalmente distinto al anterior, es el asincrónico. En este caso no tenemos múltiples procesos o hilos para lograr el efecto deseado, sino algo que se llama ``corrutina'', que no es más que una función del programa, pero con la diferencia conceptual que sabemos que estas funciones/corrutinas van a estar ejecutándose de forma concurrente en el mismo proceso (alguna en un momento, otra luego, otra o la anterior más adelante). Todo esto está manejado por otra sección del código que se llama \textit{reactor} o \textit{event loop}, el cual normalmente no necesitamos implementar sino que usamos algún ``framework asincrónico'' que nos lo provea.
 
-Este reactor entonces va a manejar los recursos según necesiten ser atendidos. Si una corrutina está esperando información de disco, el reactor ejecutará otra mientras tanto, y cuando esa información esté disponible continuará la corrutina anterior. 
+Este reactor entonces va a manejar los recursos según necesiten ser atendidos. Si una corrutina está esperando información de disco, el reactor ejecutará otra mientras tanto, y cuando esa información esté disponible continuará la corrutina anterior.
 
 Todo esto sucede dentro del mismo proceso (con lo cual no existen los cambios de contexto que mencionábamos para el caso de multitarea apropiativa). Pero entonces ¿cómo es que se puede alternar entre las distintas corrutinas y el reactor, si no hay nada que ``interrumpa''? De una única manera: la corrutina tiene que ``soltar'' el procesador cuando tiene que esperar que suceda algo externo (el \textit{cómo} se hace eso en el código depende exclusivamente del framework asincrónico que estemos usando). Es por eso que este modelo se llama ``cooperativo'', porque cada función/corrutina tiene que estar escrita de forma de cooperar con el framework asincrónico.
 
-Tengamos en cuenta que todo lo explicado hasta ahora no es específico de Python, sino genérico a toda la informática. En las siguientes secciones profundizaremos un poco en cada concepto y sí entraremos en cómo utilizar ambos modelos desde Python. 
+Tengamos en cuenta que todo lo explicado hasta ahora no es específico de Python, sino genérico a toda la informática. En las siguientes secciones profundizaremos un poco en cada concepto y sí entraremos en cómo utilizar ambos modelos desde Python.
 
 Para facilitar el entendimiento práctico mostraremos en cada caso la versión con concurrencia del siguiente ejemplo integrador, que ejecuta la típica tarea de bajar distintos archivos de un servidor:
 
@@ -66,13 +89,13 @@ Done: 288998
 
 \section{Threading}\label{sec:multithreading}
 
-Los hilos (en inglés llamados \textit{threads}) son una especie de procesos livianos que comparten entre sí la mayor parte de las estructuras internas, particularmente la memoria a la que tienen acceso. El concepto de \textit{hilo} a nivel de sistemas operativos es casi tan antiguo como el de \textit{proceso}, recomendamos \href{https://es.wikipedia.org/wiki/Hilo_(inform%C3%A1tica)}{este artículo de Wikipedia} para más información.
+Los hilos (en inglés llamados \textit{threads}) son una especie de procesos livianos que comparten entre sí la mayor parte de las estructuras internas, particularmente la memoria a la que tienen acceso. El concepto de ``hilo'' a nivel de sistemas operativos es casi tan antiguo como el de ``proceso'', recomendamos \href{https://es.wikipedia.org/wiki/Hilo_(inform%%C3%%A1tica)}{este artículo de Wikipedia} para más información.
 
 La gran ventaja de los hilos es que nos permite lograr concurrencia o paralelismo de forma sencilla, aunque implica tener algunos cuidados que mencionaremos más adelante. Hagamos un ejemplo sencillo para explicar mejor algunos conceptos de forma más tangible.
 
 \pyfile{Chapters/proc_paralelo/code/ej_hilos_simple.py}
 
-En este código tenemos una función \texttt{waiter} que calcula un número al azar entre 0 y 100, duerme esea cantidad de milisegundos, y agrega el valor a una lista global. Esta función es la que ejecutaremos en distintos hilos, de forma concurrente. Es clave en este ejemplo la diferencia entre hilos y procesos, ya que la función accede a una lista global, y eso lo puede hacer porque los hilos comparten el espacio de memoria entre sí (incluyendo al ``hilo principal'' que los genera); si hubiésemos ejecutado la función en distintos procesos, este modelo no serviría porque la función accedería a \textit{copias} de \texttt{waits}, no logrando el efecto que buscamos.
+En este código tenemos una función \texttt{waiter} que calcula un número al azar entre 0 y 100, duerme esa cantidad de milisegundos, y agrega el valor a una lista global. Esta función es la que ejecutaremos en distintos hilos, de forma concurrente. Es clave en este ejemplo la diferencia entre hilos y procesos, ya que la función accede a una lista global, y eso lo puede hacer porque los hilos comparten el espacio de memoria entre sí (incluyendo al ``hilo principal'' que los genera); si hubiésemos ejecutado la función en distintos procesos, este modelo no serviría porque la función accedería a \textit{copias} de \texttt{waits}, no logrando el efecto que buscamos.
 
 Luego tenemos un bucle \mip{for} en el que creamos un nuevo hilo (indicando que la función a ejecutar en ese hilo es \texttt{waiter}), arrancamos dicho hilo, y lo agregamos a una lista que necesitaremos luego.
 
@@ -83,13 +106,13 @@ $ python3 ej_hilos_simple.py
 [77, 97, 6, 9, 59]
 \end{shell}
 
-Si de ese código eliminamos el segundo bucle con los \mip{.join} a cada hilo, la lista mostrada estará vacía porque no esperamos a los hilos que terminen\footnote{En realidad, eso tampoco es 100\% determinístico, porque como mencionábamos antes, en la multitarea apropiativa no tenemos control sobre en qué momento los hilos se ejecutan o dejen de ejecutarse (a menos que usemos herramientas de sincronización como ``locks'' o ``semáforos''), entonces puede suceder que en alguna ejecución algún hilo lanzado sí haya terminado antes que el hilo principal.}. Les dejamos este cambio para que experimenten ustedes.
+Si de ese código eliminamos el segundo bucle con los \mip{.join} a cada hilo, la lista mostrada estará vacía porque no esperamos a los hilos que terminen\footnote{En realidad, eso tampoco es 100\% determinístico, porque como mencionábamos antes, en la multitarea apropiativa no tenemos control sobre en qué momento los hilos se ejecutan o dejen de ejecutarse (a menos que usemos herramientas de sincronización como \textit{locks} o ``semáforos''), entonces puede suceder que en alguna ejecución algún hilo lanzado sí haya terminado antes que el hilo principal.}. Les dejamos este cambio para que experimenten ustedes.
 
 En sistemas con más de un procesador (lo cual es normal en estos días), los hilos pueden ejecutarse en distintos procesadores, segun determine el sistema operativo. En lenguajes como C o C++ esto implica que los distintos hilos \textit{podrían} ejecutarse simultáneamente, logrando efectivamente paralelismo. En Python\footnote{Estos conceptos de bajo nivel y otros explicados luego como el GIL son inherentes a cPython (la implementación de Python en C), otras implementaciones pueden variar.} esto no es así, ya que incluso cuando los hilos se ejecutan en distintos procesadores, por como trabaja internamente el lenguaje esos hilos se ejecutarán no simultáneamente.
 
 Expliquemos eso un segundo. Python tiene determinadas estructuras internas (en especial el conteo de referencias a los objetos, parte de la administración dinámica y automática de la memoria\footnote{Python maneja la memoria de forma dinámica basándose en el conteo de referencias: por cada objeto creado Python lleva la cuenta de todas las referencias a ese objeto. Cuando esas referencias se pierden (el contador baja a cero), Python libera la memoria usada por ese objeto.}) que no pueden modificarse en cualquier momento desde cualquier hilo: para evitar que dos hilos accedan simultaneamente a esas estructuras se bloquea su uso de una forma particular (veremos estos conceptos con detalle más adelante).
 
-Si ese bloqueo y desbloqueo sucede cada vez que se acceden a las estructuras mencionadas, su utilización sería demasiado ineficiente, especialmente en el caso en que la aplicación no esté usando hilos. Python resuelve esto teniendo un bloqueo global a todo el intérprete (\textit{Global Interpreter Lock}, o \textit{GIL}), que es mucho más eficiente, pero tiene como resultado colateral que los distintos hilos no se ejecutarán simultaneamente, incluso cuando estén en distintos procesadores.
+Si ese bloqueo y desbloqueo sucede cada vez que se acceden a las estructuras mencionadas, su utilización sería demasiado ineficiente, especialmente en el caso en que la aplicación no esté usando hilos. Python resuelve esto teniendo un bloqueo global a todo el intérprete (\textit{Global Interpreter Lock}, o ``GIL''), que es mucho más eficiente, pero tiene como resultado colateral que los distintos hilos no se ejecutarán simultaneamente, incluso cuando estén en distintos procesadores.
 
 Esto no es para nada un problema en programas que no usan hilos (la mayoría), o incluso en programas con muchos hilos que se basan en esperar entradas/salidas (acceso a disco, a la red, o en general a cualquier periférico o dispositivo fuera del procesador), pero sí es una limitación en programas \textit{cpu-bound}\footnote{Se denominan \textit{cpu-bound} a aquellos programas que usan (casi) exclusivamente el procesador, sin tener ninguna entrada o salida, por ejemplo haciendo cálculos matemáticos, procesamiento de imágenes, manejo de datos científicos, etc.}. Por eso muchas bibliotecas de procesamiento numérico escritas en lenguajes de bajo nivel (como NumPy), liberan el GIL al ejecutarse, logrando el paralelismo real que mencionábamos antes.
 
@@ -115,13 +138,13 @@ El código es muy similar al secuencial, sólo que ahora en vez de llamar a \mip
 Si lo ejecutamos, notamos que es bastante más rápido que el secuencial, y (a priori, ver luego) nos da el mismo resultado:
 
 \begin{shell}
-$ time python3 code/concur_no.py
+$ time python3 concur_no.py
 Done: 288998
 
 real    0m0,824s
 user    0m0,108s
 sys     0m0,011s
-$ time python3 code/concur_hilos.py 
+$ time python3 concur_hilos.py
 Done: 288998
 
 real    0m0,245s
@@ -145,18 +168,18 @@ def add(self, value):
     self.total = new_total
 \end{py}
 
-Recorramos de forma detallada una secuencia que ``explote'' el problema. Supongamos que tenemos un valor de \mip{10} en \mip{self.total}, y desde dos hilos se llama a ese método con los valores \mip{2} y \mip{3}. Si se ejecutaran en momentos distintos, el resultado final sería el correcto, \mip{15}. 
+Recorramos de forma detallada una secuencia que ``explote'' el problema. Supongamos que tenemos un valor de \mip{10} en \mip{self.total}, y desde dos hilos se llama a ese método con los valores \mip{2} y \mip{3}. Si se ejecutaran en momentos distintos, el resultado final sería el correcto, \mip{15}.
 
 Pero supongamos una ejecución particularmente problemática, mostrada en el esquema a continuación. En este caso vemos que empieza ejecutándose el primer hilo, guarda el total hasta ese momento y le suma lo que recibió, quedando \mip{new_total} en \mip{12}. En ese momento su ejecución se interrumpe y entra el otro hilo, que lee \mip{10} de \mip{self.total} (porque todavía no cambió), le suma \mip{3}, y termina dejando \mip{self.total} en \mip{13}. Entra nuevamente el primer hilo, continúa con su proceso y guarda en \mip{self.total} el \mip{12} que tenía en \mip{new_total}. En este punto estamos con los dos hilos que ya ejecutaron el \mip{Adder.add}, y el valor final de \mip{self.total} es incorrecto.
 
 \begin{center}
     \includegraphics[width=300pt,keepaspectratio=true]{Chapters/proc_paralelo/imgs/race-condition-bad.pdf}
 \end{center}
-    
+
 La probabilidad de que eso suceda en ese código es baja (pero no cero), lo cual en realidad es peor aún, ya que lleva a bugs muy difíciles de reproducir y encontrar. Incluso si ejecutamos varias veces el programa con esa modificación, veremos que nos da el valor correcto:
 
 \begin{shell}
-$ python3 code/concur_hilos_explicito_1.py
+$ python3 concur_hilos_explicito_1.py
 Done: 288998
 \end{shell}
 
@@ -174,7 +197,7 @@ def add(self, value):
 Ahora sí encontramos el inconveniente:
 
 \begin{shell}
-$ python3 code/concur_hilos_explicito_2.py 
+$ python3 concur_hilos_explicito_2.py
 Done: 209628
 \end{shell}
 
@@ -184,7 +207,7 @@ Esta situación se denomina ``condición de carrera'' (\textit{race condition} e
 
 Además, tengamos en cuenta que este código era sencillo y pequeño. Extrapolemos la dificultad si tenemos miles o decenas de miles de lineas de código, ¿cuanto podemos asegurar que cada una y todas las lineas son seguras para un entorno multi-hilo?
 
-La forma de evitar el problema es usar un bloqueo para que distintos hilos \textbf{no puedan ejecutar al mismo tiempo} la parte del código que puede ser problemática. Eso se logra usando una herramienta que tanto en inglés como en castellano denominamos ``lock''.
+La forma de evitar el problema es usar un bloqueo para que distintos hilos \textbf{no puedan ejecutar al mismo tiempo} la parte del código que puede ser problemática. Eso se logra usando una herramienta que tanto en inglés como en castellano denominamos \textit{lock}.
 
 Los \textit{locks} se toman y se liberan. Antes de entrar a la zona problemática del código se toma el lock, y al salir se libera. Si tenemos el lock tomado y el sistema operativo deja de ejecutar nuestro hilo y entra otro, y ese otro hilo llega a la misma zona problemática, al intentar tomar el lock se bloqueará y sólo se desbloqueará cuando el primer hilo libere el lock.
 
@@ -223,7 +246,7 @@ Veamos el uso del lock en el código problemático que traíamos:
 \pyfile{Chapters/proc_paralelo/code/concur_hilos_explicito_3.py}
 
 \begin{shell}
-$ python3 code/concur_hilos_explicito_3.py
+$ python3 concur_hilos_explicito_3.py
 Done: 288998
 \end{shell}
 
@@ -232,7 +255,7 @@ En el siguiente diagrama vemos el flujo de ejecución:
 \begin{center}
     \includegraphics[width=300pt,keepaspectratio=true]{Chapters/proc_paralelo/imgs/race-condition-ok.pdf}
 \end{center}
-    
+
 Aquí vemos que aunque el primer hilo es interrumpido igual que en la situación anterior (donde terminábamos con el valor incorrecto), cuando el segundo hilo quiere obtener el lock se traba porque el mismo ya está tomado. Allí el sistema operativo volverá a cambiar de hilos y entrará (eventualmente) el primero, que continuará con su proceso y liberará el lock al final. En este momento el segundo hilo pasa a estar disponible y (eventualmente) se ejecutará, terminando de tomar el lock, procesando la suma, y liberando el lock también al final.
 
 ¿Dónde tenemos que usar locks? Siempre que tengamos que proteger una secuencia de operaciones que si son interrumpidas y ejecutadas en parte por distintos hilos simultáneamente podrían generarnos problemas. Uno de los más grandes inconvenientes al analizar programas propios y ajenos es reconocer estas secuencias de operaciones.
@@ -243,7 +266,7 @@ Para el ejemplo que traíamos, la zona problemática era una sola linea que hac�
 >>> import dis
 >>> def add(self, value):
 ...   self.total += value
-... 
+...
 >>> dis.dis(add)
   2           0 LOAD_FAST                0 (self)
               2 DUP_TOP
@@ -254,15 +277,15 @@ Para el ejemplo que traíamos, la zona problemática era una sola linea que hac�
              12 STORE_ATTR               0 (total)
              14 LOAD_CONST               0 (None)
              16 RETURN_VALUE
->>> 
+>>>
 \end{py}
 
-La única linea que teníamos a nivel lenguaje Python en realidad se traduce en esa secuencia de operaciones internas de la máquina virtual de cPython, que sí son atómicas (recomendamos \href{https://docs.python.org/dev/library/dis.html}{la documentación del módulo \texttt{dis}} para profundizar sobre el bytecode de Python). Ahí vemos que los pasos son varios, parecidos a los que simulamos en los códigos ejemplos que mostramos antes. 
+La única linea que teníamos a nivel lenguaje Python en realidad se traduce en esa secuencia de operaciones internas de la máquina virtual de cPython, que sí son atómicas (recomendamos \href{https://docs.python.org/es/dev/library/dis.html}{la documentación del módulo \texttt{dis}} para profundizar sobre el bytecode de Python). Ahí vemos que los pasos son varios, parecidos a los que simulamos en los códigos ejemplos que mostramos antes.
 
 La complejidad de tener que analizar todo el código y entender qué operaciones son atómicas y cuales no, al momento de modificar estructuras de datos en situación de hilos múltiples, está presente en todos los lenguajes (por ejemplo, en C una linea se transforma en muchas operaciones en assembler cuando compilamos). Como resultado, la mayoría de los programs multi-hilos tienen situaciones problemáticas escondidas, lo que lleva a bugs esporádicos muy difíciles de erradicar.
 
 
-\section{Async}
+\section{Async}\label{sec:async}
 
 Como mencionamos antes en la introducción, el modelo asincrónico se basa en tener varias corrutinas (en lugar de procesos) que se ejecutan de forma concurrente, siendo administradas por un reactor o loop de eventos (en lugar del sistema operativo con ayuda del procesador).
 
@@ -272,11 +295,11 @@ Las corrutinas entonces correrán hasta que necesiten ejecutar una operación qu
 
 \pyfile{Chapters/proc_paralelo/code/ej_async_simple.py}
 
-Esta función de Python (en realidad una corrutina, porque está definida con el \texttt{async} adelante) va a mostrar dos tiempos con un segundo de diferencia entre ellos. La corrutina no debe dejar pasar el segundo con un \mip{time.sleep(1)} clásico porque eso bloquearía a todo el proceso, sino que en vez le indica al reactor que quiere dejar pasar ese tiempo. Luego, debe interrumpir su ejecución esperando que ese evento suceda, lo cual se realiza con el \mip{await} que está delante. 
+Esta función de Python (en realidad una corrutina, porque está definida con el \texttt{async} adelante) va a mostrar dos tiempos con un segundo de diferencia entre ellos. La corrutina no debe dejar pasar el segundo con un \mip{time.sleep(1)} clásico porque eso bloquearía a todo el proceso, sino que en vez le indica al reactor que quiere dejar pasar ese tiempo. Luego, debe interrumpir su ejecución esperando que ese evento suceda, lo cual se realiza con el \mip{await} que está delante.
 
 Por supuesto, esta corrutina tiene que ser ejecutada por el reactor, lo cual se logra de forma sencilla en la última linea del código. Hay formas más complejas y versátiles de usar o crear loops de eventos; usar \mip{asyncio.run} es la forma más simple y es suficiente por ahora.
 
-En la llamada a \mip{asyncio.sleep(1)} el reactor creará un evento internamente que se ejecutará luego de un segundo, y cuando eso suceda enviará el resultado a la corrutina, la cual no se ejecutará desde el principio (como si fuese una función normal llamada nuevamente) sino que continuará desde el punto que largó el procesador (un comportamiento más parecido a los generadores que vimos en \ref{sub:funciones}).
+En la llamada a \mip{asyncio.sleep(1)} el reactor creará un evento internamente que se ejecutará luego de un segundo, y cuando eso suceda enviará el resultado a la corrutina, la cual no se ejecutará desde el principio (como si fuese una función normal llamada nuevamente) sino que continuará desde el punto que largó el procesador (un comportamiento más parecido a los generadores que vimos en \ref{sec:funciones}).
 
 Una simplificación casi absurda del código del reactor podría ser el siguiente:
 
@@ -293,7 +316,7 @@ El tener el reactor en el mismo proceso es una de las razones por las que el mod
 
 El modelo asincrónico tiene varias otras ventajas. Al estar todo el sistema dentro del mismo proceso es muy fácil compartir objetos y estructuras de datos, como sucede también en el caso de los hilos; pero a diferencia de estos el acceso a esas estructuras no puede ser interrumpido en cualquier momento por un agente externo, entonces no tenemos que protegerlas con locks (y no tenemos el riesgo de no darnos cuenta que esos locks eran necesarios, lo cual resulta en programas más robustos). Otro punto de vista sobre esta característica de no ser interrumpidos en cualquier momento de ejecución es que los programas son determinísticos, lo cual los hace mucho más fáciles de testear y depurar: si estamos analizando un programa podemos estar seguros que luego de la linea N se ejecutará la linea N+1, a menos que explícitamente liberemos el procesador.
 
-No todo son rosas, claro. El modelo tiene también sus desventajas. 
+No todo son rosas, claro. El modelo tiene también sus desventajas.
 
 El principal es que al ser un modelo cooperativo, tenemos que tener la precaución de no bloquear nunca la ejecución del proceso. Siempre utilizar una llamada preparada para trabajar asincrónicamente para todo aquello que bloquee (usar la red, por ejemplo), o incluso abrir un hilo para esa operación (veremos más adelante esto). En algún punto estamos cambiando la ``preocupación por evitar condiciones de carrera'' del modelo de múltiples hilos a la ``preocupación por no bloquear'', la diferencia sustancial es que aquí no estamos afectados por la aleatoriedad del orden de ejecución y dónde se interrumpen los hilos (en tiempo de ejecución), sino que el código se ejecuta de forma determinística y podemos detectar cuando estamos bloqueando incorrectamente al estudiar el código (al momento de escribir el código, no cuando se ejecuta).
 
@@ -311,18 +334,18 @@ Por otro lado, si necesitamos algo que sabemos que es rápido e inmediato (multi
 
 Claro, tenemos que poder distinguir ambos casos, y no siempre es tan fácil. Por ejemplo, si tenemos que leer un archivo de 2 kb de disco, ¿eso va a tardar o no? En realidad es siempre rápido... pero es potencialmente bloqueante: nos puede pasar que ese archivo esté en un sistema de archivos montado a través de la red y una lectura que a priori es casi instantánea tarde varios segundos, y no queremos bloquear todo el sistema durante esos segundos. Entonces tenemos que acceder a los archivos usando, por ejemplo, \href{https://pypi.org/project/aiofiles/}{la biblioteca \texttt{aiofiles}}.
 
-Empecemos a ver cómo usar el sistema asincrónico para lograr todo eso. 
+Empecemos a ver cómo usar el sistema asincrónico para lograr todo eso.
 
 Ya vimos que nuestro concepto fundamental son las corrutinas (más allá del reactor o loop de eventos, que usamos pero no definimos nosotros), que son nuestras ``funciones asincrónicas'' y nos permiten liberar el procesador, esperando eventos sin bloquear todo, haciendo que el sistema en sí funcione correctamente.
 
-Explorémoslas un poco más en detalle. 
+Explorémoslas un poco más en detalle.
 
 La definición de una corrutina es parecida a la de una función, pero se le debe agregar el \mip{async} adelante:
 
 \begin{py}
 >>> async def corrut():
 ...   print("Hola")
-... 
+...
 >>> corrut()
 <coroutine object corrut at 0x7f8716110140>
 \end{py}
@@ -346,7 +369,7 @@ Vemos en el código dos corrutinas. A \texttt{main} se la pasamos como punto de 
 Por su lado, \texttt{sleeper} calcula un valor al azar entre 0 y 5, hace un \texttt{sleep} con ese valor, mostrando la hora antes y después, y finalmente devuelve ese valor usado. El \texttt{sleep} también es asincrónico, por eso hay que esperarlo, pero no nos interesa guardar el valor que devuelve.
 
 \begin{shell}
-$ python3 code/seq_async_1.py
+$ python3 seq_async_1.py
 Arranca 1 a las 16:15:51.819157
 Termina 1 a las 16:15:55.991726
 Durmió: 4.168s
@@ -359,7 +382,7 @@ Veamos de forma más explícita la separación entre crear una corrutina y poner
 El código crea dos corrutinas (que casi lo primero que harían sería mostrar la hora de comienzo), pero antes de ``esperarlas'' (que las hace disponibles para el sistema asincrónico) avisa que las corrutinas fueron creadas. Luego las espera, mostrando cuanto durmió cada una:
 
 \begin{shell}
-$ python3 code/seq_async_2.py
+$ python3 seq_async_2.py
 Corrutinas creadas
 Arranca 1 a las 17:45:12.703133
 Termina 1 a las 17:45:15.223655
@@ -371,7 +394,7 @@ Durmió 2: 0.309s
 
 Como decíamos, el ``Corrutinas creadas'' aparece antes que cualquier mensaje de las corrutinas porque las mismas no se ponen a correr hasta que se esperan.
 
-Otro efecto interesante que vemos aquí (relacionado con lo que decíamos) es que aunque estamos en un sistema asincrónico y usando corrutinas, las mismas se ejecutaron de forma \textit{secuencial}. Esto es porque en el código de \texttt{main}, aunque creamos las dos corrutinas al principio, luego esperamos una (se pone a correr esa, ¡pero no la otra!), y cuando termina, luego del \mip{print}, esperamos la segunda (y recién ahí se pone a correr).
+Otro efecto interesante que vemos aquí (relacionado con lo que decíamos) es que aunque estamos en un sistema asincrónico y usando corrutinas, las mismas se ejecutaron de forma ``secuencial''. Esto es porque en el código de \texttt{main}, aunque creamos las dos corrutinas al principio, luego esperamos una (se pone a correr esa, ¡pero no la otra!), y cuando termina, luego del \mip{print}, esperamos la segunda (y recién ahí se pone a correr).
 
 Veamos cómo lograr efectivamente concurrencia al utilizar la tercera forma de poner a correr una corrutina: crear una tarea con ella.
 
@@ -380,7 +403,7 @@ Veamos cómo lograr efectivamente concurrencia al utilizar la tercera forma de p
 Este tercer código es muy parecido al anterior, sólo que ahora creamos dos tareas que esperamos luego.
 
 \begin{shell}
-$ python3 code/seq_async_3.py
+$ python3 seq_async_3.py
 Corrutinas creadas
 Arranca 1 a las 17:46:52.575249
 Arranca 2 a las 17:46:52.575287
@@ -396,7 +419,7 @@ Hay dos efectos interesantes para observar. El primero es que ``Corrutinas cread
 
 El segundo efecto es que aunque por azar la segunda tarea tuvo un \textit{delay} menor y terminó antes, el mensaje de ``cuanto durmió'' sigue apareciendo en segundo lugar. Esto es porque más allá de la ejecución concurrente de las corrutinas, nosotros en \texttt{main} las estamos esperando secuencialmente, primero a \texttt{tarea1} en la linea 18 y luego a \texttt{tarea2} en la 20.
 
-Esto que en el ejemplo rompe un poco el efecto de concurrencia que estamos buscando en realidad no es algo que nos tiene que preocupar. En códigos reales pocas veces se esperan las tareas de esa manera si se tienen varias ejecutando de forma concurrente (lo cual además sería engorroso para el caso de tener decenas de tareas, sería ridículo tener decenas de lineas haciendo \mip{await}). 
+Esto que en el ejemplo rompe un poco el efecto de concurrencia que estamos buscando en realidad no es algo que nos tiene que preocupar. En códigos reales pocas veces se esperan las tareas de esa manera si se tienen varias ejecutando de forma concurrente (lo cual además sería engorroso para el caso de tener decenas de tareas, sería ridículo tener decenas de lineas haciendo \mip{await}).
 
 Justamente para esto es que el módulo \mip{async} provee una función \mip{gather}:
 
@@ -407,7 +430,7 @@ Cambiamos un poco todo el código para esta versión, para hacerlo más genéric
 También generalizamos la forma de mostrar los valores luego de las esperas, aprovechando una característica de las respuestas del \texttt{gather} que asegura que el órden de los resultados corresponde al de las tareas indicadas.
 
 \begin{shell}
-$ python3 code/seq_async_4.py
+$ python3 seq_async_4.py
 Corrutinas creadas
 Arranca 0 a las 09:57:42.549920
 Arranca 1 a las 09:57:42.549979
@@ -443,10 +466,10 @@ El mundo asincrónico en general y \mip {asyncio} tiene muchos otros conceptos, 
 
 
 \begin{itemize}
-    \item \href{https://docs.python.org/dev/library/asyncio-stream.html}{Streams}: manejar conexiones de red (escribiendo y leyendo flujos de datos) es tan típico en los sistemas asincrónicos que hay herramientas para simplificar el proceso. En la mayoría de los sistemas asincrónicos estas herramientas son los ``protocolos'' y ``transportes'', pero el módulo \mip{asyncio} (además de esas herramientas) tiene el concepto de \textit{streams}, que nos permite trabajar con conexiones de red y enviar y recibir datos de forma más simple.
-    \item \href{https://docs.python.org/dev/library/asyncio-sync.html}{Primitivas de sincronización}: más allá que la ejecución de cada linea es determinística en el mundo asincrónico, si tenemos código ejecutándose concurrentemente que accede a recursos compartidos, es posible que necesitemos sincronizar esos accesos, para lo cual tenemos locks, eventos, semáforos, etc., como en el mundo de múltiples hilos, pero adaptados para sistemas asincrónicos.
-    \item \href{https://docs.python.org/dev/library/asyncio-subprocess.html}{Subprocesos}: para manejar asincrónicamente, sin bloquear ni tener que mandar a otro hilo, todo lo que es ejecución de subprocesos y esperar sus resultados o ir leyendo sus salidas.
-    \item \href{https://docs.python.org/dev/library/asyncio-queue.html}{Colas}: con un comportamiento similar a \texttt{queue.Queue}, el módulo \mip{asyncio} nos provee colas que trabajan asincrónicamente, y son la herramienta ideal para armar un modelo donde algunas corrutinas pueden ser productoras de información y otras consumidoras.
+    \item \href{https://docs.python.org/es/dev/library/asyncio-stream.html}{Streams}: manejar conexiones de red (escribiendo y leyendo flujos de datos) es tan típico en los sistemas asincrónicos que hay herramientas para simplificar el proceso. En la mayoría de los sistemas asincrónicos estas herramientas son los ``protocolos'' y ``transportes'', pero el módulo \mip{asyncio} (además de esas herramientas) tiene el concepto de \textit{streams}, que nos permite trabajar con conexiones de red y enviar y recibir datos de forma más simple.
+    \item \href{https://docs.python.org/es/dev/library/asyncio-sync.html}{Primitivas de sincronización}: más allá que la ejecución de cada linea es determinística en el mundo asincrónico, si tenemos código ejecutándose concurrentemente que accede a recursos compartidos, es posible que necesitemos sincronizar esos accesos, para lo cual tenemos locks, eventos, semáforos, etc., como en el mundo de múltiples hilos, pero adaptados para sistemas asincrónicos.
+    \item \href{https://docs.python.org/es/dev/library/asyncio-subprocess.html}{Subprocesos}: para manejar asincrónicamente, sin bloquear ni tener que mandar a otro hilo, todo lo que es ejecución de subprocesos y esperar sus resultados o ir leyendo sus salidas.
+    \item \href{https://docs.python.org/es/dev/library/asyncio-queue.html}{Colas}: con un comportamiento similar a \texttt{queue.Queue}, el módulo \mip{asyncio} nos provee colas que trabajan asincrónicamente, y son la herramienta ideal para armar un modelo donde algunas corrutinas pueden ser productoras de información y otras consumidoras.
 \end{itemize}
 
 
@@ -464,7 +487,7 @@ La sesión inicializa recursos, que luego cierra automáticamente al salir del c
 
 En realidad nosotros no estamos haciendo el mejor uso de la interfaz de aiohttp; deberíamos compartir la sesión (y no crear una en cada llama a downloader) para optimizar recursos. En este código ejemplo es practicamente lo mismo (y lo dejamos así por razones pedagógicas), pero en un sistema real, si quisiéramos escalar a centenas o miles de direcciones web, lo mejor es crear la sesión una sola vez y usar siempre esa.
 
-Finalmente agrupamos el bloque de código principal dentro de una corrutina, que es la que le indicamos al reactor para que ejecute inicialmente, pero más allá de ese detalle la estructura es muy similar a la de hilos, cambiando ``threads'' por ``coroutines'', y aprovechando el \texttt{gather} que nos simplifica esperar varias corrutinas a la vez en lugar de tener que hacer un \texttt{.join} por cada hilo.
+Finalmente agrupamos el bloque de código principal dentro de una corrutina, que es la que le indicamos al reactor para que ejecute inicialmente, pero más allá de ese detalle la estructura es muy similar a la de hilos, cambiando \textit{threads} por \textit{coroutines}, y aprovechando el \texttt{gather} que nos simplifica esperar varias corrutinas a la vez en lugar de tener que hacer un \texttt{.join} por cada hilo.
 
 Cabe destacar que como en el modelo de múltiples hilos (donde a veces es dificil detectar potenciales condiciones de carrera), en el modelo asincrónico también es difícil a veces detectar potenciales situaciones bloqueantes; en el código ejemplo tenemos el caso de que todo es manejado asincrónicamente, excepto la resolución del nombre del servidor... o sea, la traducción de \texttt{raw.githubusercontent.com} a la dirección IP correspondiente. Para que este paso sea automáticamente asincrónico, también deberíamos instalar la biblioteca \texttt{aiodns}.
 
@@ -480,7 +503,7 @@ Exploraremos entonces algunas formas de lograr paralelismo a mano, utilizando al
 
 \subsection{Introducción}
 
-A nivel de ejecutar otros procesos, Python nos ofrece las herramientas básicas sobre las que se construye todo el resto. 
+A nivel de ejecutar otros procesos, Python nos ofrece las herramientas básicas sobre las que se construye todo el resto.
 
 Entrar en el detalle de cuales son y sus alcances sería engorroso y se escapa al alcance de este libro, pero como ejemplos mencionaremos dos que están disponibles en plataformas POSIX. Por un lado tenemos al \texttt{fork}, que crea un nuevo proceso duplicando el actual; el nuevo se llama ``proceso hijo'', mientras que el que ejecutó el \texttt{fork} es el ``proceso padre'' (los dos procesos se ejecutan en espacios de memoria separados que al momento del \texttt{fork} tienen el mismo contenido). Por otro lado tenemos la familia \texttt{exec*}, que reemplazan el proceso actual con uno nuevo, inmediatamente, y no se vuelve al original (las distintas funciones de la familia, \texttt{execl}, \texttt{execve}, \texttt{execvpe}, etc., difieren en cómo se pasan argumentos a ese nuevo proceso).
 
@@ -492,14 +515,14 @@ Veamos el siguiente ejemplo donde tenemos una función que factoriza números. M
 
 \pyfile{Chapters/proc_paralelo/code/ej_paralelo_futures.py}
 
-La funcionalidad interesante a explicar es el \texttt{ProcessPoolExecutor}, usado en la linea 32. Es un administrador de contexto que nos da un \texttt{executor} que a su vez tiene un método \texttt{map}. Este método es similar a la función \mip{map} integrada en Python que aplica una función a todos los elementos de un iterable, pero con la gran diferencia en este caso que esa función va a ser ejecutada en otros procesos. ¿En cuantos procesos y en qué orden? El \texttt{ProcessPoolExecutor} arma una cantidad de procesos (por default la cantidad de procesadores que tengamos, para el ejemplo forzamos 4) y ejecuta en esos procesos la función; cuando termina una se le pasa un nuevo valor para que vuelva a ejecutarse, sin importar lo que suceda en otros procesos. 
+La funcionalidad interesante a explicar es el \texttt{ProcessPoolExecutor}, usado en la linea 32. Es un administrador de contexto que nos da un \texttt{executor} que a su vez tiene un método \texttt{map}. Este método es similar a la función \mip{map} integrada en Python que aplica una función a todos los elementos de un iterable, pero con la gran diferencia en este caso que esa función va a ser ejecutada en otros procesos. ¿En cuantos procesos y en qué orden? El \texttt{ProcessPoolExecutor} arma una cantidad de procesos (por default la cantidad de procesadores que tengamos, para el ejemplo forzamos 4) y ejecuta en esos procesos la función; cuando termina una se le pasa un nuevo valor para que vuelva a ejecutarse, sin importar lo que suceda en otros procesos.
 
 Los resultados, como con el \texttt{asyncio.gather} que vimos antes, estarán en el mismo orden que los valores de entrada, por eso podemos relacionarlos y mostrarlos con el \mip{zip} al final.
 
 Veamos cómo se ejecuta el ejemplo, considerando lo que aprendimos de cómo funciona:
 
 \begin{shell}
-$ python3 code/ej_paralelo_futures.py
+$ python3 ej_paralelo_futures.py
 Ejecutando todo:
    2429192056233:    0.20s
         25301356:    0.37s
@@ -523,7 +546,7 @@ Los tiempos de ejecución que se muestran al principio son cuando termina cada f
 
 Veamos de forma explícita cómo sucedió el procesamiento. Especificamos que la cantidad máxima de trabajadores sea cuatro, entonces el sistema arrancó procesando los números \texttt{8919372543}, \texttt{2429192056233}, \texttt{23286190456122}, y \texttt{51734095734}. La primer función, en alguno de los procesos, termina a los 200 milisegundos, entonces el sistema pasa a ejecutar en ese proceso la función sobre el quinto número. También termina rapidamente, y sigue con los números de entrada. En paralelo, claro, algunos procesos siguen con los números difíciles de factorizar.
 
-Eventualmente todos terminan, el administrador de contexto termina, y mostramos el tiempo total de cálculo, que es prácticamente igual al del número más ``costoso''. 
+Eventualmente todos terminan, el administrador de contexto termina, y mostramos el tiempo total de cálculo, que es prácticamente igual al del número más ``costoso''.
 
 También tenemos la opción de crear procesos, ejecutar funciones en esos procesos, y esperar que esos procesos terminen, todos los pasos ``a mano'', como mostramos antes con los hilos (y de forma muy similar a ese código). Este sería el cambio con respecto al programa que mostramos antes, solamente pasamos a usar \mip{multiprocessing.Process} en lugar de \mip{threading.Thread} y llamar apropiadamente a los objetos:
 
@@ -545,7 +568,7 @@ En cambio, si la entrada o la salida del procesamiento necesario tienen un tama�
 
 Si el corpus grande de datos a procesar puede ser manejado en paralelo, podemos particionarlo y que los distintos procesos trabajen sobre una parte de ese corpus grande. Entonces, la información de entrada que viajará a los distintos procesos serán los límites de comienzo y fin a procesar. Pero claro, de alguna manera los distintos procesos tienen que acceder al corpus grande de información. Y también, si los resultados son grandes, dejarlos a disposición del proceso central que tiene que acceder al resultado completo.
 
-Una alternativa típica es trabajar con archivos. Podemos bajar el corpus grande de datos a disco y que los distintos procesos lean la información de allí. Otra opción, especialmente útil cuando ya tenemos la información en memoria (por cómo la obtuvimos) y luego debemos tener el resultado en memoria (para un procesamiento posterior), es compartir memoria entre el proceso principal y los otros procesos 
+Una alternativa típica es trabajar con archivos. Podemos bajar el corpus grande de datos a disco y que los distintos procesos lean la información de allí. Otra opción, especialmente útil cuando ya tenemos la información en memoria (por cómo la obtuvimos) y luego debemos tener el resultado en memoria (para un procesamiento posterior), es compartir memoria entre el proceso principal y los otros procesos
 
 Veamos un ejemplo donde tenemos dos listas de valores extremadamente grandes y tenemos que realizar una operación compleja y costosa entre cada elemento de esas dos listas, guardando cada resultado en una tercera. Por razones pedagógicas, sin embargo, acotemos el tamaño de las listas a 12 valores y la operación a una simple suma, para que sea más fácil de entender el resto.
 
@@ -555,12 +578,12 @@ Incluso veamos como primer paso un código que está conceptualmente equivocado,
 
 Primero se define las tres inmensamente grandes listas, las dos de entrada de largo 12 llenas de unos y tres respectivamente, y la de salida con 12 Nones (que indican que no se calculó nada en esa posición todavía. Luego tenemos la función que recibe los límites inferior y superior dentro de los que va a operar, y efectivamente aplica una operación compleja y costosa elemento por elemento, mostrando luego la parte del resultado sobre la cual se trabajó.
 
-Luego tenemos los límites (escritos a mano, por simplicidad), y el \texttt{ProcessPoolExecutor} que nos va a distribuir los límites en los distintos procesos para realizar todo el trabajo. Notemos el detalle de hacer un \mip{list()} alrededor del {executor.map}; esto es solamente para iterar sobre las operaciones, lo cual obligará al \texttt{ProcessPoolExecutor} a efectivamente esperar que todas terminen. 
+Luego tenemos los límites (escritos a mano, por simplicidad), y el \texttt{ProcessPoolExecutor} que nos va a distribuir los límites en los distintos procesos para realizar todo el trabajo. Notemos el detalle de hacer un \mip{list()} alrededor del {executor.map}; esto es solamente para iterar sobre las operaciones, lo cual obligará al \texttt{ProcessPoolExecutor} a efectivamente esperar que todas terminen.
 
 Finalmente, mostramos el resultado cuando todo terminó:
 
 \begin{shell}
-$ python3 code/ej_paralelo_equivocado.py
+$ python3 ej_paralelo_equivocado.py
 Operando entre 0 y 4
 Resultado parcial: [4, 4, 4, 4]
 Operando entre 8 y 12
@@ -587,14 +610,14 @@ En este nuevo código vemos que ahora no usamos listas simples, sino que tenemos
 Otro detalle importante es que luego de terminar con los sub-procesos que usan esa memoria compartida, tenemos que cerrar y liberar esos recursos, lo cual hacemos en las últimas tres lineas.
 
 \begin{shell}
-$ python3 code/ej_paralelo_compartida.py
+$ python3 ej_paralelo_compartida.py
 Operando entre 0 y 4
 Operando entre 8 y 12
 Operando entre 4 y 8
 Resultado final: ShareableList([4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4], name='psm_65c91d2a')
 \end{shell}
 
-La estructura \texttt{ShareableList} es muy práctica, porque nos esconde la serialización y deserialización de los objetos, y aunque nos provee algunas utilidades más, tenemos que tener en cuenta que tiene sus limitaciones. 
+La estructura \texttt{ShareableList} es muy práctica, porque nos esconde la serialización y deserialización de los objetos, y aunque nos provee algunas utilidades más, tenemos que tener en cuenta que tiene sus limitaciones.
 
 Para trabajar con memoria compartida de forma más genérica, Python nos ofrece la estructura \texttt{multiprocessing.shared\_memory.SharedMemory}, que nos permite trabajar directamente sobre la memoria compartida. Claro, nos tendremos que encargar de la serialización y deserialización, pero ya no tendremos límites sobre qué estructuras o secuencias de datos podemos compartir. Veremos más adelante un ejemplo que usa esta estructura.
 
@@ -605,12 +628,12 @@ Para el caso puntual de tener que sólo compartir números, que es algo muy com�
 
 \pyfile{Chapters/proc_paralelo/code/ej_paralelo_array.py}
 
-Si comparamos este último programa con el anterior veremos que son prácticamente iguales. Una diferencia importante es que a \texttt{RawArray} le tenemos que pasar el tipo de datos que va a soportar (porque arma la memoria compartida para una cantidad fija de bytes que alcanza para almacenar exactamente eso), podemos ver la lista de los distintos tipos de datos en la \href{https://docs.python.org/dev/library/array.html#module-array}{documentación de \texttt{array}} (que es la misma que se usa aquí).
+Si comparamos este último programa con el anterior veremos que son prácticamente iguales. Una diferencia importante es que a \texttt{RawArray} le tenemos que pasar el tipo de datos que va a soportar (porque arma la memoria compartida para una cantidad fija de bytes que alcanza para almacenar exactamente eso), podemos ver la lista de los distintos tipos de datos en la \href{https://docs.python.org/es/dev/library/array.html#module-array}{documentación de \texttt{array}} (que es la misma que se usa aquí).
 
 La otra diferencia es que ahora no tenemos que liberar los recursos al final, es automático. Esto es porque \texttt{RawArray} sólo sirve para compartir memoria entre el proceso principal y sus sub-procesos (entonces la limpieza es automática), en contraste con la memoria compartida de \texttt{ShareableList} o \texttt{SharedMemory}, a la que podemos acceder desde cualquier otro proceso (sabiendo el nombre usado al momento de creación).
 
 \begin{shell}
-$ python3 code/ej_paralelo_array.py
+$ python3 ej_paralelo_array.py
 Operando entre 0 y 4
 Operando entre 8 y 12
 Operando entre 4 y 8
@@ -632,9 +655,9 @@ Finalmente, mostramos el resultado y liberamos los recursos de memoria compartid
 
 \subsection{Ejemplo práctico}
 
-Cerremos la parte de procesamiento paralelo con un ejemplo práctico. 
+Cerremos la parte de procesamiento paralelo con un ejemplo práctico.
 
-El desafío es hacer una transformada (rápida) de Fourier (\textit{Fast Fourier Transform}, o FFT)sobre alguna señal obtenida de alguna máquina o sensor. 
+El desafío es hacer una transformada (rápida) de Fourier (\textit{Fast Fourier Transform}, o FFT)sobre alguna señal obtenida de alguna máquina o sensor.
 
 \begin{info}
 El algoritmo de la FFT basicamente toma un array de valores y deja otro; la fuente es la amplitud de la señal en cada momento de tiempo, y el resultado es una indicación de cuanta energía tiene la señal para cada frecuencia.
@@ -655,13 +678,13 @@ Luego sí pasamos a calcular la FFT propiamente dicha, tomamos sólo un ``costad
 En este punto tenemos todo lo necesario para el gráfico: los valores para el eje Y (en \texttt{FFT\_side}) y sus correspondientes posiciones en el eje X (en \texttt{freqs}). Pero habíamos dicho que queríamos sólo los valores correspondientes al rango audible, entonces calculamos una máscara (\texttt{audible} es un vector del largo de la señal con valores \mip{True} y \mip{False} según la frecuencia sea mayor que la mínima y menor que la máxima) y luego aplicamos esa máscara a los dos vectores en los que tenemos toda la información. Y como últimos pasos graficamos y guardamos la imagen resultante.
 
 \begin{info}
-Pueden leer más sobre máscaras en el capítulo de Numpy\ref{numpy}.
+Pueden leer más sobre máscaras en el capítulo de Numpy\ref{ch:numpy}.
 \end{info}
 
 Como también vemos en el código, la ejecución nos va dando información de la señal y los pasos del procesamiento:
 
 \begin{shell}
-$ python code/wav-fft-simple.py bach.wav 
+$ python wav-fft-simple.py bach.wav
 Cargando bach.wav
 Frecuencia de muestreo: 44100
 Canales: 2
@@ -674,15 +697,15 @@ Listo
 \begin{center}
     \includegraphics[width=400pt,keepaspectratio=true]{Chapters/proc_paralelo/imgs/fft-simple.pdf}
 \end{center}
-    
+
 En las lineas de arriba no se nota, pero la ejecución tarda demasiado. Nos gustaría que fuese más rápido, necesitamos optimizarlo.
 
 Una regla de oro a seguir cuando necesitamos optimizar código es que necesitamos medir para poder saber qué secciones del mismo necesitamos optimizar.
 
-Como ya tenemos el código que va imprimiendo por pantalla los distintos pasos, podemos obtener una medición rápida de los mismos usando la utilidad \texttt{ts} que nos agrega fecha y hora a cada linea de la salida de un programa.
+Como ya tenemos el código que va imprimiendo por pantalla los distintos pasos, podemos obtener una medición rápida de los mismos usando la utilidad \texttt{ts} (en Debian/Ubuntu puede instalarse haciendo \texttt{sudo apt install moreutils}) que nos agrega fecha y hora a cada linea de la salida de un programa.
 
 \begin{shell}
-$ python -u code/wav-fft-simple.py bach.wav | ts
+$ python -u wav-fft-simple.py bach.wav | ts
 2022-05-29 13:49:00.702611 Cargando bach.wav
 2022-05-29 13:49:02.037465 Frecuencia de muestreo: 44100
 2022-05-29 13:49:02.037580 Canales: 2
@@ -705,7 +728,7 @@ Entonces, la primer optimización es sencilla. En vez de armar el gráfico con t
 No hace falta mostrar todo el resto del código acá ya que no tiene cambios, pero queda almacenado en el archivo \texttt{code/wav-fft-optimiz.py}.
 
 \begin{shell}
-$ python -u code/wav-fft-optimiz.py bach.wav | ts
+$ python -u wav-fft-optimiz.py bach.wav | ts
 2022-05-29 14:02:15.010729 Cargando bach.wav
 2022-05-29 14:02:15.545837 Frecuencia de muestreo: 44100
 2022-05-29 14:02:15.545931 Canales: 2
@@ -727,7 +750,7 @@ En realidad, matemáticamente, sí hay forma de paralelizar el cálculo, pero im
 
 Si no tenemos en cuenta lo antedicho, podemos inocentemente tratar de cortar la señal en partes y luego sumar los resultados de cada análisis; por completitud implementamos esto en \texttt{code/wav-fft-paralelo-mal.py} donde analiza la señal en dos partes (el código permite extenderlo sencillamente a muchas) y termina con un resultado que ya se nota incorrecto con una simple inspección visual del gráfico generado. Dejamos a les lectores el ejercicio de ejecutar el código y compararlo con el resultado correcto.
 
-Algo podemos hacer, sin embargo. Teniendo en cuenta que para cada valor del resultado necesitamos sí o sí recorrer toda la señal, lo que podemos hacer es re-muestrear la señal cada N elementos en cada procesador, y luego sí sumar los vectores resultados. Supongamos que paralelizamos el procesamiento en 3 partes, entonces mandaremos los valores de las posiciones 0, 3, 6... al primer procesador, los de las posiciones 1, 4, 7... al segundo, y los de las posiciones 2, 5, 8... al tercero. 
+Algo podemos hacer, sin embargo. Teniendo en cuenta que para cada valor del resultado necesitamos sí o sí recorrer toda la señal, lo que podemos hacer es re-muestrear la señal cada N elementos en cada procesador, y luego sí sumar los vectores resultados. Supongamos que paralelizamos el procesamiento en 3 partes, entonces mandaremos los valores de las posiciones 0, 3, 6... al primer procesador, los de las posiciones 1, 4, 7... al segundo, y los de las posiciones 2, 5, 8... al tercero.
 
 Ahora, sabiendo que tenemos que procesar la señal en distintos procesos, es momento de ocuparnos de cómo va a estar disponible la señal para los distintos procesos y cómo cada uno va a dejar su resultado para el proceso principal. De forma muy similar a lo que explicamos antes, usaremos memoria compartida tanto para la señal de entrada como para el resultado.
 
@@ -735,9 +758,9 @@ Implementamos todo esto en el \texttt{code/wav-fft-paralelo-ok.py}, del cual com
 
 \pyfile[firstline=28, lastline=37]{Chapters/proc_paralelo/code/wav-fft-paralelo-ok.py}
 
-El primer cambio es pasar a usar memoria compartida así cada proceso no tiene que tener una copia de las estructuras de datos de señal y resultado. 
+El primer cambio es pasar a usar memoria compartida así cada proceso no tiene que tener una copia de las estructuras de datos de señal y resultado.
 
-En ambos casos la idea es la misma: instanciamos \texttt{SharedMemory} con la cantidad de bytes necesarios, y luego construimos un array de NumPy con la forma y tipos de nuestra señal pero indicándole que la zona de memoria a utiliza sea la compartida. 
+En ambos casos la idea es la misma: instanciamos \texttt{SharedMemory} con la cantidad de bytes necesarios, y luego construimos un array de NumPy con la forma y tipos de nuestra señal pero indicándole que la zona de memoria a utiliza sea la compartida.
 
 Para el caso de la señal de entrada, luego de obtener la memoria compartida tenemos que copiar allí la señal misma, objeto que luego borramos justamente para liberar esa memoria y que no se copie a cada nuevo proceso. Para el caso del resultado es suficiente con crear el array arrancando desde la memoria compartida, ya que así tendrá todos sus valores en cero.
 
@@ -756,7 +779,7 @@ Y luego al final del script limpiamos los recursos de la memoria compartida.
 Podemos ver que la ejecución es más rápida que en el caso secuencial:
 
 \begin{shell}
-$ python -u code/wav-fft-paralelo-ok.py bach.wav | ts
+$ python -u wav-fft-paralelo-ok.py bach.wav | ts
 2022-05-29 14:21:25.566173 Cargando bach.wav
 2022-05-29 14:21:25.920670 Frecuencia de muestreo: 44100
 2022-05-29 14:21:25.920731 Canales: 2

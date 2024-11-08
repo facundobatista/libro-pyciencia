@@ -88,6 +88,6 @@ if __name__ == "__main__":
     print("Opciones del script:", args)
     main(args.archivo, args.usar_tex)
 
-# Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

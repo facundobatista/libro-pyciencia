@@ -6,7 +6,7 @@
 %% Ver:
 % https://arxiv.org/abs/2310.10368
 %%
- \chapter{Machine learning} \label{ch:machine}   
+ \chapter{Aprendizaje automático} \label{ch:machine}   
 \begin{wraptable}{r}{5cm}
 \begin{modulesinfo}
 \begin{center}
@@ -15,11 +15,12 @@
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Keras & 3.0.5 \\
-        Matplotlib & 3.5.3 \\
-        NumPy & 1.24.2 \\
-        scikit-learn & 1.4.1.post1 \\
-        tqdm & 4.64.1 \\
+        Keras & 3.6.0 \\
+        Matplotlib & 3.9.2 \\
+        NumPy & 1.26.4 \\
+        scikit-learn & 1.5.2 \\
+        tensorflow & 2.18.0 \\
+        tqdm & 4.66.6 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
@@ -32,7 +33,7 @@
 
 En el contexto de la inteligencia artificial coexisten diversas metodologías tales como sistemas expertos, agentes racionales, procesamiento del lenguaje natural, visión de computadoras, robótica, y aprendizaje de máquinas o \textit{machine learning} (ML). Particularmente esta ultima metodología ha mostrado un desarrollo impresionante de aplicaciones en los últimos años, debido principalmente al avance en los procesadores de cálculo especializados (GPUs\footnote{\textit{Graphics processing unit}, unidad de procesamiento gráfico.} y TPUs\footnote{\textit{Tensor processing unit}, unidad de procesamiento tensorial.}) y a la existencia sistematizada de grandes cantidades de información (\textit{big data}).
 
- Entre las diferentes metodologías de ML se encuentran las redes neuronales (o NN por su sigla en inglés), cuyos orígenes se remontan al trabajo de McCulloch y Pitts de 1943 \cite{McCulloch1943}, quienes intentaron modelar las redes de neuronas en el cerebro mediante redes de cálculo computacional. Existen numerosas topologías o \textit{arquitecturas}\footnote{Ver \href{https://www.asimovinstitute.org/neural-network-zoo/}{\textit{The Neural Network Zoo}} (en inglés).} de estas redes, que se especializan para realizar diferentes tareas de como ajuste de funciones, clasificación, identificación de patrones, detección de agregados (``\textit{clustering}''), etc.
+ Entre las diferentes metodologías de ML se encuentran las redes neuronales (o NN por su sigla en inglés), cuyos orígenes se remontan al trabajo de McCulloch y Pitts de 1943 \cite{McCulloch1943}, quienes intentaron modelar las redes de neuronas en el cerebro mediante redes de cálculo computacional. Existen numerosas topologías o ``arquitecturas''\footnote{Ver \href{https://www.asimovinstitute.org/neural-network-zoo/}{\textit{The Neural Network Zoo}} (en inglés).} de estas redes, que se especializan para realizar diferentes tareas de como ajuste de funciones, clasificación, identificación de patrones, detección de agregados (``\textit{clustering}''), etc.
 
 Analizaremos aquí un modelo simple de red del tipo \textit{feedforward} (o de avance o propagación directa), en las cuales las conexiones entre distintas neuronas son solo en una dirección, formando de este modo un grafo acíclico entre las entradas y las salidas. Cada nodo de la red computa una función de sus entradas y pasa el resultado a las entradas de los nodos siguientes, sin generar ciclos. Por otra parte, existen otros tipos de redes como las recurrentes, en las cuales las entradas de los nodos se retroalimentan con sus propias salidas (este tipo de redes es apropiado para el ajuste de series temporales, por ejemplo).
 
@@ -46,11 +47,11 @@ Analizaremos aquí un modelo simple de red del tipo \textit{feedforward} (o de a
 \end{figure}
 
 \section{Nodos, pesos y funciones de activación}
-Una red neuronal constituye un grafo en el que los nodos representan las \textit{neuronas}, que son unidades de cálculo inspiradas en las neuronas biológicas. Estas últimas están conectadas unas a otras mediante axones y dendritas por medio de enlaces sinápticos que realizan la transmisión de impulsos nerviosos. Este proceso es el que se simula en las redes neuronales artificiales, en las que los nodos de cada capa están conectados a los nodos de la capa siguiente de la red a través de \textit{pesos} que representan la intensidad de la conexión sináptica entre los nodos. Una red neuronal artificial calcula una función de los valores de entrada hacia los nodos de salida, utilizando estos pesos como parámetros de dicha función. Un esquema de esta estructura se ve en la Figura \ref{fig:red}, en la que se muestra la capa de nodos de entrada (en azul), varias capas intermedias (u \textit{ocultas}, en verde), y una capa de nodos de salida (en rojo). Las neuronas de cada capa están densamente conectadas con las capas vecinas.
+Una red neuronal constituye un grafo en el que los nodos representan las ``neuronas'', que son unidades de cálculo inspiradas en las neuronas biológicas. Estas últimas están conectadas unas a otras mediante axones y dendritas por medio de enlaces sinápticos que realizan la transmisión de impulsos nerviosos. Este proceso es el que se simula en las redes neuronales artificiales, en las que los nodos de cada capa están conectados a los nodos de la capa siguiente de la red a través de ``pesos'' que representan la intensidad de la conexión sináptica entre los nodos. Una red neuronal artificial calcula una función de los valores de entrada hacia los nodos de salida, utilizando estos pesos como parámetros de dicha función. Un esquema de esta estructura se ve en la Figura \ref{fig:red}, en la que se muestra la capa de nodos de entrada (en azul), varias capas intermedias (u ``ocultas'', en verde), y una capa de nodos de salida (en rojo). Las neuronas de cada capa están densamente conectadas con las capas vecinas.
 
 Cada nodo (o neurona) en la red computa una suma ponderada de las entradas de sus nodos predecesores, y a este resultado le aplica una función no lineal para producir la salida, tal como se representa en la Figura \ref{fig:nodo}. Si denotamos por $y_j$ la salida del nodo $j$, y $\omega_{i,j}$ el peso correspondiente a la conexión entre el nodo predecesor $i$ y el $j$, la salida del nodo $j$ da como resultado:
 \[ y_j = g_j\left(\sum_{i=0}^n \omega_{ij} x_i\right) = g_j(z_j) \]
-donde $z_j = \sum_{i=0}^n \omega_{ij} x_i$ es la suma ponderada de los $n$ nodos precedentes conectados con el nodo $j_i$, denominado \textit{valor de activación}. Aquí, $g_j(\cdot)$ es alguna función no lineal denominada \textit{función de activación}. Es usual asumir que $x_0 = 1$ por lo que $\omega_{0j}$ es un término de \textit{bias} o sesgo, y es un parámetro que permite que los nodos de la red aprendan aún cuando todas las entradas sean nulas.
+donde $z_j = \sum_{i=0}^n \omega_{ij} x_i$ es la suma ponderada de los $n$ nodos precedentes conectados con el nodo $j_i$, denominado ``valor de activación''. Aquí, $g_j(\cdot)$ es alguna función no lineal denominada ``función de activación''. Es usual asumir que $x_0 = 1$ por lo que $\omega_{0j}$ es un término de \textit{bias} o sesgo, y es un parámetro que permite que los nodos de la red aprendan aún cuando todas las entradas sean nulas.
 
 \begin{figure}[t]
     \begin{center}
@@ -99,16 +100,16 @@ Una forma general de abordar el tratamiento matemático que realiza una red \tex
     \includegraphics[width=1.0\textwidth]{Chapters/machine_learning/figs/flow.pdf}
     %\includegraphics[scale=1.0]{Chapters/machine_learning/figs/flow.pdf}
 \end{center}
-\caption{Flujo del cálculo de operaciones matemáticas en una red "\textit{feedforward}". A la izquierda, el detalle para una red con dos neuronas de entrada $(x_1, x_2)$, dos neuronas en la capa oculta, con funciones de activación $g_3$ y $g_4$, y una neurona en la capa de salida con función de activación $g_5$ que produce la predicción $y$. A la derecha, la forma simplificada usual de representación.}
+\caption{Flujo del cálculo de operaciones matemáticas en una red ``\textit{feedforward}''. A la izquierda, el detalle para una red con dos neuronas de entrada $(x_1, x_2)$, dos neuronas en la capa oculta, con funciones de activación $g_3$ y $g_4$, y una neurona en la capa de salida con función de activación $g_5$ que produce la predicción $y$. A la derecha, la forma simplificada usual de representación.}
 \label{fig:flujo}
 \end{figure}
 
 
 \section{Aprendizaje}
 
-El procedimiento por el cual se modifican los valores de los pesos de una red neuronal, con el propósito de minimizar el error en sus predicciones, se denomina \textit{aprendizaje}. Este procedimiento se inicia con un conjunto de datos de entrada a los que se expone la red, y a partir de las predicciones que obtiene de estas entradas se genera una retroalimentación que pueden clasificarse, en general, en tres tipos:
+El procedimiento por el cual se modifican los valores de los pesos de una red neuronal, con el propósito de minimizar el error en sus predicciones, se denomina ``aprendizaje''. Este procedimiento se inicia con un conjunto de datos de entrada a los que se expone la red, y a partir de las predicciones que obtiene de estas entradas se genera una retroalimentación que pueden clasificarse, en general, en tres tipos:
 \begin{itemize}
-    \item \textbf{Aprendizaje supervisado}. Cada valor de entrada se acompaña de la correspondiente salida conocida (que usualmente se denomina \textit{etiqueta}), y la red aprende una función que mapea la entrada con la salida. Este será el caso que abordaremos a continuación, en la que cada entrada es una imagen y la correspondiente salida es un dígito decimal.
+    \item \textbf{Aprendizaje supervisado}. Cada valor de entrada se acompaña de la correspondiente salida conocida (que usualmente se denomina ``etiqueta''), y la red aprende una función que mapea la entrada con la salida. Este será el caso que abordaremos a continuación, en la que cada entrada es una imagen y la correspondiente salida es un dígito decimal.
     \item \textbf{Aprendizaje no supervisado}. En este caso, la red aprende a detectar patrones en las entradas sin la especificación de la retroalimentación. Uno de los ejemplos más usuales de este caso el el agrupamiento o \textit{clustering}.
     \item \textbf{Aprendizaje por refuerzo}. Aquí se utiliza un sistema de refuerzo, por lo general un premio y castigo. Esta forma de aprendizaje es la típica de redes que aprenden a jugar, obteniendo un premio al ganar el juego o un castigo al perderlo. De este modo, la red aprende de qué forma puede actuar para ganar más premios en el futuro.
 \end{itemize}
@@ -117,7 +118,7 @@ Dado que este aprendizaje representa formalmente un proceso de optimización, po
 
 Formalmente, el entrenamiento para el caso del aprendizaje supervisado se puede proponer del siguiente modo: dado el conjunto de entrenamiento con $N$ muestras
 \[ X = \{ (\bm{x}_1,\bm{y}_1), (\bm{x}_2, \bm{y}_2), \cdots, (\bm{x}_n, \bm{y}_N) \} \]
-donde cada par fue generado por una función desconocida $\bm{y} = f(\bm{x})$, determinar una función $\hat{f}(X, \bm{\omega})$ que aproxime a $f$. Naturalmente, tanto $\bm{x}_i$ como $\bm{y}_i$ son usualmente cantidades vectoriales. Con este fin, se define una \textit{función costo}\footnote{Es usual referirse a la función costo también como función de pérdida (\textit{loss}) o función objetivo.}, $C$, que resulta de alguna medida de la diferencia entre los valores $\hat{\bm{y}}_i = (y_1^L, y_2^L, \ldots, y_{m_L}^L)$ que predice la red para una determinada entrada $\bm{x}_i$ y parámetros de pesos y sesgos $\bm{\omega}$. Aquí, $L$ es el número de capas de la red ($L$ es el índice de la capa de salida) y $m_L$ es la cantidad de nodos que tiene la capa $L$. Claramente, la idea es que durante el aprendizaje de la red, los valores de esta función disminuyan progresivamente, dado que idealmente si las predicciones coinciden con los valores reales, la ``distancia'' entre ellas será nula. Según el problema que abordamos con la red (regresión, clasificación, salidas discretas o continuas), pueden elegirse distintas opciones para $C$, por ejemplo el valor absoluto de la diferencia entre el valor predicho y el valor verdadero $\norm{\bm{y} - \hat{\bm{y}}}$ (conocida usualmente como la norma $L^1$), el error cuadrático $\norm{\bm{y} - \hat{\bm{y}}}^2$, o la función de costo $0/1$ que devuelve un valor 1 si la predicción es incorrecta y es útil para salidas con valores discretos $0 \text{ si } y = \hat{y}, \text{ si no } 1$. 
+donde cada par fue generado por una función desconocida $\bm{y} = f(\bm{x})$, determinar una función $\hat{f}(X, \bm{\omega})$ que aproxime a $f$. Naturalmente, tanto $\bm{x}_i$ como $\bm{y}_i$ son usualmente cantidades vectoriales. Con este fin, se define una ``función costo''\footnote{Es usual referirse a la función costo también como función de pérdida (\textit{loss}) o función objetivo.}, $C$, que resulta de alguna medida de la diferencia entre los valores $\hat{\bm{y}}_i = (y_1^L, y_2^L, \ldots, y_{m_L}^L)$ que predice la red para una determinada entrada $\bm{x}_i$ y parámetros de pesos y sesgos $\bm{\omega}$. Aquí, $L$ es el número de capas de la red ($L$ es el índice de la capa de salida) y $m_L$ es la cantidad de nodos que tiene la capa $L$. Claramente, la idea es que durante el aprendizaje de la red, los valores de esta función disminuyan progresivamente, dado que idealmente si las predicciones coinciden con los valores reales, la ``distancia'' entre ellas será nula. Según el problema que abordamos con la red (regresión, clasificación, salidas discretas o continuas), pueden elegirse distintas opciones para $C$, por ejemplo el valor absoluto de la diferencia entre el valor predicho y el valor verdadero $\norm{\bm{y} - \hat{\bm{y}}}$ (conocida usualmente como la norma $L^1$), el error cuadrático $\norm{\bm{y} - \hat{\bm{y}}}^2$, o la función de costo $0/1$ que devuelve un valor 1 si la predicción es incorrecta y es útil para salidas con valores discretos $0 \text{ si } y = \hat{y}, \text{ si no } 1$. 
 
 La función $\hat{f}$ que mencionamos anteriormente depende los valores de las entradas del conjunto de entrenamiento, $x$, y también de los valores de los pesos y sesgos $\bm{\omega}$. No obstante, durante el aprendizaje los valores tanto de las entradas como las etiquetas están fijos, por lo que solo tenemos la posibilidad de minimizar la función costo a través de $\bm{\omega}$. En lo siguiente, adoptaremos como $C$ la función error cuadrático medio\footnote{En el ejemplo de aplicación utilizaremos como función costo la función de entropía cruzada o \textit{crossentropy}.}:
 \begin{equation} C(X, \bm{\omega}) = \frac{1}{2n} \sum_{i=1}^N \norm{\bm{\hat{y}}_i - \bm{y}_i}^2 \label{ec:costo} \end{equation}
@@ -129,7 +130,7 @@ Si bien esta función depende de los valores de $\bm{y}_i$, recordemos que estos
 \label{eq:actpesos}
 \end{equation}
 
-donde $\bm{\omega}^t$ denota los parámetros de la red neuronal en la iteración $t$ del descenso del gradiente. $\eta$ se denomina \textit{tasa de aprendizaje} y determina el tamaño del paso que se da en la dirección del descenso del gradiente y por lo tanto condiciona la forma en que converge la minimización. El valor de $\eta$ debe realizarse cuidadosamente para evitar inestabilidades en el proceso de aprendizaje, y usualmente está definido en el rango $0 < \eta < 1$.
+donde $\bm{\omega}^t$ denota los parámetros de la red neuronal en la iteración $t$ del descenso del gradiente. $\eta$ se denomina ``tasa de aprendizaje'' y determina el tamaño del paso que se da en la dirección del descenso del gradiente y por lo tanto condiciona la forma en que converge la minimización. El valor de $\eta$ debe realizarse cuidadosamente para evitar inestabilidades en el proceso de aprendizaje, y usualmente está definido en el rango $0 < \eta < 1$.
 
 Dado que la función costo se puede descomponer en una suma sobre términos de costo o error para cada para individual de entrada salida $(\bm{x}_i, \bm{y}_i)$, la derivada se puede calcular para cada par entrada/salida individualmente y luego combinar estos términos al final, ya que la derivada de una suma de funciones es la suma de las derivadas de cada función:
 \[ \frac{\partial C(X, \bm{\omega})}{\partial \omega_{ij}^k} = \frac{1}{N} \sum_{d=1}^N \frac{\partial}{\partial \omega_{ij}^k} \left(\dfrac{1}{2}(\bm{\hat{y}}_d - \bm{y}_d)^2\right) = \frac{1}{N} \sum_{d=1}^N \frac{\partial C_d}{\partial \omega_{ij}^k} \]
@@ -139,7 +140,7 @@ donde omitimos el subíndice $d$ en $C_d$, $\bm{\hat{y}}_d$ y $\bm{y}$ por simpl
 
 La derivación del algoritmo de \textit{backpropagation} comienza aplicando la regla de la cadena a la derivada parcial de la función costo
 \[ \frac{\partial C}{\partial \omega_{ij}^k} = \frac{\partial C}{\partial z_j^k} \frac{\partial z_j^k}{\partial \omega_{ij}^k} \]
-donde $z_j^k$ es el valor de activación del nodo $j$ de la capa $k$ antes de pasar por la función de activación para generar la salida $y_j^k$. Esta descomposición de la derivada parcial establece que el cambio en la función costo debido a un peso es el producto del cambio de la función $C$ debido a la activación $z_j^k$ multiplicado por el cambio en la activación $z_j^k$ debido al peso $\omega_{ij}^k$. Generalmente se llama \textit{error} al primer factor de la expresión anterior, y se denota por
+donde $z_j^k$ es el valor de activación del nodo $j$ de la capa $k$ antes de pasar por la función de activación para generar la salida $y_j^k$. Esta descomposición de la derivada parcial establece que el cambio en la función costo debido a un peso es el producto del cambio de la función $C$ debido a la activación $z_j^k$ multiplicado por el cambio en la activación $z_j^k$ debido al peso $\omega_{ij}^k$. Generalmente se llama ``error'' al primer factor de la expresión anterior, y se denota por
 \[ \delta_j^k \equiv \frac{\partial C}{\partial z_j^k} \]
 
 El segundo factor se puede calcular a partir de la definición del valor de activación:
@@ -172,11 +173,11 @@ Reemplazando esta expresión en la ecuación previa obtenida para $\delta_j^k$, 
 
 Esta ecuación es el motivo del nombre del algoritmo de aprendizaje. El error $\delta_j^k$ en la capa $k$ depende de los errores $\delta_l^{k+1}$ de la capa siguiente $k+1$. De este modo, los errores se propagan hacia atras desde la última capa hacia la primera. El algoritmo comienza entonces calculando los errores de la última capa a partir de la salida predicha por la red $\hat{y}_j = g_o(z_j^L)$ y del valor de entrenamiento $y_j$. A partir de aquí, los términos de error de la capa previa son calculados realizando una suma de los errores recién calculados ponderada por los pesos $\omega_{jl}^{k+1}$ de los términos de error de la capa siguiente y escalados por $g'(z_j^k)$, y esto se repite hasta que se alcanza la primera capa.
 
-Esta propagación hacia atrás de los errores es muy similar a la propagación hacia adelante que calcula la predicción de la red. Por esto, el cálculo de la salida de la red se suele llamar la \textit{fase de propagación hacia adelante}, mientras que el cálculo de los errores y derivadas se denomina usualmente \textit{fase de propagación hacia atrás}, o \textit{backpropagation}. Durante la fase de avance, las entradas se combinan repetidamente desde la primer capa hasta la última por medio de las sumas ponderadas por los pesos $\omega_{ij}^k$ y las funciones de activación $g(x)$ y $g_o(x)$. En la fase de retroceso, las ``entradas'' son los términos de error de la capa final, que son repetidamente recombinados desde la última capa hacia la primera mediante sumas ponderadas por los pesos $\omega_{ij}^{k+1}$ y transformados por los factores de escala no lineales $g_o'(z_j^L)$ y $g'(z_j^k)$.
+Esta propagación hacia atrás de los errores es muy similar a la propagación hacia adelante que calcula la predicción de la red. Por esto, el cálculo de la salida de la red se suele llamar la ``fase de propagación hacia adelante'', mientras que el cálculo de los errores y derivadas se denomina usualmente ``fase de propagación hacia atrás'', o \textit{backpropagation}. Durante la fase de avance, las entradas se combinan repetidamente desde la primer capa hasta la última por medio de las sumas ponderadas por los pesos $\omega_{ij}^k$ y las funciones de activación $g(x)$ y $g_o(x)$. En la fase de retroceso, las ``entradas'' son los términos de error de la capa final, que son repetidamente recombinados desde la última capa hacia la primera mediante sumas ponderadas por los pesos $\omega_{ij}^{k+1}$ y transformados por los factores de escala no lineales $g_o'(z_j^L)$ y $g'(z_j^k)$.
 
 Con las expresiones obtenidas para el cálculo del gradiente de $C$ con respecto de $\bm{\omega}$, podemos realizar la secuencia de actualizaciones de los pesos dada por la ecuación \eqref{eq:actpesos}. Esta actualización no se realiza calculando el gradiente completo sobre todo el conjunto de entrenamiento $X$ simultáneamente, sino que se realiza una estimación del gradiente utilizando un subconjunto de $X$ elegido aleatoriamente, en lo que se denomina un \textit{minibatch}. El uso de \textit{minibatchs} otorga eficiencia al método, dado que permiten un entrenamiento más rápido al calcular el gradiente y actualizar los pesos solo con una parte de los datos. Además, al promediar los gradientes de múltiples ejemplos, reduce el ruido y mejora la estabilidad del proceso de aprendizaje. No obstante, este método puede afectar a la precisión final de la red, ya que la actualización de los pesos se basa en una aproximación del gradiente total. El tamaño de la muestra que compone el minibatch es un parámetro importante que se debe ajustar para obtener un buen rendimiento.
 
-Una vez que el conjunto $X$ se particiona en subconjuntos aleatorios de muestras en \textit{minibatch}, se llama una \textit{era} a la secuencia de actualizaciones de los pesos en cada \textit{minibatch}, hasta que se recorre el conjunto completo de aprendizaje. Luego, se iteran sucesivas eras hasta que la función costo alcanza un valor suficientemente bajo. En el ejemplo siguiente analizaremos una implementación práctica del algoritmo de \textit{backpropagation} para el entrenamiento de una red \textit{feedforward}. 
+Una vez que el conjunto $X$ se particiona en subconjuntos aleatorios de muestras en \textit{minibatch}, se llama una ``era'' a la secuencia de actualizaciones de los pesos en cada \textit{minibatch}, hasta que se recorre el conjunto completo de aprendizaje. Luego, se iteran sucesivas eras hasta que la función costo alcanza un valor suficientemente bajo. En el ejemplo siguiente analizaremos una implementación práctica del algoritmo de \textit{backpropagation} para el entrenamiento de una red \textit{feedforward}. 
 
 
 \section{Ejemplo de red usando NumPy}
@@ -319,7 +320,7 @@ En la sección anterior implementamos una red \textit{feedforward} con herramien
 
 A continuación abordaremos la identificación de las imágenes del conjunto MNIST por medio de la biblioteca Keras\footnote{\url{https://keras.io/}.}, que a su vez se ejecuta sobre la biblioteca TensorFlow\footnote{\url{https://www.tensorflow.org/}.}, en este caso usando un \textit{notebook} de Jupyter.
 
-Como es usual, comenzamos importando los módulos que nos permiten manipular arrays, realizar gráficos y acceder al conjunto MNIST:
+Comenzamos importando numpy y fijando una semilla para los números al azar, con el propósito de tener repetibilidad en los cálculos:
 
 \jupynotex[1]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
@@ -331,35 +332,31 @@ Para ver cómo son las imágenes que la red tratará de identificar, elegimos 25
 
 \jupynotex[3, output-image-size=70mm]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
-Ahora importamos las herramientas de Keras que nos permite el armado de la red neuronal:
-    
-\jupynotex[4]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
-
 Al igual que hicimos en la sección anterior, convertimos las etiquetas que tenemos en formato de dígito (0, 1, $\cdots$, 9) en un array codificado en forma \textit{one-hot encoding} (OHE):
 
-\jupynotex[5]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[4]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 En las dos celdas siguientes obtenemos la dimensión del array que representa la imagen de entrada, y adaptamos los arrays de entrada de una imagen cuadrada de bits en el rango \mip{[0, 255]} a un array unidimensional cuyos valores están normalizados:
 
-\jupynotex[6-7]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[5-6]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 A continuación construimos una red con la misma estructura que usamos en la sección anterior, es decir, una capa de entrada, dos capas densas con activación ReLU con 100 y 200 nodos, respectivamente, y una capa de salida de 10 nodos con activación softmax. Para ello instanciamos un objeto \mip{model} de la clase \mip{Sequential}:
 
-\jupynotex[8]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[7]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 Podemos invocar el método \mip{summary()} para ver los detalles de la red, particularmente la cantidad de parámetros que se ajustarán en la fase de entrenamiento:
 
-\jupynotex[9]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[8]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 Esta celda muestra que tenemos un total de 100710 parámetros que entrenar, que ocupan un total de \mip{393.40} KB. 
 
 En la celda siguiente invocamos el método \mip{compile} sobre el objeto \mip{model}. Este método verifica que la arquitectura del modelo (red) sea válida y que todas las capas estén correctamente conectadas, y prepara el modelo para la fase de entrenamiento en una CPU, GPU o TPU. \mip{compile} recibe tres argumentos: \mip{loss}, que especifica cuál será la función de costo (o pérdida) a utilizar, en este caso entropía cruzada con valores categóricos; \mip{optimizer}, que corresponde al método de optimización, y que para este ejemplo elegimos \mip{adam} (\textit{Adaptative Moments}) que es una variación del método del descenso estocástico del gradiente; y finalmente una métrica, \mip{accuracy}, que es la fracción o porcentaje de predicciones correctas:
  
-\jupynotex[10]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[9]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 Ya tenemos entonces todo listo para iniciar el entrenamiento:
  
-\jupynotex[11]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[10]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 El método \mip{fit} recibe los arrays de entrada y etiquetas (\mip{x_train} y \mip{y_train}), la cantidad de épocas y el tamaño del batch. Adicionalmente pasamos el argumento \mip{verbose=0} para evitar la salida extensa de esta celda, pero si pasamos el valor por defecto de este parámetro (omitiéndolo por ejemplo), el método mostrará el progreso del entrenamiento informando el tiempo que le toma cada época, la precisión obtenida y el valor de la función de costo, tal como se muestra en la Figura \ref{fig:fit}.
 
@@ -373,11 +370,11 @@ El método \mip{fit} recibe los arrays de entrada y etiquetas (\mip{x_train} y \
 
 Una vez entrenada la red, podemos probar cuán eficaz es para predecir las imágenes del conjunto de prueba. Para ello ejecutamos la celda siguiente:
  
-\jupynotex[12]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[11]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
-Vemos que la tasa de aciertos alcanza el 98.1\%, muy similar a la precisión que alcanzamos con el modelo de la sección anterior. Una descripción más completa que muestra el desempeño de la red la da la matriz de confusión. Esta matriz representa la cantidad de aciertos para cada clase o etiqueta, así como los ``desaciertos'' al predecir etiquetas erróneas. En la celdas siguientes definimos una función que realiza el gràfico de la matriz de confusion (tomada de la web de scikit-learn, versión 0.18), y obtenemos los valores predichos y verdaderos transformándolos a dígitos desde su representación como arrays OHE:
+Vemos que la tasa de aciertos alcanza el 98\%, muy similar a la precisión que alcanzamos con el modelo de la sección anterior. Una descripción más completa que muestra el desempeño de la red la da la matriz de confusión. Esta matriz representa la cantidad de aciertos para cada clase o etiqueta, así como los ``desaciertos'' al predecir etiquetas erróneas. En la celdas siguientes definimos una función que realiza el gràfico de la matriz de confusion (tomada de la web de scikit-learn, versión 0.18), y obtenemos los valores predichos y verdaderos transformándolos a dígitos desde su representación como arrays OHE:
 
-\jupynotex[13-14]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
+\jupynotex[12-13]{Chapters/machine_learning/code/nn-mnist-keras.ipynb}
 
 Los valores sobre la diagonal son los aciertos de la red, mientras que los que están fuera de la diagonal muestran cómo se distribuyen los fallos de la red sobre el resto de las etiquetas. Tal como ocurrió en la sección anterior, las imágenes que contienen al número 5 son las que más le cuesta identificar a la red. Si pasamos como argumento \mip{normalize=True} a la función que construye la red, se mostrarán las fracciones de acierto en vez de los números absolutos.
 

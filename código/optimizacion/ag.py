@@ -2,6 +2,7 @@
 
 import random
 
+
 class Individual():
     genes = (0, 1)
     max_weight = 102
@@ -167,6 +168,6 @@ if __name__ == "__main__":
     print("Valor:", population.best().fitness)
     print("Peso:", population.best().weight)
 
-# Copyright 2020-2023 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

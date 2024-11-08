@@ -1,5 +1,5 @@
 
-% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -13,12 +13,12 @@
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Matplotlib & 3.3.4 \\
-        NumPy & 1.19.5 \\
-        SciPy & 1.6.0 \\
-        SymPy & 1.7.1 \\
-        mpmath & 1.2.1 \\
-        vegas & 5.0 \\
+        Matplotlib & 3.9.2 \\
+        NumPy & 1.26.4 \\
+        SciPy & 1.14.1 \\
+        SymPy & 1.13.3 \\
+        mpmath & 1.3.0 \\
+        vegas & 6.1.3 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
@@ -29,7 +29,7 @@
 \end{modulesinfo}
 \end{wraptable}
  
-Muchas aplicaciones científicas y tecnológicas requieren la integración de funciones, en una gran variedad de contextos. La integración analítica de funciones es mucho más compleja que la diferenciación, y solo se puede realizar en los pocos casos en los que existe la primitiva del integrando. Por esta razón es necesario recurrir frecuentemente a la integración numérica, denominada \textit{cuadratura} por razones históricas.
+Muchas aplicaciones científicas y tecnológicas requieren la integración de funciones, en una gran variedad de contextos. La integración analítica de funciones es mucho más compleja que la diferenciación, y solo se puede realizar en los pocos casos en los que existe la primitiva del integrando. Por esta razón es necesario recurrir frecuentemente a la integración numérica, denominada ``cuadratura'' por razones históricas.
 
 El cálculo de una integral definida en forma analítica consiste en evaluar
 \[ \int_a^b f(x) \, dx = F(b) - F(a)\]
@@ -37,7 +37,7 @@ El cálculo de una integral definida en forma analítica consiste en evaluar
 donde 
 \[ f(x) = \frac{dF(x)}{dx} \]
 
-El problema se reduce a encontrar una función primitiva $F$ (o \textit{antiderivada}) correspondiente a una dada $f(x)$. El intervalo de integración $[a, b]$ puede ser finito, semi infinito, (cuando $a = -\infty$ o $b = \infty$), o infinito (ambos $a = -\infty$ y $b = \infty$). Gráficamente, calcular la integral corresponde a evaluar el área entre la curva de $f(x)$ y el eje $x$, tal como muestra la figura \ref{fig:int-areas}, donde el área se considera positiva cuando $f(x) > 0$ (verde) y negativa si $f(x) < 0$ (roja).
+El problema se reduce a encontrar una función primitiva $F$ (o ``antiderivada'') correspondiente a una dada $f(x)$. El intervalo de integración $[a, b]$ puede ser finito, semi infinito, (cuando $a = -\infty$ o $b = \infty$), o infinito (ambos $a = -\infty$ y $b = \infty$). Gráficamente, calcular la integral corresponde a evaluar el área entre la curva de $f(x)$ y el eje $x$, tal como muestra la figura \ref{fig:int-areas}, donde el área se considera positiva cuando $f(x) > 0$ (verde) y negativa si $f(x) < 0$ (roja).
 
 \begin{figure}[ht]
  \centering
@@ -124,7 +124,7 @@ El abordaje central para la integración numérica (definida) de una función co
 \begin{equation}\label{eq:int02}
  I = \int_a^b f(x) \, dx = \sum_{i=1}^{n} {\omega_i f(x_i)} + r_n
 \end{equation} 
-donde $x_i$ son las \textit{abscisas nodales}, $\omega_i$ son los \textit{pesos} y $r_n$ es el residuo producto de la aproximación. Es importante tener una estimación del término $r_n$ para saber con qué precisión estamos estimando la integral, pero en general asumiremos que es una cantidad pequeña.
+donde $x_i$ son las ``abscisas nodales'', $\omega_i$ son los ``pesos'' y $r_n$ es el residuo producto de la aproximación. Es importante tener una estimación del término $r_n$ para saber con qué precisión estamos estimando la integral, pero en general asumiremos que es una cantidad pequeña.
 
 En la suma de la expresión \eqref{eq:int02} tenemos $n$ abscisas, por lo que estamos considerando una cuadratura de $n$-puntos. Según cómo elijamos la ubicación de las abscisas y los pesos correspondientes tendremos diferentes esquemas de cuadratura, con diferencias en el grado de precisión alcanzado y la complejidad en el cálculo. En este aspecto, podemos distinguir dos grandes grupos:
 \begin{itemize}
@@ -132,7 +132,7 @@ En la suma de la expresión \eqref{eq:int02} tenemos $n$ abscisas, por lo que es
  \item \textbf{Cuadraturas gaussianas:} utilizan abscisas que no están equiespaciadas, eligiendo los valores $x_i$ de modo que pueda obtenerse un aumento en la precisión. Como resultado se utilizan menos abscisas que en las fórmulas de Newton-Cotes y por lo tanto un número menor de evaluaciones de $f$, lo cual es una ventaja cuando estas evaluaciones son costosas computacionalmente.
 \end{itemize}
 
-Por otra parte, se puede considerar otra categorización teniendo en cuenta si los límites del intervalo de integracion ($a$ y $b$) pertenecen al grupo de abscisas $x_i$ en donde se evalúa la función. Los métodos que incluyen las evaluaciones $f(a)$ y $f(b)$ son \textit{cerrados}, mientras que los que los excluyen son \textit{abiertos}. Las cuadraturas gaussianas forman parte de los métodos abiertos, al igual que la regla del punto medio, mientras que las fórmulas de la regla trapezoidal y Simpson de Newton-Cotes constituyen ejemplos de métodos cerrados.
+Por otra parte, se puede considerar otra categorización teniendo en cuenta si los límites del intervalo de integracion ($a$ y $b$) pertenecen al grupo de abscisas $x_i$ en donde se evalúa la función. Los métodos que incluyen las evaluaciones $f(a)$ y $f(b)$ son ``cerrados'', mientras que los que los excluyen son ``abiertos''. Las cuadraturas gaussianas forman parte de los métodos abiertos, al igual que la regla del punto medio, mientras que las fórmulas de la regla trapezoidal y Simpson de Newton-Cotes constituyen ejemplos de métodos cerrados.
 
 
 \subsection{Métodos de Newton-Cotes}
@@ -142,14 +142,14 @@ Las diversas reglas de integración de Newton-Cotes se derivan del orden de inte
 \begin{equation}\label{eq:int03}
 I = \int_a^b f(x) \, dx \approx f \left( \frac{a + b}{2}  \right) \int_a^b dx = (b - a) f \left( \frac{a + b}{2}  \right)
 \end{equation} 
-que se conoce como la \textit{regla del punto medio}. En este caso, la integral se aproxima con el área de un rectángulo cuya base es $(b-a)$ y la altura es $f[(b-a)/2]$, y es capaz de integrar polinomios hasta primer orden (es decir, funciones lineales), y por este motivo se dice que es de grado polinomial uno. Con la misma aproximación (polinomio de grado cero) se puede utilizar uno de los extremos del intervalo dando origen de esta forma a la \textit{regla del rectángulo}. Este abordaje es muy común en las reglas de integración compuestas (de la que hablaremos más adelante).
+que se conoce como la ``regla del punto medio''. En este caso, la integral se aproxima con el área de un rectángulo cuya base es $(b-a)$ y la altura es $f[(b-a)/2]$, y es capaz de integrar polinomios hasta primer orden (es decir, funciones lineales), y por este motivo se dice que es de grado polinomial uno. Con la misma aproximación (polinomio de grado cero) se puede utilizar uno de los extremos del intervalo dando origen de esta forma a la ``regla del rectángulo''. Este abordaje es muy común en las reglas de integración compuestas (de la que hablaremos más adelante).
 
-Aproximando la función $f(x)$ por un polinomio de primer grado, evaluada en los puntos extremos del intervalo de integración, obtenemos la \textit{regla del trapecio}:
+Aproximando la función $f(x)$ por un polinomio de primer grado, evaluada en los puntos extremos del intervalo de integración, obtenemos la ``regla del trapecio'':
 \begin{equation}\label{eq:int04}
 I = \int_a^b f(x) \, dx \approx \frac{(b-a)}{2} \left[ f(a) + f(b) \right]
 \end{equation} 
 
-que también es polinomial de grado uno. Si utilizamos, en cambio, un polinomio de interpolación de segundo grado, resulta la \textit{regla de Simpson}:
+que también es polinomial de grado uno. Si utilizamos, en cambio, un polinomio de interpolación de segundo grado, resulta la ``regla de Simpson'':
 \begin{equation}\label{eq:int05}
 I = \int_a^b f(x) \, dx \approx \frac{(b-a)}{6} \left[ f(a) + 4 f\left( \frac{a+b}{2} \right) + f(b) \right]
 \end{equation} 
@@ -209,7 +209,7 @@ Las reglas de cuadratura de mayor orden se pueden obtener aumentando el número 
 
 El uso de las fórmulas de Newton-Cotes es inapropiado en intervalos largos de integración. Por un lado, esto requeriría usar interpolaciones de grado superior y los pesos correspondientes son engorrosos de calcular. Por otro, dado que estas fórmulas utilizan abscisas equiespaciadas, la naturaleza oscilatoria de los polinomios de interpolación de alto orden no necesariamente convergen al valor exacto de la integral.
 
-El procediemiento para obtener las fórmulas compuestas de Newton-Cotes, por ejemplo para la regla de Simpson, consiste en seleccionar un entero par $n$ y subdividir el intervalo $[a, b]$ en $n$ subintervalos, aplicando la regla de Simpson en cada par consecutivo de ellos. Definiendo el \textit{paso} $h = (b -a)/n$, y $x_i = a + i h$ para cada $i = 0, 1, \ldots, n$ tenemos:
+El procediemiento para obtener las fórmulas compuestas de Newton-Cotes, por ejemplo para la regla de Simpson, consiste en seleccionar un entero par $n$ y subdividir el intervalo $[a, b]$ en $n$ subintervalos, aplicando la regla de Simpson en cada par consecutivo de ellos. Definiendo el ``paso'' $h = (b -a)/n$, y $x_i = a + i h$ para cada $i = 0, 1, \ldots, n$ tenemos:
 \begin{align*}
  \int_a^b f(x) \, dx &= \sum_{i=1}^{n/2} \int_{x_{2i-2}}^{x_{2i}} f(x) \, dx \\
   &= \sum_{i=1}^{n/2}  \frac{h}{3} \left[ f(x_{2i-2}) + 4 f(x_{2i-1}) + f(x_{2i}) \right] 
@@ -235,7 +235,7 @@ siempre que $f \in C^4[a,b]$, es decir, $f$ sea continua y con todas sus derivad
 \subsection{Cuadraturas gaussianas}
 En las secciones anteriores hemos visto que dado un conjunto de $n$ abscisas $x_i$, podemos encontrar los pesos $\omega_i$ de modo tal que la fórmula resultante sea exacta para la integración de polinomios de grado menor o igual a $n-1$. En algunos casos, la fórmula de Simpson de tres puntos es exacta para polinomios hasta tercer grado. En las fórmulas de Newton-Cotes tenemos fijos los valores de las abscisas, y obtenemos los pesos para que las integrales sean exactas en el contexto mencionado.
 
-Podemos aumentar la precisión de las aproximaciones si tenemos más parámetros que podamos utilizar aumentando de este modo los ``grados de libertad'' disponibles para este propósito. De esta manera, si podemos \textit{elegir} los valores de las abscisas y de los pesos, podemos obtener expresiones que dan valores exactos para la integración de polinomios hasta de grado $2n-1$, dando origen de este modo a las \textit{cuadraturas gaussianas}.
+Podemos aumentar la precisión de las aproximaciones si tenemos más parámetros que podamos utilizar aumentando de este modo los ``grados de libertad'' disponibles para este propósito. De esta manera, si podemos \textit{elegir} los valores de las abscisas y de los pesos, podemos obtener expresiones que dan valores exactos para la integración de polinomios hasta de grado $2n-1$, dando origen de este modo a las ``cuadraturas gaussianas''.
 
 Ilustraremos el caso de derivación de las abscisas y los pesos de la fórmula de Gauss-Legendre, de modo de poder integrar exactamente polinomios de tercer grado en el intervalo $[-1, 1]$ solo con dos evaluaciones de la función integrando. Usaremos la misma metodología que para derivar la regla de Simpson.
 
@@ -274,7 +274,7 @@ Se puede observar que en la ecuación \eqref{eq:intGL} estamos integrando en el 
 
 Es posible extender la metodología para obtener fórmulas de Gauss-Legendre de mayor orden aumentando el número de abscisas. Existen tablas\footnote{Ver tablas 3.5.1-5 en \url{https://dlmf.nist.gov/3.5\#v}} en donde figuran las abscisas y los pesos para cuadraturas de Gauss-Legendre con más de dos puntos. En la sección \ref{sec:cuadfuneval} mostramos cómo realizar la evaluación numérica de cuadraturas gaussianas utilizando el módulo \mip{integrate} de SciPy. 
 
-El análisis del error en las cuadraturas gaussianas excede el alcance de este libro (invitamos a las personas interesadas en consultar la referencia \citep{stoer2002} para ver una demostración rigurosa), pero podemos mencionar que en este caso, si $f \in C^{(2n)} [a, b]$, el error en la cuadratura es
+El análisis del error en las cuadraturas gaussianas excede el alcance de este libro (invitamos a las personas interesadas en consultar la referencia \cite{stoer2002} para ver una demostración rigurosa), pero podemos mencionar que en este caso, si $f \in C^{(2n)} [a, b]$, el error en la cuadratura es
 \begin{equation}
     \varepsilon_{CG} = K \frac{f^{(2n)}(\xi)}{(2n!)}
 \end{equation} 
@@ -392,10 +392,10 @@ Como un ejemplo simple de uso de las rutinas de SciPy, evaluaremos la integral
  I = \int_{-1}^{1} \int_{-1}^1 \exp\left( -x^2 - y^2 \right) \, dx \, dy 
 \end{equation}
 
-En la celda 10 definimos la función integrando \mip{f2}, y en la 11 definimos los límites de integración para $x$ (\mip{a} y \mip{b}), así como las funciones $g(x)$ y $h(x)$ utilizando funciones \mip{lambda}, y finalmente invocamos el método \mip{dblquad} de \mip{scipy.integrate}, cuidando que el orden en el que aparecen los argumentos debe respetar el orden de los argumentos de \mip{f2}. El resultado de \mip{dblquad} muestra una tupla con el valor de la integral y una estimación del error.
+En la celda 10 definimos la función integrando \mip{f2}, y en la 11 definimos los límites de integración para $x$ (\mip{a} y \mip{b}), así como las funciones $g(x)$ y $h(x)$, y finalmente invocamos el método \mip{dblquad} de \mip{scipy.integrate}, cuidando que el orden en el que aparecen los argumentos debe respetar el orden de los argumentos de \mip{f2}. El resultado de \mip{dblquad} muestra una tupla con el valor de la integral y una estimación del error.
 \jupynotex[10-11]{Chapters/integracion/code/integracion-scipy.ipynb}
 
-Podemos extender el ejemplo a tres dimensiones fácilmente. En este caso definimos la función \mip{f3} agregando el argumento \mip{z}, así como los límites de integración para esta variable que en este caso deben ser funciones de las variables de las rutinas ``mas internas'' que integran en \mip{x} y \mip{y}. Nuevamente hacemos uso, por simplicidad, de las funciones \mip{lambda} asignando los límites en \mip{z} a \mip{q} y \mip{r}:
+Podemos extender el ejemplo a tres dimensiones fácilmente. En este caso definimos la función \mip{f3} agregando el argumento \mip{z}, así como los límites de integración para esta variable que en este caso deben ser funciones de las variables de las rutinas ``mas internas'' que integran en \mip{x} y \mip{y}. Nuevamente definimos funciones asignando los límites en \mip{z} a \mip{q} y \mip{r}:
 \jupynotex[12]{Chapters/integracion/code/integracion-scipy.ipynb}
 
 Para integrales de dimensiones mayores, SciPy ofrece el método \mip{nquad}. Este método recibe como argumentos la función a ser integrada y los rangos de integración para cada variable como una secuencia de dos números. Naturalmente, \mip{nquad} devuelve los mismos resultados que \mip{dblquad} y \mip{tplquad} para dos y tres dimensiones, respectivamente:
@@ -404,10 +404,10 @@ Para integrales de dimensiones mayores, SciPy ofrece el método \mip{nquad}. Est
 Tal como anticipamos al comienzo de esta sección, la complejidad computacional crece rápidamente al incrementar las dimensiones de la integral. Para cuantificar esta tendencia usaremos \mip{nquad} con una función generalizada del integrando de los ejemplos anteriores que acepta un número arbitrario de argumentos:
 \jupynotex[14]{Chapters/integracion/code/integracion-scipy.ipynb}
 
-Evaluaremos entonces la integral con un número creciente de dimensiones (desde 1 hasta 5) y estimaremos el tiempo de ejecución utilizando el comando \textit{mágico} \verb|%time|\footnote{Estos cálculos se realizaron en un procesador AMD Ryzen 5 5600X.}:
+Evaluaremos entonces la integral con un número creciente de dimensiones (desde 1 hasta 5) y estimaremos el tiempo de ejecución utilizando el comando ``mágico'' \verb|%time|\footnote{Estos cálculos se realizaron en un procesador Intel i7 1355U.}:
 \jupynotex[15-19]{Chapters/integracion/code/integracion-scipy.ipynb}
 
-Podemos ver que los tiempos de ejecución aumentan desde algunas centenas de microsegundos para una dimensión, hasta 20 segundos para 5. Es decir, aumentando el número de dimensiones 5 veces, el tiempo aumenta cuatro órdenes de magnitud. 
+Podemos ver que los tiempos de ejecución aumentan desde algunas centenas de microsegundos para una dimensión, hasta varios segundos para 5. Es decir, aumentando el número de dimensiones 5 veces, el tiempo aumenta cuatro órdenes de magnitud. 
 
 
 
@@ -442,7 +442,7 @@ En la celda 20 importamos el módulo \textbf{vegas}, y a continuación creamos u
 
 \jupynotex[20]{Chapters/integracion/code/integracion-scipy.ipynb}
 
-Lo primero que podemos notar es que el tiempo requerido para evaluar la integral (en la misma computadora que en los casos anteriores) es de poco menos de 400 ms, esto es, unas 50 veces más rápido que utilizando \mip{nquad} de \mip{scipy.integrate} para la misma dimensionalidad del dominio de integración. Como contrapartida, la precisión obtenida es de apenas el $0.16$ \% frente al $1.1 \times 10^{-12}$ \% de \mip{nquad}. Podemos mejorar la precisión obtenida con el método de Monte Carlo incrementando el número de puntos muestreados \mip{neval}, o la cantidad de iteraciones \mip{nitn}, aunque es generalmente mejor aumentar \mip{neval}. Si utilizamos un orden de magnitud mayor (\mip{neval=1e5}), la precisión pude disminuir un poco sin casi incrementar el tiempo de ejecución. Para más detalles sobre el paquete \textbf{vegas} y métodos avanzados de integración, recomendamos leer su documentación\footnote{\href{https://vegas.readthedocs.io/}{https://vegas.readthedocs.io/}}.
+Lo primero que podemos notar es que el tiempo requerido para evaluar la integral (en la misma computadora que en los casos anteriores) es de poco menos de 65 ms, esto es, unas 200 veces más rápido que utilizando \mip{nquad} de \mip{scipy.integrate} para la misma dimensionalidad del dominio de integración. Como contrapartida, la precisión obtenida es de apenas el $0.16$ \% frente al $1.1 \times 10^{-12}$ \% de \mip{nquad}. Podemos mejorar la precisión obtenida con el método de Monte Carlo incrementando el número de puntos muestreados \mip{neval}, o la cantidad de iteraciones \mip{nitn}, aunque es generalmente mejor aumentar \mip{neval}. Si utilizamos un orden de magnitud mayor (\mip{neval=1e5}), la precisión pude disminuir un poco sin casi incrementar el tiempo de ejecución. Para más detalles sobre el paquete \textbf{vegas} y métodos avanzados de integración, recomendamos leer su documentación\footnote{\href{https://vegas.readthedocs.io/}{https://vegas.readthedocs.io/}}.
 
 
 \section{Lecturas recomendadas}

@@ -13,19 +13,20 @@
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Cython & 0.29.35 \\
-        cffi & 1.15.1 \\
-        line-profiler & 4.1.1 \\
-        mypy & 1.5.1 \\
-        numba & 0.57.0 \\
-        pyinstrument & 4.6.0 \\
-        quantiphy & 2.19 \\
-        scalene & 1.5.31.1 \\
+        Cython & 3.0.11 \\
+        cffi & 1.17.0 \\
+        line-profiler & 4.1.3 \\
+        mypy & 1.11.2 \\
+        numba & 0.60.0 \\
+        pandas & 2.2.2 \\
+        pyinstrument & 4.7.3 \\
+        quantify & 2.20 \\
+        scalene & 1.5.44.1 \\
         snakeviz & 2.2.0 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
-    
+
     \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/profiling/}{Código disponible}
 }
 \end{center}
@@ -48,7 +49,7 @@ En este capítulo veremos cómo realizar esas mediciones en tiempo de ejecución
 
 \section{Profiling}
 
-El perfilamiento (término que casi no se utiliza porque acostumbramos a mencionarlo en inglés, \textit{profiling}) se basa en medir la ejecución de aplicaciones o programas para entender su comportamiento dinámico. 
+El perfilamiento (término que casi no se utiliza porque acostumbramos a mencionarlo en inglés, \textit{profiling}) se basa en medir la ejecución de aplicaciones o programas para entender su comportamiento dinámico.
 
 En otras palabras, no es información que se pueda obtener ``inspeccionando'' el código, sino que debemos ejecutarlo luego de haberlo instrumentado, obtener las distintas mediciones necesarias, y analizarlas para entender cuanto tiempo lleva la ejecución de cada parte.
 
@@ -56,7 +57,7 @@ Por supuesto, también podemos encontrar por inspección problemas de performanc
 
 A lo largo de esta sección veremos distintas herramientas para hacer \textit{profiling}, basándonos en un programa ejemplo. Este programa fue realizado tratando de evitar cualquier optimización que salga naturalmente; casi podemos decir que a propósito cometimos varios errores inocentes, para luego poder mostrar que aunque hay varias partes del código que intuitivamente veríamos de optimizar, en realidad siempre debemos medir para luego saber donde enfocarnos (justamente, hacer \textit{profiling}).
 
-La idea del programa es analizar un texto grande y mostrar las 10 palabras que aparecen con mayor frecuencia. Como texto fuente usamos la obra del Don Quijote, que podemos \href{https://www.gutenberg.org/cache/epub/2000/pg2000.txt}{descargar de aquí}.
+La idea del programa es analizar un texto grande y mostrar las 10 palabras que aparecen con mayor frecuencia. Como texto fuente usamos la obra del Don Quijote, que podemos \href{https://www.gutenberg.org/cache/epub/2000/pg2000.txt}{descargar de aquí} (guardarlo como \texttt{quijote.txt}).
 
 El programa está estructurado en una función principal y tres auxiliares.
 
@@ -70,13 +71,13 @@ Es necesario filtrar el contenido porque el archivo que bajamos tiene toda una s
 
 \pyfile[firstline=21, lastline=40]{Chapters/profiling/code/quijote-1.py}
 
-Para contar las palabras armamos dos listas para esas palabras que vamos encontrando y sus ocurrencias. Luego recorremos las líneas, separando cada una en palabras (limpiando cada una de signos de puntuación y poniéndola en minúsculas) y las contamos. El algoritmo para contar es el siguiente: buscamos la palabra en la lista de palabras que ya tenemos, si está presente (la llamada a \texttt{index} nos devuelve la posición) obtenemos el número en la posición correspondiente de la otra lista y le sumamos 1, pero si no está presente (se generó una excepción de tipo \texttt{ValueError}) la agregamos al final de la lista de palabras y agregamos el número 1 en la lista de valores de conteo. 
+Para contar las palabras armamos dos listas para esas palabras que vamos encontrando y sus ocurrencias. Luego recorremos las líneas, separando cada una en palabras (limpiando cada una de signos de puntuación y poniéndola en minúsculas) y las contamos. El algoritmo para contar es el siguiente: buscamos la palabra en la lista de palabras que ya tenemos, si está presente (la llamada a \texttt{index} nos devuelve la posición) obtenemos el número en la posición correspondiente de la otra lista y le sumamos 1, pero si no está presente (se generó una excepción de tipo \texttt{ValueError}) la agregamos al final de la lista de palabras y agregamos el número 1 en la lista de valores de conteo.
 
 \pyfile[firstline=4, lastline=18]{Chapters/profiling/code/quijote-1.py}
 
 Esta función recibe directamente las dos listas que se generaron en el proceso de conteo. Para mostrar las diez principales va a realizar el mismo procedimiento diez veces, en cada caso encuentra el valor máximo de la lista de conteos, y luego informa ese valor y la palabra de la misma posición; antes de la próxima iteración retira de la lista el valor y palabras informados, para así encontrar el próximo par.
 
-Volvemos a recalcar lo absurdo de estos algoritmos, por favor no hagan esto en sus casas. 
+Volvemos a recalcar lo absurdo de estos algoritmos, por favor no hagan esto en sus casas.
 
 Veamos entonces cómo se comporta, ejecutando nuestro programa con Python, y a la vez ejecutando todo con \texttt{time}, una herramienta que luego de la ejecución del programa nos informará cuanto tiempo pasó (nos da tres valores, de los cuales nos interesa el \texttt{real}, que es el tiempo que usó el proceso):
 
@@ -164,7 +165,7 @@ Top 10:
     37454    0.024    0.000    0.024    0.000 {method 'split' of 'str' objects}
 \end{shell}
 
-Al ejecutarlo encontramos que primero se muestra la salida normal que ya habíamos visto arriba, y luego todo un reporte del \texttt{cProfile}: nos indica que se llamaron funciones más de siete millones de veces en casi siete segundos. Cabe destacar que el tiempo total de ejecución subió un 17\% entre la ejecución inicial y la realizada al obtener mediciones, lo cual se explica por la carga extra que mencionamos antes. 
+Al ejecutarlo encontramos que primero se muestra la salida normal que ya habíamos visto arriba, y luego todo un reporte del \texttt{cProfile}: nos indica que se llamaron funciones más de siete millones de veces en casi siete segundos. Cabe destacar que el tiempo total de ejecución subió un 17\% entre la ejecución inicial y la realizada al obtener mediciones, lo cual se explica por la carga extra que mencionamos antes.
 
 Luego tenemos una serie de columnas:
 
@@ -242,7 +243,7 @@ $ python3 -m cProfile -s cumtime quijote-2.py
 (...)
 \end{shell}
 
-Ahora vemos que \texttt{replace} y \texttt{lower} todavía están, pero se ejecutan muchísimo menos que en la versión anterior y ya no aportan al tiempo total. Encontramos que \texttt{\_count\_words} sigue siendo muy cara, y la explicación está en la gran cantidad de llamadas a \texttt{index} (el 96\% del tiempo total), que se usa en esa función. La razón subyacente es que estamos usando \texttt{index} para el conteo de palabras, y buscar en una lista es potencialmente muy costoso (porque va comparando el objeto buscado posición por posición). Pensemos una mejor forma para guardar la cantidad de veces que encontremos cada palabra: un diccionario, donde podemos tener la palabra como clave y la cantidad como valor, teniendo en cuenta que el acceso por clave a un diccionario es extremadamente rápido. 
+Ahora vemos que \texttt{replace} y \texttt{lower} todavía están, pero se ejecutan muchísimo menos que en la versión anterior y ya no aportan al tiempo total. Encontramos que \texttt{\_count\_words} sigue siendo muy cara, y la explicación está en la gran cantidad de llamadas a \texttt{index} (el 96\% del tiempo total), que se usa en esa función. La razón subyacente es que estamos usando \texttt{index} para el conteo de palabras, y buscar en una lista es potencialmente muy costoso (porque va comparando el objeto buscado posición por posición). Pensemos una mejor forma para guardar la cantidad de veces que encontremos cada palabra: un diccionario, donde podemos tener la palabra como clave y la cantidad como valor, teniendo en cuenta que el acceso por clave a un diccionario es extremadamente rápido.
 
 Mejoremos el código, obteniendo la versión 3.
 
@@ -275,11 +276,11 @@ $ python3 -m cProfile -s cumtime quijote-3.py
 (...)
 \end{shell}
 
-¿Podemos seguir mejorando el código? Seguramente. ¿Vale la pena? Quizás no, ya que el tiempo total de ejecución es de alrededor de 100 milisegundos. 
+¿Podemos seguir mejorando el código? Seguramente. ¿Vale la pena? Quizás no, ya que el tiempo total de ejecución es de alrededor de 100 milisegundos.
 
 Habiendo dicho eso, este código puntual sí merece una mejora, que es la de reemplazar la función de búsqueda propia y el algoritmo para mostrar los primeros 10, utilizando para ello el objeto \texttt{Counter} del módulo \texttt{collections}, no sólo porque es apenas más rápido, sino porque estamos reemplazando bastante código hecho por nosotros para nuestro programa por funcionalidad que ya viene en la biblioteca estándar, que está mucho más probada y optimizada. Menos código nuestro significa menos fallas ahora y menos mantenimiento en el futuro. Les dejamos como desafío luego de la lectura el adaptar la versión 3 de esta manera (pero si quieren espiar el resultado, busquen la versión 4 del código).
 
-Volviendo al perfilamiento, el ejercicio que hicimos en el libro es válido pero sólo un ejemplo sencillo. Si el programa fuese más complejo y largo, el reporte total puede volverse bastante confuso. 
+Volviendo al perfilamiento, el ejercicio que hicimos en el libro es válido pero sólo un ejemplo sencillo. Si el programa fuese más complejo y largo, el reporte total puede volverse bastante confuso.
 
 Una forma de mejorar esto es, si ya tenemos detectada la función que se lleva la mayor parte del tiempo, realizar el \textit{profiling} solo allí. Adaptemos de esta manera la versión 1 original del código, dando lugar a una versión 5; mostramos aquí sólo el cambio, que es en la función principal:
 
@@ -339,13 +340,13 @@ En este caso se nos abrirá un programa de escritorio donde podemos interactuar 
 Una forma alternativa de ver los resultados es línea por línea del código, y ese es el formato en que muestra los resultados un perfilador alternativo (si lo usamos de la forma correcta): el \texttt{line\_profiler}. La utilidad que usamos es \texttt{kernprof}, pero antes de ejecutarla debemos decorar la función que queremos perfilar, agregándole un \texttt{@profile} antes de su definición (al cual no hay que importar, se encarga el perfilador mismo de proveerlo). Entonces:
 
 \begin{shell}
-(env) $ kernprof -lv quijote-1.py 
+(env) $ kernprof -lv quijote-1b.py
 (...)
 Wrote profile results to quijote-1.py.lprof
 Timer unit: 1e-06 s
 
 Total time: 8.36627 s
-File: quijote-1.py
+File: quijote-1b.py
 Function: _count_words at line 22
 
 Line #     Hits        Time  Per Hit  % Time  Line Contents
@@ -392,10 +393,10 @@ Finalmente, veamos un perfilador que trabaja de forma estadística (lo cual no e
 
 \begin{shell}
 $ pyinstrument quijote-1.py
-(...)
+(...pyinstrument quijote-1.py)
   _     ._   __/__   _ _  _  _ _/_   Recorded: 20:54:28  Samples:  8048
  /_//_/// /_\ / //_// / //_'/ //     Duration: 8.479     CPU time: 8.477
-/   _/                      v4.5.3
+/   _/                      v4.7.3
 
 Program: pyinstrument quijote-1.py
 
@@ -460,14 +461,14 @@ Los Jupyter Notebook nos dan la facilidad de invocar a \texttt{timeit} de forma 
 
 \jupynotex[1]{Chapters/profiling/code/perfimp.ipynb}
 
-Más allá de la forma de invocar al módulo, lo importante es entender que no importa la medición en sí, sino que es un accesorio que nos permite entender qué está sucediendo de forma subyacente. Lo ideal sería armar un modelo mental de cómo se está ejecutando el programa con las distintas estructuras de datos y luego confirmar o refutar el modelo que armamos utilizando la medición. 
+Más allá de la forma de invocar al módulo, lo importante es entender que no importa la medición en sí, sino que es un accesorio que nos permite entender qué está sucediendo de forma subyacente. Lo ideal sería armar un modelo mental de cómo se está ejecutando el programa con las distintas estructuras de datos y luego confirmar o refutar el modelo que armamos utilizando la medición.
 
 
 \subsection{Usando Python de forma más eficiente}
 
-Hay distintas situaciones donde el código es lento por cómo usamos alguna estructura de datos o armamos el programa en sí, como el caso que mencionamos al final de la subsección anterior de buscar en una lista, cuya duración depende del largo de esa lista. 
+Hay distintas situaciones donde el código es lento por cómo usamos alguna estructura de datos o armamos el programa en sí, como el caso que mencionamos al final de la subsección anterior de buscar en una lista, cuya duración depende del largo de esa lista.
 
-Es útil conocer los casos más evidentes para evitar caer en esas pequeñas trampas, entendiendo que si en nuestro código hacemos algo de esto una, dos o diez veces no es problema, pero si vamos a tener bucles grandes sí podemos tener algo para corregir. 
+Es útil conocer los casos más evidentes para evitar caer en esas pequeñas trampas, entendiendo que si en nuestro código hacemos algo de esto una, dos o diez veces no es problema, pero si vamos a tener bucles grandes sí podemos tener algo para corregir.
 
 En esta subsección presentamos varios casos, y aunque no son todos los casos posibles, sí son los más conocidos.
 
@@ -475,7 +476,7 @@ En lugar de usar el \texttt{\%timeit} de Jupyter Notebook armamos una función p
 
 \jupynotex[2]{Chapters/profiling/code/perfimp.ipynb}
 
-La función que armamos recibe los dos casos a comparar y opcionalmente un espacio de nombre con los objetos que necesitan esos casos. Luego, para cada uno, instancia un objeto \texttt{Timer} con el caso indicado, le pide evaluar un número de iteraciones que no sean ni pocos (bajo valor estadístico) ni muchos (tardaría demasiado) y luego realiza las mediciones, obteniendo la demora total. La demora para un caso único es ese valor dividido la cantidad de intentos, y la guardamos usando \texttt{Quantity} para que al mostrarse automáticamente esté escalado y con una unidad que tenga sentido leer. Luego mostramos los dos valores y la mejora (en ``veces'') del primero al segundo. 
+La función que armamos recibe los dos casos a comparar y opcionalmente un espacio de nombre con los objetos que necesitan esos casos. Luego, para cada uno, instancia un objeto \texttt{Timer} con el caso indicado, le pide evaluar un número de iteraciones que no sean ni pocos (bajo valor estadístico) ni muchos (tardaría demasiado) y luego realiza las mediciones, obteniendo la demora total. La demora para un caso único es ese valor dividido la cantidad de intentos, y la guardamos usando \texttt{Quantity} para que al mostrarse automáticamente esté escalado y con una unidad que tenga sentido leer. Luego mostramos los dos valores y la mejora (en ``veces'') del primero al segundo.
 
 Entonces, el primer caso que evaluamos es el que mencionábamos en la subsección anterior. Aquí comparamos buscando casi el último elemento en una estructura de un millón de largo, con lo cual la mejora es notable:
 
@@ -550,7 +551,7 @@ Esta función principal recorre toda la estructura de directorios y para cada ar
 
 La función que procesa el archivo lo abre y lee línea por línea, separando los tres valores y convirtiéndolos a \texttt{float} para poder operar. Luego calcula la distancia entre el centro de la partícula y el centro de la zona a buscar; si esta distancia es menor que la suma de los radios de la partícula y la zona a buscar significa que la partícula toca esa zona, e incrementa el contador (en realidad la distancia sería la raíz cuadrada de lo calculado, pero es más eficiente elevar al cuadrado la suma de los radios, total para la comparación sirve). Al final devuelve el valor acumulado y listo.
 
-El correr este programa sobre toda la estructura de directorios generada tarda 3 minutos 16 segundos. 
+El correr este programa sobre toda la estructura de directorios generada tarda 3 minutos 16 segundos.
 
 \begin{shell}
 $ time python3 particulas-1.py superdir/ results.txt 2000 2000 100
@@ -592,9 +593,9 @@ sys     0m15,846s
 Encontramos que esta versión es muchísimo más rápida, lo que nos lleva a una conclusión que también habíamos sacado en el capítulo sobre NumPy \ref{ch:numpy}: si encontramos que nuestro problema ya está resuelto por una biblioteca, siempre es mejor usarla... va a estar más probada y estabilizada en el tiempo que nuestro propio código, y si abajo utiliza código compilado y optimizado será incluso más rápida que nuestro propio código en C o C++.
 
 \begin{center}
- \begin{tabular} {ccccc} 
+ \begin{tabular} {ccccc}
  \toprule
-  \textbf{Programa} & \textbf{Tiempo} & \textbf{Mejora} & \textbf{Contra C++} \\ 
+  \textbf{Programa} & \textbf{Tiempo} & \textbf{Mejora} & \textbf{Contra C++} \\
   C++ puro & 2m11 & NA & NA \\
   Py 1: Primer intento & 3m 16s & NA & +50\% \\
   Py 2: Optimizado & 3m 09s & -4\% & +44\% \\
@@ -603,7 +604,7 @@ Encontramos que esta versión es muchísimo más rápida, lo que nos lleva a una
  \end{tabular}
 \end{center}
 
-Pero volvamos a código nuestro, porque en definitiva estamos aprendiendo cómo podemos optimizar código para el que no encontraremos bibliotecas que nos resuelven el problema. 
+Pero volvamos a código nuestro, porque en definitiva estamos aprendiendo cómo podemos optimizar código para el que no encontraremos bibliotecas que nos resuelven el problema.
 
 En la secuencia que vimos llegamos al límite donde ateniéndonos puramente a Python fuimos mejorando la performance del código pero nos quedamos lejos de los tiempos de la versión en C++.
 
@@ -616,7 +617,7 @@ La herramienta Mypyc compila módulos de Python a extensiones en C.
 
 El lenguaje compilado es una variante de Python en mayor o menor medida tipado, con lo cual gana en performance al restringir el uso de características dinámicas de Python (en la mayoría de los casos sin perder compatibilidad con el Python estándar).
 
-Para definir el tipo de las distintas estructuras usa las sugerencias de tipado estándar de Python. La herramienta \texttt{mypyc} es parte de la biblioteca \texttt{mypy}, con lo cual aprovecha todo su poder de inferencia de tipos. 
+Para definir el tipo de las distintas estructuras usa las sugerencias de tipado estándar de Python. La herramienta \texttt{mypyc} es parte de la biblioteca \texttt{mypy}, con lo cual aprovecha todo su poder de inferencia de tipos.
 
 Por ejemplo, en nuestro código sólo hace falta algunas modificaciones mínimas:
 
@@ -624,7 +625,7 @@ Por ejemplo, en nuestro código sólo hace falta algunas modificaciones mínimas
 
 Vemos que sólo cambiamos la signatura de la función, indicando que el \textit{path} del archivo es una cadena de texto y el resto de los parámetros punto flotante binario, mientras que el resultado es un entero. La biblioteca infiere que los valores leídos del archivo también son punto flotante binario (porque son el resultado de llamar a \texttt{float}), que el conteo es un entero (porque lo inicializamos en cero y siempre le sumamos un entero), etc.
 
-Es muy sencillo correr la herramienta sobre nuestro código: \texttt{mypyc particulas\_mod\_4.py}; vemos que mas allá de algunos mensajes de compilación el resultado es un archivo con una estructura específica: \texttt{particulas\_mod\_4.cpython-310-x86\_64-linux-gnu.so}. 
+Es muy sencillo correr la herramienta sobre nuestro código: \texttt{mypyc particulas\_mod\_4.py}; vemos que mas allá de algunos mensajes de compilación el resultado es un archivo con una estructura específica: \texttt{particulas\_mod\_4.cpython-310-x86\_64-linux-gnu.so}.
 
 Este archivo es un módulo compilado que Python puede utilizar directamente, y la estructura de su nombre indica la posibilidad de su utilización (está compilado para CPython 3.10, en Linux, etc.). Este archivo puede convivir sin problemas con el \texttt{particulas\_mod\_4.py} original, Python utilizará automáticamente esta versión compilada si está presente.
 
@@ -638,7 +639,7 @@ sys     0m5,150s
 
 Hay una ganancia marginal de tiempo, esta versión armada con \texttt{mypyc} tarda un 5\% menos que el código optimizado anterior. Podrá parecer poco, pero tengamos en cuenta que el costo de ir a esta solución es bajo, o incluso casi nulo si ya teníamos nuestro código con las sugerencias de tipado agregadas previamente.
 
-Volviendo a la instrumentación del código, justamente, es importante entender si Mypyc tiene toda la información necesaria para optimizar el funcionamiento del mismo. Nuestro ejemplo es sencillo, pero así y todo hay varios objetos cuyo tipo debe inferirse, ya sea a partir de devolución de funciones o resultado de cálculos. 
+Volviendo a la instrumentación del código, justamente, es importante entender si Mypyc tiene toda la información necesaria para optimizar el funcionamiento del mismo. Nuestro ejemplo es sencillo, pero así y todo hay varios objetos cuyo tipo debe inferirse, ya sea a partir de devolución de funciones o resultado de cálculos.
 
 Mypyc provee una función que podemos utilizar para entender cómo está trabajando en ese sentido, \texttt{reveal\_type}, que no tenemos que importar sino directamente usarla. Por ejemplo, si en la línea 9 de \texttt{particulas\_mod\_4.py} agregamos...
 
@@ -653,7 +654,7 @@ particulas_mod_4.py:9: note: Revealed type is "builtins.float"
 \end{verbatim}
 
 Alternativamente con el parámetro \texttt{--html-report DIR} podemos generar un reporte que nos indica qué porcentaje de nuestro código tiene el control de tipos; para nuestro ejemplo está cubierto al 100\%.
-                
+
 Para profundizar en esta herramienta les recomendamos no sólo ver \href{https://mypy-lang.org/}{su documentación} sino también la del \href{https://docs.python.org/es/dev/library/typing.html}{módulo sobre tipado} de la biblioteca estándar.
 
 
@@ -665,7 +666,7 @@ Cython es un compilador tanto para Python en sí como para un lenguaje de progra
 
 Con Cython entonces podemos ir ajustando código Python con definiciones de tipado estático que le sirven a Cython para lograr código compilado (de forma similar a lo que vimos con Mypyc) y también escribir código en Python que corra código C o C++ nativo, o integrarlo a bibliotecas y aplicaciones ya compiladas.
 
-Esta transición resulta porque Cython es un lenguaje alrededor de Python mismo, que además soporta llamar a funciones en C y declarar tipos de C en variables y atributos de clase. Pero, al mismo tiempo, es código que no es perfectamente compatible con Python, por eso utilizamos la extensión \texttt{.pyx}. 
+Esta transición resulta porque Cython es un lenguaje alrededor de Python mismo, que además soporta llamar a funciones en C y declarar tipos de C en variables y atributos de clase. Pero, al mismo tiempo, es código que no es perfectamente compatible con Python, por eso utilizamos la extensión \texttt{.pyx}.
 
 Veamos cómo queda nuestro ejemplo:
 
@@ -708,13 +709,13 @@ Para terminar les recomendamos explorar \href{https://cython.readthedocs.io/en/l
 
 \subsection{Explorando Numba}
 
-Numba traduce funciones hechas en Python a código de máquina optimizado durante la ejecución misma. 
+Numba traduce funciones hechas en Python a código de máquina optimizado durante la ejecución misma.
 
 No se necesita un paso extra de compilación ni tener un compilador de C o C++ instalado, sólo tenemos que aplicar un decorador en nuestra función y Numba hará el resto.
 
 Numba está pensado para optimizar algoritmos numéricos, dónde puede terminar alcanzando velocidades de C o Fortran. Nuestro ejemplo se escapa un poco de ese área, y veremos que los resultados no son los mejores, pero decidimos contarles sobre esta herramienta por completitud.
 
-La primera modificación al código optimizado original es importar \texttt{njit} (el compilador justo-a-tiempo de Numba ) y aplicarlo como decorador en la función \texttt{proc\_file}. Pero a diferencia de lo prometido por la documentación encontramos que teníamos que realizar cambios más profundos. Por un lado el \texttt{with} (administrador de contexto) no es soportado, ni tampoco si abrimos el archivo directamente con un \texttt{open}. Tampoco soportaba llamar a \texttt{map} ni a \texttt{float}. 
+La primera modificación al código optimizado original es importar \texttt{njit} (el compilador justo-a-tiempo de Numba ) y aplicarlo como decorador en la función \texttt{proc\_file}. Pero a diferencia de lo prometido por la documentación encontramos que teníamos que realizar cambios más profundos. Por un lado el \texttt{with} (administrador de contexto) no es soportado, ni tampoco si abrimos el archivo directamente con un \texttt{open}. Tampoco soportaba llamar a \texttt{map} ni a \texttt{float}.
 
 En consideración de esas restricciones decidimos separar la función en dos partes, una que abre el archivo, lo lee y guarda en una lista todos los datos para operar luego, y otra función que lo único que hace es trabajar sobre esos números, a la que justamente decoramos con \texttt{njit}:
 
@@ -732,9 +733,9 @@ Luego de recorrer el uso de las distintas herramientas podemos ver que hay disti
 El resumen de los cambios de velocidad obtenidos es:
 
 \begin{center}
- \begin{tabular} {ccccc} 
+ \begin{tabular} {ccccc}
  \toprule
-  \textbf{Programa} & \textbf{Tiempo} & \textbf{Mejora} & \textbf{Contra C++} \\ 
+  \textbf{Programa} & \textbf{Tiempo} & \textbf{Mejora} & \textbf{Contra C++} \\
   C++ puro & 2m11 & NA & NA \\
   Py 2: Optimizado & 3m 09s & NA & +44\% \\
   Py 4: Mypyc & 2m 59s & -5\% & +37\% \\
@@ -748,14 +749,14 @@ Que haya diversas formas de acercarse a este tipo de solución significa que no 
 
 Es de vital importancia entender que compilar el código no es una solución mágica. En general funciona porque minimizamos el dinamismo intrínseco de Python, llevando parte del procesamiento a la capa en C sin pasar por estructuras de Python más complejas, y esto muchas veces implica un recorte de la funcionalidad. Por ejemplo, cuando en Cython declaramos que nuestra variable \texttt{count} es ahora de tipo \texttt{cdef int}, estamos abandonando los enteros sin límites de Python y yendo a 32 o 64 bits dependiendo de la plataforma.
 
-Debemos resaltar el mensaje original de hacer \texttt{profiling} antes de encarar cualquier optimización: tampoco vale la pena compilar código que no es parte de la ``zona caliente'' del programa. 
+Debemos resaltar el mensaje original de hacer \texttt{profiling} antes de encarar cualquier optimización: tampoco vale la pena compilar código que no es parte de la ``zona caliente'' del programa.
 
 Para cerrar esta parte, algunas palabras sobre \href{https://nuitka.net}{Nuitka}, un compilador de Python escrito en Python que crea ejecutables que luego podrán correr sin necesitar un instalador por separado. Está más pensado para empaquetar el código junto a sus datos y el intérprete de Python en un sólo ejecutable que para acelerar la ejecución propiamente dicha. Para el caso puntual del ejemplo que manejamos en esta sección no mostró ninguna mejora en los tiempos.
 
 
 \section{Usando directamente código compilado}
 
-Hay veces que toda optimización es corta, siempre necesitamos mejor performance. O puede suceder que ya disponemos de una determinada librería escrita en C++, C, Fortran, etc, y necesitamos utilizarla pero al mismo tiempo no queremos armar \textit{todo} nuestro programa en ese lenguaje. 
+Hay veces que toda optimización es corta, siempre necesitamos mejor performance. O puede suceder que ya disponemos de una determinada librería escrita en C++, C, Fortran, etc, y necesitamos utilizarla pero al mismo tiempo no queremos armar \textit{todo} nuestro programa en ese lenguaje.
 
 En otras palabras, queremos hacer el 90\% del programa en Python aprovechando su alto nivel y facilidad de desarrollo pero también usar esa librería que ya tenemos hecha en otro lenguaje súper optimizado para la parte computacional crítica de nuestro sistema.
 
@@ -764,7 +765,7 @@ Es hora de conectar Python con C.
 
 \subsection{Extendiendo Python con C o C++}
 
-El intérprete de Python permite conectar el código hecho en ese lenguaje con código en C que maneja los objetos de Python mismo. Justamente el intérprete mismo del lenguaje hecho en C (que denominamos CPython) trabaja de esa manera. 
+El intérprete de Python permite conectar el código hecho en ese lenguaje con código en C que maneja los objetos de Python mismo. Justamente el intérprete mismo del lenguaje hecho en C (que denominamos CPython) trabaja de esa manera.
 
 El truco es que se expone una interfaz bien definida y muy estable en el tiempo para que se pueda trabajar desde y con otros programas hecho en estos otros lenguajes, un conjunto de funciones, macros y variables que dan acceso a la mayoría de los aspectos de Python en tiempo de ejecución. Este factor es parte del éxito de Python: históricamente siempre fue fácil utilizar desde Python otras librerías construidas con anterioridad, lo que fue clave para construir su extensa red de módulos disponibles (tanto dentro como fuera de la biblioteca estándar).
 
@@ -774,7 +775,7 @@ La API de Python entonces les da acceso a los programadores en C y C++ a una var
 Aunque esta API es igualmente utilizable desde C++ por brevedad se la refiere generalmente como la Python/C API.
 \end{info}
 
-Hay dos formas de trabajar una unión entre Python y otros programas hechos en C. 
+Hay dos formas de trabajar una unión entre Python y otros programas hechos en C.
 
 Una es ``extender'' un programa hecho en Python con código en este otro lenguaje, o en otras palabras tener todo el programa en Python y utilizar alguna función o estructura hecha en C, generalmente como módulo o llamada a una biblioteca ya previamente compilada.
 
@@ -813,7 +814,7 @@ Todo el procesamiento de los argumentos recibidos lo hace \texttt{PyArg\_ParseTu
 
 Si \texttt{PyArg\_ParseTupleAndKeywords} termina correctamente tendremos efectivamente en esas variables los valores que se le pasaron a la función, y lo único que hacemos es llamar a la \texttt{\_proc\_file} que hace el procesamiento real. Esta función devuelve el conteo que es un \texttt{int} a nivel de C, debemos construir un objeto entero a nivel de Python (llamado PyLong por razones históricas) para devolverlo a esa capa.
 
-Por otro lado, si \texttt{PyArg\_ParseTupleAndKeywords} devuelve cero es que hubo un problema en la interpretación de los argumentos recibidos. En ese caso sólo debemos devolver \texttt{NULL} porque todos los objetos correspondientes a ``generar una excepción'' a nivel de Python ya están en su lugar. 
+Por otro lado, si \texttt{PyArg\_ParseTupleAndKeywords} devuelve cero es que hubo un problema en la interpretación de los argumentos recibidos. En ese caso sólo debemos devolver \texttt{NULL} porque todos los objetos correspondientes a ``generar una excepción'' a nivel de Python ya están en su lugar.
 
 A esta altura ya tenemos una función que podemos usar directamente desde afuera sin cambiar ese código externo. Pero todavía no tenemos un módulo propiamente dicho.
 
@@ -850,9 +851,9 @@ sys     0m2,899s
 Comparemos estos resultados con los anteriores:
 
 \begin{center}
- \begin{tabular} {ccccc} 
+ \begin{tabular} {ccccc}
  \toprule
-  \textbf{Programa} & \textbf{Tiempo} & \textbf{Mejora} & \textbf{Contra C++} \\ 
+  \textbf{Programa} & \textbf{Tiempo} & \textbf{Mejora} & \textbf{Contra C++} \\
   C++ puro & 2m11 & NA & NA \\
   Py 2: Optimizado & 3m 09s & NA & +44\% \\
   Py 5: Cython & 2m 37s & -17\% & +20\% \\
@@ -893,7 +894,7 @@ La primer herramienta que veremos es el módulo \texttt{ctypes} de la biblioteca
 <CDLL 'libgsl.so.27', handle 564375d67b50 at 0x7ff8355a44c0>
 \end{py}
 
-Con dicha función cargamos la biblioteca que vamos a usar como ejemplo, y vemos que tenemos una instancia de \texttt{CDLL}, que representa la biblioteca ya cargada. 
+Con dicha función cargamos la biblioteca que vamos a usar como ejemplo, y vemos que tenemos una instancia de \texttt{CDLL}, que representa la biblioteca ya cargada.
 
 Ya mencionamos que íbamos a operar con una función específica dentro de esta biblioteca:
 
@@ -961,6 +962,6 @@ Al correr ese script nos deja un \texttt{gsl.cpython-310-x86\_64-linux-gnu.so} s
 6.053924347066125
 \end{py}
 
-Como ya habíamos declarador la interfaz antes, CFFI armó automáticamente la capa que permite a nuestro código en Python utilizar el código ya compilado, entonces el uso es directo. 
+Como ya habíamos declarador la interfaz antes, CFFI armó automáticamente la capa que permite a nuestro código en Python utilizar el código ya compilado, entonces el uso es directo.
 
 Esto contrasta con \texttt{ctypes} ya que, aunque tengamos que armar ciertas estructuras para tener una interfaz compilada, luego en el uso propiamente dicho no hay ningún detalle que necesitemos considerar.

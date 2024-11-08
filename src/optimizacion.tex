@@ -1,5 +1,5 @@
 
-% Copyright 2020-2023 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -13,9 +13,9 @@
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        Matplotlib & 3.5.3 \\
-        SciPy & 1.9.1 \\
-        SymPy & 1.12 \\
+        Matplotlib & 3.9.2 \\
+        SciPy & 1.14.1 \\
+        SymPy & 1.13.3 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
@@ -44,7 +44,7 @@ Sin perder generalidad podemos considerar la optimización como un problema de m
  \label{eq:opt01}
 \end{align}
 
-Aquí, el vector $\bm{x} = (x_1, \ldots, x_n)$ es la variable de optimización del problema (también denominadas usualmente \textit{variables de decisión}), la función $f: \mathbb{R}^n \rightarrow \mathbb{R}$ es la función objetivo, las funciones $g_i: \mathbb{R}^n \rightarrow \mathbb{R}, \; i = 1, \cdots, m$ son las funciones de restricción, y las constantes $b_1, \cdots, b_m$ son los límites de las restricciones. Un vector $\bm{x}^*$ se denomina óptimo, o solución del problema \eqref{eq:opt01}, si tiene el menor valor objetivo entre todos los vectores que satisfacen las restricciones: para todo $\bm{z}$ con $g_1(\bm{z}) \leq b_1, \ldots, g_m(\bm{z}) \leq b_m$ tenemos que $f(\bm{x}^*) \leq f(\bm{z})$. 
+Aquí, el vector $\bm{x} = (x_1, \ldots, x_n)$ es la variable de optimización del problema (también denominadas usualmente ``variables de decisión''), la función $f: \mathbb{R}^n \rightarrow \mathbb{R}$ es la función objetivo, las funciones $g_i: \mathbb{R}^n \rightarrow \mathbb{R}, \; i = 1, \cdots, m$ son las funciones de restricción, y las constantes $b_1, \cdots, b_m$ son los límites de las restricciones. Un vector $\bm{x}^*$ se denomina óptimo, o solución del problema \eqref{eq:opt01}, si tiene el menor valor objetivo entre todos los vectores que satisfacen las restricciones: para todo $\bm{z}$ con $g_1(\bm{z}) \leq b_1, \ldots, g_m(\bm{z}) \leq b_m$ tenemos que $f(\bm{x}^*) \leq f(\bm{z})$. 
 
 Las formas particulares que presentan las funciones objetivo y de restricción caracterizan familias o clases de problemas de optimización muy variados. Un abordaje matemático general es difícil de tratar y no hay métodos eficientes para resolver completamente problemas genéricos de optimización. Sin embargo, existen métodos muy eficientes para muchos casos de importancia teórica o práctica, en los cuales resulta valioso conocer todo lo posible sobre las funciones objetivo y de restricciones para resolver con éxito el problema.
 
@@ -62,20 +62,20 @@ La forma más obvia de encontrar el mínimo de una función es diferenciarla y e
 
 Como ejemplo de optimización unidimensional consideraremos el ejemplo clásico de minimizar el área de un cilindro con un volumen $V_0$ dado. Las variables a considerar son el radio $r$ y la altura $h$ del cilindro, y la función objetivo es $f(r, h) = 2 \pi r^2 + 2 \pi r h$, con la condición de restricción $g(r, h) = \pi r^2 h - V_0 = 0$. El problema así planteado presenta dos variables, pero a partir de la restricción podemos reducirlo a una sola dimensión usando $h = V_0/\pi r^2$ y substituyendo en $f(r, h)$, lo que conduce a minimizar $f(r) = 2 \pi r^2 + 2 V_0 / r$.
 
-Comenzaremos solucionando el problema en forma analítica aprovechando las capacidades de cálculo simbólico de SymPy. En la primera celda importamos las funciones necesarias de SymPy, en la segunda declaramos las variables y ecuaciones que representan el problema, obteniendo el valor exacto de $r$ que minimiza el área para un volumen $V_0$ dado:
-\jupynotex[1-2]{Chapters/optimizacion/code/optimizacion.ipynb}
+Comenzaremos solucionando el problema en forma analítica aprovechando las capacidades de cálculo simbólico de SymPy. En la primera celda declaramos las variables y ecuaciones que representan el problema, obteniendo el valor exacto de $r$ que minimiza el área para un volumen $V_0$ dado:
+\jupynotex[1]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Podemos verificar que es un mínimo evaluando las derivadas primera y segunda de \mip{Area_r} en el valor obtenido para \mip{r_sol}:
-\jupynotex[3]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[2]{Chapters/optimizacion/code/optimizacion.ipynb}
 \noindent dando un valor positivo ($12 \pi$) para la derivada segunda confirmando que \mip{r_sol} es un mínimo. El área que corresponde a esta solución es:
-\jupynotex[4]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[3]{Chapters/optimizacion/code/optimizacion.ipynb}
 
-Utilizaremos el valor exacto del mínimo obtenido para $r$ (\mip{r_sol}) en la celda 2 para compararlo con el que obtendremos mediante una optimización numérica. Para ello evaluamos \mip{r_sol} para el caso en que $V_0 = 1$: 
-\jupynotex[5]{Chapters/optimizacion/code/optimizacion.ipynb}
+Utilizaremos el valor exacto del mínimo obtenido para $r$ (\mip{r_sol}) en la celda 1 para compararlo con el que obtendremos mediante una optimización numérica. Para ello evaluamos \mip{r_sol} para el caso en que $V_0 = 1$: 
+\jupynotex[4]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Para problemas simples la resolución analítica es posible, pero en problemas reales es común tener que recurrir a métodos numéricos (por ejemplo cuando no es posible resolver la ecuación $f'(x) = 0$). Para abordar este problema con el submódulo \mip{optimize} de SciPy, primero debemos definir la función \mip{f()} que implementa la función objetivo (en este caso asumimos que $V_0 = 1$), y luego pasamos esta función como argumento de \mip{minimize_scalar} para realizar la minimización numérica, junto con un intervalo de \textit{bracketing} y la selección del método de optimización. El método de Brent utiliza una combinación de interpolación parabólica y el método de sección de oro. En la celda siguiente realizamos la optimizaciòn de nuestro problema con este método:
 
-\jupynotex[6]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[5]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Como resultado de la optimización, el método devuelve un objeto (asignado en este caso a la variable \mip{solucion}) que en sus atributos contiene informción acerca de cómo fue la ejecución de la optimización, tal como un mensaje que describe el motivo de la finalización, una variable booleana que indica si hubo convergencia (\mip{success}), el valor de la función evaluada en el valor óptimo (\mip{fun}), el valor óptimo hallado (\mip{x}), el número de iteraciones (\mip{nit}) y las llamadas a la función objetivo (\mip{nfev}). Podemos ver que el resultado numérico coincide con el valor ``exacto'' obtenido con SymPy hasta la precisión informada. La figura \ref{fig:opt-1d} muestra la función y el valor óptimo hallado. Siempre es recomendable visualizar la función antes de aceptar el valor obtenido como válido.
 
@@ -136,46 +136,46 @@ El submódulo \mip{optimize} de SciPy contiene la función \mip{minimize}, que p
 \[ f(x_1, x_2) = \frac{1}{2} \sum_{i=1}^2 (x_i^4 - 16 x_i^2 + 5 x_i) \]
 que tomamos de \citeauthor{styblinski1990} \cite{styblinski1990} y tiene cuatro mínimos locales, con el mínimo global localizado en $x_i^* = -2.903534, i= 1, 2$, y un máximo local ubicado cerca del origen. Para utilizar el método de Newton, necesitamos calcular el gradiente de la función y también el hessiano. En el ejemplo que estamos analizando es simple realizar estos cálculos manualmente, pero aprovecharemos la oportunidad para utilizar la potencia de cálculo simbólico de SymPy, y veremos cómo utilizar las expresiones simbólicas obtenidas en el contexto numérico de NumPy. 
 
-Comenzamos entonces definiendo los símbolos a utilizar , la función $f$ (simbólica) y sus derivadas parciales, tal como se muestra en la celda 7:
-\jupynotex[7]{Chapters/optimizacion/code/optimizacion.ipynb}
+Comenzamos entonces definiendo los símbolos a utilizar , la función $f$ (simbólica) y sus derivadas parciales, tal como se muestra en la celda 6:
+\jupynotex[6]{Chapters/optimizacion/code/optimizacion.ipynb}
 Podemos ver el gradiente representando en forma matricial (aunque estrictamente es un vector columna en este caso) utilizando la función \mip{Matrix} de SymPy:
-\jupynotex[8]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[7]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Análogamente podemos obtener la matriz hessiana:
-\jupynotex[9-10]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[8-9]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Habiendo realizado estos cálculos, necesitamos ahora obtener la representación vectorizada de estas funciones, de modo de que puedan ser manipuladas por NumPy y SciPy. Para ello invocamos la función \mip{lambdify} de SciPy:
 
-\jupynotex[11]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[10]{Chapters/optimizacion/code/optimizacion.ipynb}
 
-\noindent con lo que ahora \mip{f_num}, \mip{f_d1_num} y \mip{f_hess_num} representan a $f$, su gradiente y su matriz hessiana, respectivamente. Sin embargo, las funciones generadas por \mip{lambdify} toman un argumento por cada variable en la correspondiente expresión, mientras que las funciones de optimización de SciPy esperan funciones vectorizadas en las que todos los argumentos se encuentran empaquetados en un array. Por lo tanto, para obtener funciones que sean compatibles con las rutinas de optimización de SciPy, debemos ``envolver'' las funciones generadas por \mip{lambdify} con funciones de Python que reacomoden los argumentos, tal como mostramos en la celda 12:
-\jupynotex[12]{Chapters/optimizacion/code/optimizacion.ipynb}
+\noindent con lo que ahora \mip{f_num}, \mip{f_d1_num} y \mip{f_hess_num} representan a $f$, su gradiente y su matriz hessiana, respectivamente. Sin embargo, las funciones generadas por \mip{lambdify} toman un argumento por cada variable en la correspondiente expresión, mientras que las funciones de optimización de SciPy esperan funciones vectorizadas en las que todos los argumentos se encuentran empaquetados en un array. Por lo tanto, para obtener funciones que sean compatibles con las rutinas de optimización de SciPy, debemos ``envolver'' las funciones generadas por \mip{lambdify} con funciones de Python que reacomoden los argumentos, tal como mostramos en la celda 11:
+\jupynotex[11]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Finalmente tenemos todo listo para proceder con la optimización. Esto lo hacemos con la función \mip{minimze} de \mip{scipy.optimize}, pasándole como argumentos la función a minimizar (\mip{f}), su gradiente (\mip{f1}, argumento \mip{jac}) y la matriz hessiana (\mip{fh}, argumento \mip{hess}), así como el punto de partida de la búsqueda: \mip{(1, 1)}:
 
-\jupynotex[13]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[12]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 La función encuentra un mínimo en $(x_1, x_2) = (2.747, 2.747)$, y muestra información sobre cómo ha resultado la ejecución del algoritmo, incluyendo el número de iteraciones, el valor de la función en el mínimo, el valor del gradiente (\mip{jac}) y la cantidad de evaluaciones de la función, del gradiente y del hessiano. Podemos verificar el valor de la función en el mínimo hallado:
 
-\jupynotex[14]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[13]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Como es usual en estos casos, resulta útil visualizar el problema. Para ello realizamos un mapa de calor donde el color representa el valor de la función y marcamos con una estrella roja el óptimo hallado:
 
-\jupynotex[15]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[14]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 En la práctica no siempre suele ser factible calcular el gradiente o el hessiano de la función, por lo que pueden utilizarse otros métodos que estiman estas funciones numéricamente. Un método popular mencionado anteriormente es el BFGS. Para utilizar este método podemos invocar la función \mip{optimize} con el argumento \mip{method='BFGS'}:
-\jupynotex[16]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[15]{Chapters/optimizacion/code/optimizacion.ipynb}
 Vemos que en este caso no es necesario suministrar el gradiente ni la matriz hessiana, y tambien podemos notar que, en consecuencia, el número de evaluaciones de la función aumenta significativamente (30) respecto del método de Newton (7 evaluaciones).
 
 Otro método del que dispone SciPy es el del gradiente conjugado. En este caso podemos usar el gradiente de la función, mientras que el hessiano no es requerido:
-\jupynotex[17]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[16]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Si no se conocen ni el gradiente ni el hessiano, el método BFGS suele ser un buen punto de partida para la búsqueda del óptimo. En caso de poder calcular el gradiente, el método del gradiente conjugado resulta más eficiente (en nuestro caso solo necesita 17 evaluaciones de la función para hallar el mínimo). Naturalmente, cuanta más información le podamos aportar al método, más eficiente será el cálculo, tal como se muestra al utilizar el método de Newton, que provee la convergencia más rápida. En cualquier caso es necesario también evaluar la complejidad de las funciones para el cálculo del gradiente o del hessiano, debido a que puede resultar costosa la evaluación numérica de ellas, haciendo más conveniente el uso del método BFGS.
 
 En general, los métodos que hemos visto hasta aquí convergen a mínimos locales. En los problemas con muchos mínimos locales, es muy posible que estos métodos converjan a uno de estos mínimos locales (dependiendo, naturalmente, del valor inicial de la iteración), y que nos resulte difícil localizar el mínimo global. En estos casos es recomendable realizar una primera búsqueda utilizando un método de fuerza bruta, que consiste simplemente en discretizar el dominio en una grilla y evaluar la función en los nodos de esta discretización, y utilizar el resultado de esta búsqueda como punto incial de un método iterativo. SimPy provee la función \mip{brute} de \mip{optimize} para realizar esta búsqueda inicial, a la que le pasamos como argumento la función \mip{f}, y una tupla de objetos \mip{slice}, con un elemento por cada dimensión del espacio de parámetros (valor inicial, valor final y paso para cada coordenada), que especifica la grilla sobre la que se evaluará la función. Como tercer argumento especificamos \mip{finish=None} para evitar que la función \mip{brute} refine la búsqueda (dejaremos esa tarea a uno de nuestros algoritmos, posteriormente):
-\jupynotex[18-19]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[17-18]{Chapters/optimizacion/code/optimizacion.ipynb}
 Vemos que el punto de la grilla $(-3, 3)$ ofrece el menor valor de \mip{f} ($-78$). Ahora usamos ese punto como valor inicial del método BFGS:
-\jupynotex[20]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[19]{Chapters/optimizacion/code/optimizacion.ipynb}
 \noindent que converge al valor del mínimo global que anticipamos al inicio. Dado que nuestro punto de partida es bastante cercano al óptimo, el número de evaluaciones requeridas por el algoritmo BFGS es la mitad de la requerida para el punto inicial $(1, 1)$, que converge a un mínimo local.
 
 \section{Optimización con restricciones}
@@ -189,11 +189,11 @@ SciPy puede resolver estos problemas de optimización con restricciones simples 
 \[ f(x_1, x_2) = (a - x_1)^2 + b (x_2 - x_1^2)^2 \]
 donde usaremos $a = 1$ y $b = 1$. Esta función tiene un mínimo global en $(a, a^2)$ en donde la función se anula. Intentaremos localizar los mínimos en el problema sin restricciones, y restringiendo el dominio de las variables de decisión al rectángulo $2 \leq x_1 \leq 3$ y $0 \leq x_2 \leq 2$:
 
-\jupynotex[21]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[20]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Aquí podemos ver que cuando optimizamos sin restringir los valores de $x_1$ y $x_2$ localizamos el mínimo global de la función de Rosembrock, pero al establecer la optimización limitada a los intervalos especificados para cada variable, el valor óptimo se establece en $(2, 2)$ en donde $f = 5$. Dado que este ejemplo presenta una optimización de dos variables, podemos realizar un gráfico para visualizar cómo se ubican los valores óptimos en cada caso. En la celda siguiente construimos esta visualización, realizando previamente una definición de la función de Rosembrock para que acepte como parámetros de entrada dos valores en vez de una tupla, ya que de este modo necesitamos ingresar los valores de la grilla de visualización. Marcamos también en gris el rectángulo que comprenden los intervalos de la restricción. La estrella azul representa los valores que minimizan la función sin restricciones, mientras que la roja lo hace al establecer las restricciones.
 
-\jupynotex[22]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[21]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 \subsection{Programación lineal} \label{subsec:proglin}
 La programación lineal aborda el problema de optimizar una función objetivo lineal sujeta a restricciones lineales en forma de igualdades y desigualdades sobre las variables de decisión. Estos problemas se pueden expresar en una variedad de formas equivalentes. Veremos en un ejemplo simple cómo abordar un problema de programación lineal.
@@ -216,7 +216,7 @@ El requerimiento diario de carbohidratos, proteínas y vitaminas es 10, 15 y 6, 
 
 El paso siguiente es determinar la función objetivo a maximizar o minimizar. En este ejemplo, queremos minimizar el costo diario total, que se obtiene mediante el cálculo $0.82 \, x_1 + 0.50 \, x_2 + 0.40  \, x_3$.
 
-Por último necesitamos describir las restricciones que deben satisfacer $x_1$, $x_2$ y $x_3$. En primer lugar, estas variables deben ser positivas (no podemos comer cantidades negativas de alimentos). Estas restricciones se denominan \textit{restricciones de no negatividad}, y se encuentran muy frecuentemente en los problemas de programación lineal. Además, no todos los valores de $x_1$, $x_2$ y $x_3$ dan lugar a una dieta con las cantidades diarias necesarias de nutrientes. La cantidad de proteínas en $x_1$ unidades de $A_1$, $x_2$ de $A_2$ y $x_3$ de $A_3$ es $4 \, x_1 + 2 \, x_2 + 2 \, x_3$, y esa cantidad debe ser al menos de 15 por día. Esto significa que $x_1$, $x_2$ y $x_3$ deben satisfacer $4 \, x_1 + 2 \, x_2 + 2 \, x_3 \geq 15$.
+Por último necesitamos describir las restricciones que deben satisfacer $x_1$, $x_2$ y $x_3$. En primer lugar, estas variables deben ser positivas (no podemos comer cantidades negativas de alimentos). Estas restricciones se denominan ``restricciones de no negatividad'', y se encuentran muy frecuentemente en los problemas de programación lineal. Además, no todos los valores de $x_1$, $x_2$ y $x_3$ dan lugar a una dieta con las cantidades diarias necesarias de nutrientes. La cantidad de proteínas en $x_1$ unidades de $A_1$, $x_2$ de $A_2$ y $x_3$ de $A_3$ es $4 \, x_1 + 2 \, x_2 + 2 \, x_3$, y esa cantidad debe ser al menos de 15 por día. Esto significa que $x_1$, $x_2$ y $x_3$ deben satisfacer $4 \, x_1 + 2 \, x_2 + 2 \, x_3 \geq 15$.
 
 Entonces, este problema de optimización dietaria se puede formular de la siguiente forma:
 
@@ -248,17 +248,17 @@ donde $\bm{x}$ representa el vector con las variables de decisión, $\bm{c}$ es 
 
 Podemos ver que en nuestro problema representado en la forma \eqref{eq:opt03} las restricciones de desigualdad tienen el sentido inverso al requerido por \mip{linprog}. Esto no representa ninguna dificultad, ya que multiplicando cada ecuación miembro a miembro por $(-1)$ las adaptamos para usarlas en la función. 
 
-La función \mip{linprog} utiliza los métodos \mip{highs-ds} y \mip{highs-ipm} para resolver el problema de minimización. que consisten en rutinas desarrolladas en C++ de alto desempeño\footnote{Ver \url{https://highs.dev/}.} que implementan los métodos simplex dual revisado y de punto interior, cuyas descripciones exceden el alcance de este libro \cite{huangfu2018}. En la celda 23 definimos \mip{c} como una lista con los coeficientes de $f$, \mip{A} representa la matriz $\bm{A}_{ub}$, la lista \mip{b} contiene los elementos del vector $\bm{b}_{ub}$, y finalmente establecemos los límites para cada variable de decisión con la tupla \mip{(0, None)} que significa que el límite inferior en cada variable es cero, y el superior es infinito (todas las variables de decisión son no negativas):
+La función \mip{linprog} utiliza los métodos \mip{highs-ds} y \mip{highs-ipm} para resolver el problema de minimización. que consisten en rutinas desarrolladas en C++ de alto desempeño\footnote{Ver \url{https://highs.dev/}.} que implementan los métodos simplex dual revisado y de punto interior, cuyas descripciones exceden el alcance de este libro \cite{huangfu2018}. En la celda 22 definimos \mip{c} como una lista con los coeficientes de $f$, \mip{A} representa la matriz $\bm{A}_{ub}$, la lista \mip{b} contiene los elementos del vector $\bm{b}_{ub}$, y finalmente establecemos los límites para cada variable de decisión con la tupla \mip{(0, None)} que significa que el límite inferior en cada variable es cero, y el superior es infinito (todas las variables de decisión son no negativas):
 
-\jupynotex[23]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[22]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Ahora podemos invocar la función \mip{linprog}, guardando su resultado en un objeto \mip{res} que contiene el valor mínimo de la función objetivo (\mip{res.fun}) evaluada en los valores óptimos obtenidos (\mip{res.x}):
 
-\jupynotex[24]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[23]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 \noindent que verificamos mostrando el valor del producto \mip{c @ res.x}. El objeto \mip{res} contiene más información acerca de la ejecución de la rutina de optimización:
 
-\jupynotex[25]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[24]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Para la interpretación de la información contenida en \mip{res}, invitamos a ver la documentación\footnote{\url{https://docs.scipy.org/doc/scipy/reference/optimize.linprog-highs.html\#optimize-linprog-highs}.}.
 
@@ -267,27 +267,27 @@ Una vez más, cuando en el problema intervienen relaciones no lineales entre las
 
 Una de las técnicas que se pueden utilizar para problemas de optimización con restricciones no lineal es la de los multiplicadores de Lagrange, que convierte un problema con restricciones en uno sin restricciones mediante la incorporación de variables adicionales. La idea es incorporar cada restricción a la función objetivo y resolver el problema como uno sin restricciones.
 
-Por ejemplo, consideremos el problema de optimización $\min f(\bm{x})$ sujeto a restricciones de igualdad $g(\bm{x}) = 0$. Si no consideramos esta restricción, el gradiente de $f(\bm{x})$ se anula en los puntos extremos, $\nabla f(\bm{x}) = 0$. Se puede mostrar que al incorporar la restricción, el negativo del gradiente pertenece al espacio soportado por la restricción normal, es decir, $-\nabla f(\bm{x}) = \bm{\lambda } J_g^{\intercal}(\bm{x})$, donde $J_g(\bm{x})$ es la matriz jacobiana de la función de restricción $g(\bm{x})$ y $\bm{\lambda}$ son las nuevas variables representadas por el vector de los multiplicadores de Lagrange. Esta condición tiene su origen en igualar a cero la función $L(\bm{x}, \bm{\lambda}) = f(\bm{x}) + \bm{\lambda}^{\intercal} g(\bm{x})$ denominada \textit{función lagrangiana}. Si ambas funciones $f$ y $g$ son continuas y diferenciables, un punto estacionario $(\bm{x}_0, \bm{\lambda}_0)$ de $L$ corresponde a un $\bm{x}_0$ que es un óptimo del problema original con restricciones.
+Por ejemplo, consideremos el problema de optimización $\min f(\bm{x})$ sujeto a restricciones de igualdad $g(\bm{x}) = 0$. Si no consideramos esta restricción, el gradiente de $f(\bm{x})$ se anula en los puntos extremos, $\nabla f(\bm{x}) = 0$. Se puede mostrar que al incorporar la restricción, el negativo del gradiente pertenece al espacio soportado por la restricción normal, es decir, $-\nabla f(\bm{x}) = \bm{\lambda } J_g^{\intercal}(\bm{x})$, donde $J_g(\bm{x})$ es la matriz jacobiana de la función de restricción $g(\bm{x})$ y $\bm{\lambda}$ son las nuevas variables representadas por el vector de los multiplicadores de Lagrange. Esta condición tiene su origen en igualar a cero la función $L(\bm{x}, \bm{\lambda}) = f(\bm{x}) + \bm{\lambda}^{\intercal} g(\bm{x})$ denominada ``función lagrangiana''. Si ambas funciones $f$ y $g$ son continuas y diferenciables, un punto estacionario $(\bm{x}_0, \bm{\lambda}_0)$ de $L$ corresponde a un $\bm{x}_0$ que es un óptimo del problema original con restricciones.
 
 Veamos un ejemplo minimizando nuevamente la función de Rosembrock 
 \[ f(x_1, x_2) = (a - x_1)^2 + b (x_2 - x_1^2)^2 \]
 con la condición $g(x_1, x_2) = x_1^2 + x_2^2 = 1$. Al igual que en el ejemplo de la subsección \ref{subsec:proglin}. tomamos $a = 1$ y $b = 1$. Esta vez utilizaremos como argumento de la función \mip{minimize} el método SLSQP (\textit{Sequential Least Squares Programming}), que implementa en forma iterativa la optimización de un modelo cuadrático utilizando aproximaciones de segundo orden del lagrangiano. La condición de restricción debe pasarse como diccionario en el argumento \mip{constraints} de \mip{optimize}, declarando en la definición que se trata de una restricción de igualdad a cero (\mip{type='eq'}):
 
-\jupynotex[26]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[25]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Ahora hacemos la minimización del mismo modo que en los ejemplos anteriores:
 
-\jupynotex[27]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[26]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 Y visualizamos el proceso mostrando con una estrella azul el mínimo de la función de Rosembrock sin restricciones, y el nuevo óptimo (en rojo) cuya restricción exige que se encuentre sobre la circunferencia de radio $1$:
 
-\jupynotex[28]{Chapters/optimizacion/code/optimizacion.ipynb}
+\jupynotex[27]{Chapters/optimizacion/code/optimizacion.ipynb}
 
 \section{Algoritmo genético}
 
-En esta sección tomaremos un abordaje cualitativamente diferente al que hemos usado hasta ahora para resolver problemas de optimización. Introduciremos en forma sintética el algoritmo genético (AG), como ejemplo de la clase de métodos heurísticos de optimización. En particular, los AG están inspirados en el proceso de selección natural en el que una \textit{población} de posibles soluciones (denominados \textit{individuos} o \textit{cromosomas}) evolucionan hacia soluciones mejores.
+En esta sección tomaremos un abordaje cualitativamente diferente al que hemos usado hasta ahora para resolver problemas de optimización. Introduciremos en forma sintética el algoritmo genético (AG), como ejemplo de la clase de métodos heurísticos de optimización. En particular, los AG están inspirados en el proceso de selección natural en el que una ``población'' de posibles soluciones (denominados ``individuos'' o ``cromosomas'') evolucionan hacia soluciones mejores.
 
-Los individuos de un AG codifican las variables de decisión del problema de optimización en cadenas de longitud finita de algún alfabeto. Estas cadenas que representan candidatos a la solución están compuestas de \textit{genes} dados por el alfabeto utilizado. Para evolucionar hacia mejores soluciones e implementar un mecanismo de selección natural, es necesario una medida que distinga buenas soluciones de las que no son tan adecuadas para resolver el problema. Por lo general, esta medida es una función objetivo, que puede estar dada tanto por una expresión matemática como por el resultado de una simulación, y a la que generalmente se la denomina \textit{fitness}.
+Los individuos de un AG codifican las variables de decisión del problema de optimización en cadenas de longitud finita de algún alfabeto. Estas cadenas que representan candidatos a la solución están compuestas de ``genes'' dados por el alfabeto utilizado. Para evolucionar hacia mejores soluciones e implementar un mecanismo de selección natural, es necesario una medida que distinga buenas soluciones de las que no son tan adecuadas para resolver el problema. Por lo general, esta medida es una función objetivo, que puede estar dada tanto por una expresión matemática como por el resultado de una simulación, y a la que generalmente se la denomina \textit{fitness}.
 
 Una vez que el problema ha sido codificado a través de un determinado alfabeto en forma de cromosomas, y que disponemos de la correspondiente función de \textit{fitness}, el algoritmo de evolución se implementa de la siguiente manera:
 
@@ -305,7 +305,7 @@ Cada uno de estos pasos requiere de la implementación de operadores (selección
 
 Los métodos de selección se pueden clasificar en selección proporcional al \textit{fitness} o en métodos ordinales. Un ejemplo de implementación del primer caso lo constituye el método de la ruleta, en el que a cada individuo se le asigna una ``caja'' cuyo tamaño es proporcional a su \textit{fitness}, de modo que al lanzar la bola de la ruleta haya más probabilidades de que caiga en la caja de los individuo con mayor fitness. Un ejemplo de método ordinal es la selección por torneo, en el que se selecciona un número arbitrario de candidatos (mínimamente dos), con o sin reemplazo, y el que tiene el mayor \textit{fitness} gana el torneo y es seleccionado como padre para la próxima generación. El torneo debe repetirse hasta seleccionar la cantidad  de padres necesaria.
 
-La operación de recombinación o \textit{crossover} consiste en mezclar los genes de los cromosomas de dos padres. Típicamente, esto se logra intercambiando tramos de genes de los padres para formar a los hijos de la nueva generación, a través del \textit{crossover} de uno o dos puntos, en los que el o los puntos de corte se eligen aleatoriamente a lo largo del cromosoma; o del \textit{Crossover} uniforme, en el que se genera una máscara binaria y se intercambian los genes a los que les corresponde el valor \mip{1} en la posición de la máscara. Los siguientes esqueman ejemplifican estas variantes del operador de \textit{crossover}.
+La operación de recombinación o \textit{crossover} consiste en mezclar los genes de los cromosomas de dos padres. Típicamente, esto se logra intercambiando tramos de genes de los padres para formar a los hijos de la nueva generación, a través del ``\textit{crossover} de uno o dos puntos'', en los que el o los puntos de corte se eligen aleatoriamente a lo largo del cromosoma; o del ``\textit{crossover} uniforme'', en el que se genera una máscara binaria y se intercambian los genes a los que les corresponde el valor \mip{1} en la posición de la máscara. Los siguientes esqueman ejemplifican estas variantes del operador de \textit{crossover}.
 
 \begin{center}
 \textit{Crossover} de un punto: $\left\lbrace
@@ -349,9 +349,9 @@ Antes & & Después \\
 \right.$
 \end{center}
 
-Por último, también existen variantes para el operador de reemplazo. El más simple consiste en reemplazar completamente la población actual con la nueva población de hijos. Esto es sencillo de realizar, pero puede suceder que en la nueva generación los individuos no tengan \textit{fitness} tan buenos como el de algunos padres. Una forma de sortear esta posibilidad es implementar \textit{elitismo}, que consiste en reemplazar solamente una porción $r$ de los individuos originales, dejando sobrevivir en la nueva generación la porción $1 - r$ de los que tienen mejor \textit{fitness}. Es usual que a través de la evolución de la población se mantenga constante el número de individuos que la componen.
+Por último, también existen variantes para el operador de reemplazo. El más simple consiste en reemplazar completamente la población actual con la nueva población de hijos. Esto es sencillo de realizar, pero puede suceder que en la nueva generación los individuos no tengan \textit{fitness} tan buenos como el de algunos padres. Una forma de sortear esta posibilidad es implementar ``elitismo'', que consiste en reemplazar solamente una porción $r$ de los individuos originales, dejando sobrevivir en la nueva generación la porción $1 - r$ de los que tienen mejor \textit{fitness}. Es usual que a través de la evolución de la población se mantenga constante el número de individuos que la componen.
 
-Implementaremos ahora un AG básico para resolver un problema que, según su tamaño (es decir, el número de variables de decisión), puede ser muy difícil de abordar. El \textit{problema de la mochila} se puede enunciar de la siguiente forma:
+Implementaremos ahora un AG básico para resolver un problema que, según su tamaño (es decir, el número de variables de decisión), puede ser muy difícil de abordar. El ``problema de la mochila'' se puede enunciar de la siguiente forma:
 \begin{quote}
  Dado un conjunto de ítems, cada uno con un peso y un valor, determinar qué ítems incluir en una colección de forma tal que el peso total sea menor o igual a la capacidad máxima de la mochila, maximizando el valor de los objetos incluidos en la colección.\footnote{Recomendamos la lectura de \fullcite{kellerer2004}.}
 \end{quote}

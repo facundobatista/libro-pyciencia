@@ -1,5 +1,5 @@
 
-% Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
@@ -25,11 +25,9 @@ En lo que sigue, con el propósito de simplificar la escritura, adoptaremos la n
         \toprule
         \textbf{Módulo} & \textbf{Versión} \\
         \midrule
-        argparse & 1.1 \\
-        Matplotlib & 3.3.4 \\
-        NumPy & 1.19.5 \\
-        SciPy & 1.6.0 \\
-        Sympy & 1.7.1 \\
+        Matplotlib & 3.9.2 \\
+        NumPy & 1.26.4 \\
+        SciPy & 1.14.1 \\
         \bottomrule
     \end{tabular}
     \vspace{0.75em}
@@ -305,7 +303,7 @@ Debe notarse que la matriz $\mathbb{A}$ no posee elementos que cambien con el ti
  \label{fig:calor1dimpl}
 \end{figure}
 
-La implementación del algoritmo para resolver la ecuación de calor en una dimensión usando el esquema implícito se encuentra integrada al código que presentamos en la subsección anterior (\ref{subsec:calor_exlicito}), esta vez en la definición de la función \mip{resolver_implicito()} en la línea 106. Inicialmente definimos los parámetros del algoritmo: cantidad de puntos en que dividimos la malla en cada dimensión $x$ y $t$ (\mip{Nx} y \mip{Nt}, los pasos en cada malla (\mip{h} y \mip{k}) y el número de malla de Fourier (\mip{F}), tal como se puede ver en las líneas 109--113.
+La implementación del algoritmo para resolver la ecuación de calor en una dimensión usando el esquema implícito se encuentra integrada al código que presentamos en la subsección anterior (\ref{subsec:calor_explicito}), esta vez en la definición de la función \mip{resolver_implicito()} en la línea 106. Inicialmente definimos los parámetros del algoritmo: cantidad de puntos en que dividimos la malla en cada dimensión $x$ y $t$ (\mip{Nx} y \mip{Nt}, los pasos en cada malla (\mip{h} y \mip{k}) y el número de malla de Fourier (\mip{F}), tal como se puede ver en las líneas 109--113.
 
 \pyfile[firstline=106, lastline=153]{Chapters/ecuaciones_parciales/code/calor1D-completo.py}
 
@@ -318,7 +316,7 @@ En el bucle \mip{for} de la línea 139 iteramos sobre los valores de $j$ que rep
 Tal como hicimos al final de la sección anterior, proponemos ahora al lector resolver el sistema utilizando pasos temporales mayores (es decir con menos divisiones de la malla en la dimensión temporal) para observar que, a diferencia del esquema implícito, no se generan inestabilidades numéricas.
 
 \subsection{Implementación con matriz rala}
-Hemos visto que la matriz $\mathbb{A}$ de la sección anterior es tridiagonal, aunque no explotamos este hecho en el código de resolución con el abordaje implícito, ya que almacenamos en el array \mip{A} una representación completa (o \textit{densa}) que incluye muchos elementos que sabemos desde el inicio que son nulos, y el algoritmo implementado en \mip{solve} resuelve el sistema con todos los ceros. Considerando que tenemos $N_x-1$ incógnitas, el método \mip{solve} realiza operaciones del orden de $(N_x -1)^3$ y requiere el almacenamiento de $(N_x - 1)^2$ elementos.
+Hemos visto que la matriz $\mathbb{A}$ de la sección anterior es tridiagonal, aunque no explotamos este hecho en el código de resolución con el abordaje implícito, ya que almacenamos en el array \mip{A} una representación completa (o ``densa'') que incluye muchos elementos que sabemos desde el inicio que son nulos, y el algoritmo implementado en \mip{solve} resuelve el sistema con todos los ceros. Considerando que tenemos $N_x-1$ incógnitas, el método \mip{solve} realiza operaciones del orden de $(N_x -1)^3$ y requiere el almacenamiento de $(N_x - 1)^2$ elementos.
 
 Por otra parte, utilizando el hecho que $\mathbb{A}$ es tridiagonal y utilizando las herramientas de \textit{software} correspondientes, las demanda de cálculo y almacenamiento son proporcionales solamente a $N_x$. Esto conduce a una mejora significativa en el rendimiento del código, tanto por el uso de memoria como por la velocidad de ejecución. Veremos ahora cómo resolver la ecuación de calor en 1 dimensión con un esquema implícito tomando ventaja de que $\mathbb{A}$ es tridiagonal.
 
@@ -328,7 +326,7 @@ La idea es utilizar por un lado una representación de $\mathbb{A}$ como matriz 
 
 Al igual que en los casos de las subsecciones anteriores, las primeras líneas de esta función determinan los parámetros del algoritmo y los arrays que almacenan la grilla y la solución (ver líneas 159--171).
 
-En las líneas 174--176 calculamos los elementos no nulos de $\mathbb{A}$ que componen la diagonal principal, superior e inferior de $\mathbb{A}$, almacenándolos en las variables \mip{diagonal}, \mip{superior} e \mip{inferior}, respectivamente. Con estos valores construimos la matriz rala \mip{A} en la línea 178. Este método requiere varios argumentos: \mip{diagonals} es una lista conteniendo los valores que definen la matriz; \mip{offsets} establece la ubicación en la matriz (0 es la diagonal principal, 1 es la primer diagonal superior, $-$1 es la primer diagonal inferior); \mip{shape} establece la cantidad de elementos en la matriz y finalmente \mip{format} da cuenta de cómo se almacenan internamente los elementos de \mip{A}. En particular, el método \mip{'csr'} (formato \textit{Compressed Sparse Row}) es el apropiado para realizar las operaciones de manipulación y multiplicacion requeridas para resolver el sistema lineal de ecuaciones.\footnote{Ver \href{https://en.wikipedia.org/wiki/Sparse_matrix}{entrada en Wikipedia.}}
+En las líneas 174 a 176 calculamos los elementos no nulos de $\mathbb{A}$ que componen la diagonal principal, superior e inferior de $\mathbb{A}$, almacenándolos en las variables \mip{diagonal}, \mip{superior} e \mip{inferior}, respectivamente. Con estos valores construimos la matriz rala \mip{A} en la línea 178. Este método requiere varios argumentos: \mip{diagonals} es una lista conteniendo los valores que definen la matriz; \mip{offsets} establece la ubicación en la matriz (0 es la diagonal principal, 1 es la primer diagonal superior, $-$1 es la primer diagonal inferior); \mip{shape} establece la cantidad de elementos en la matriz y finalmente \mip{format} da cuenta de cómo se almacenan internamente los elementos de \mip{A}. En particular, el método \mip{'csr'} (formato \textit{Compressed Sparse Row}) es el apropiado para realizar las operaciones de manipulación y multiplicacion requeridas para resolver el sistema lineal de ecuaciones.\footnote{Ver \href{https://en.wikipedia.org/wiki/Sparse_matrix}{entrada en Wikipedia.}}
 
 En la línea 183 imprimimos en pantalla la representación densa de \mip{A}, para verificar que fue construida correctamente. Cuando establecemos el valor \mip{Nx = 10} en la línea 159 la salida en pantalla es:
 
@@ -415,7 +413,7 @@ Resolver un problema con condiciones de borde como la ecuación de Poisson \eqre
 \end{enumerate}
 
 \subsection{Formulación variacional}
-La idea central del método de elementos finitos consiste en representar el dominio sobre el que está definido la EDP con un conjunto finito de regiones discretas, o \textit{elementos}, y aproximar la función desconocida por medio de una combinación lineal de funciones base con soporte local sobre estos elementos (o sobre un grupo de elementos vecinos).
+La idea central del método de elementos finitos consiste en representar el dominio sobre el que está definido la EDP con un conjunto finito de regiones discretas, o ``elementos'', y aproximar la función desconocida por medio de una combinación lineal de funciones base con soporte local sobre estos elementos (o sobre un grupo de elementos vecinos).
 
 El núcleo del procedimiento para convertir una EDP en un problema variacional es el de multiplicar la EDP por una función $v$, integrar esa función sobre el dominio $\Omega$ mediante integración por partes de los términos con derivadas de segundo orden. A la función $v$ utilizada para multiplicar la EDP se la denomina función de prueba o \textit{test}. Por otra parte, la función desconocida $u$ que se va a aproximar se denomina función ensayo o \textit{trial}. Mantendremos en adelante los nombres en inglés debido a que es como se las llama en el código Python de FEniCS.
 
@@ -433,7 +431,7 @@ donde $\partial u / \partial n$ es la derivada de $u$ en la dirección normal a 
  \int_{\Omega} \nabla u \cdot \nabla v \; dx = \int_{\Omega} f v \; dx
 \end{equation} 
 
-Esta ecuación es válida para toda $v$ en algún espacio de funciones $\hat{V}$, mientras que la función \textit{trial} $u$ pertenece al (posiblemente diferente) espacio de funciones $V$. La ecuación \eqref{eq:fem03} representa la \textit{formulación débil} del problema con condiciones de borde original (o \textit{formulación fuerte}) dado por las ecuaciones \eqref{eq:poisson} -- \eqref{eq:poisson-b}.
+Esta ecuación es válida para toda $v$ en algún espacio de funciones $\hat{V}$, mientras que la función \textit{trial} $u$ pertenece al (posiblemente diferente) espacio de funciones $V$. La ecuación \eqref{eq:fem03} representa la ``formulación débil'' del problema con condiciones de borde original (o ``formulación fuerte'') dado por las ecuaciones \eqref{eq:poisson} -- \eqref{eq:poisson-b}.
 
 Para resolver numéricamente la ecuación de Poisson necesitamos transformar el problema variacional continuo \eqref{eq:fem03} en un problema variacional discreto. Esto se consigue introduciendo espacios de dimensión finita para las funciones \textit{test} y \textit{trial}, que denotaremos como $\hat{V}_h \subset \hat{V}$ y $V_h \subset V$, respectivamente. El problema variacional discreto puede enunciarse entonces como: encontrar $u_h \in V_h \subset V$ tal que:
 \begin{equation} \label{eq:fem04}
@@ -462,7 +460,7 @@ Para la solución de la ecuación de Poisson, las expresiones explícitas en la 
  L(v) &= \int_{\Omega} f v \; dx \label{eq:femlineal} 
 \end{align}
 
-En la literatura matemática, $a(u, v)$ se conoce como una \textit{forma bilineal} ($V \times \hat{V} \mapsto \mathbb{R}$), mientras que $L(v)$ es una \textit{forma lineal} ($\hat{V} \mapsto \mathbb{R}$). De este modo, para cada problema lineal que queremos resolver tenemos que identificar los términos con la función incógnita $u$ y agruparlos en $a(u, v)$, y del mismo modo agrupar los términos que dependen solo de las funciones conocidas en $L(v)$. Estas fórmulas para $a$ y $L$ se codifican directamente en el programa.
+En la literatura matemática, $a(u, v)$ se conoce como una ``forma bilineal'' ($V \times \hat{V} \mapsto \mathbb{R}$), mientras que $L(v)$ es una ``forma lineal'' ($\hat{V} \mapsto \mathbb{R}$). De este modo, para cada problema lineal que queremos resolver tenemos que identificar los términos con la función incógnita $u$ y agruparlos en $a(u, v)$, y del mismo modo agrupar los términos que dependen solo de las funciones conocidas en $L(v)$. Estas fórmulas para $a$ y $L$ se codifican directamente en el programa.
 
 En síntesis, antes de escribir el código de Python para que FEniCS resuelva una EDP, debemos realizar dos pasos:
 \begin{enumerate}
@@ -488,9 +486,9 @@ El código para resolver la ecuación de Poisson en 2D usando FEniCS, dadas las 
 
 \pyfile{Chapters/ecuaciones_parciales/code/fem.py}
 
-Iniciamos el programa importando todo lo que está definido en el módulo \mip{fenics}. En particular nos permite usar las funciones \mip{UnitSquareMesh}, \mip{FunctionSpace}, \mip{Expression} y demás definiones. También importamos \mip{numpy} para realizar alguna operación sobre arrays.
+Iniciamos el programa importando todo lo que está definido en el módulo \mip{fenics}\footnote{Este módulo de Python no está disponible en PyPI, hay que instalarlo en el sistema, \href{https://fenics.readthedocs.io/en/latest/installation.html}{aquí hay instrucciones} para hacerlo.}. En particular nos permite usar las funciones \mip{UnitSquareMesh}, \mip{FunctionSpace}, \mip{Expression} y demás definiones. También importamos \mip{numpy} para realizar alguna operación sobre arrays.
 
-Lo primero que hacemos es crear una malla que almacenamos en la variable \mip{mesh}, en la línea 17. Para eso usamos \mip{UnitSquareMesh} que define una malla uniforme sobre el cuadrado unitario $[0,1] \times [0,1]$. Esta malla está compuesta de celdas que en 2D son triángulos. Los parámetros 10 y 10 especifican que el cuadrado debe dividirse primero en 10 divisiones en cada dimensión (lo que genera 100 cuadrados de lado $0.1$ que cubren todo el cuadrado unitario). Cada uno de estos cuadrados interiores se divide en un par de triángulos (incluso se puede definir en qué dirección trazar la diagonal que divide el cuadrado en dos triángulos). En total se generan $2 \times 10 \times 10 = 200$ triángulos, con un total de $(10 + 1) (10 + 1) = 121$ vértices o nodos. FEniCS dispone de rutinas que realizan mallados sobre geometrías simples en una, dos y tres dimensiones, pero en problemas con geometrías complejas es necesario utilizar programas especializados en esta tarea (podemos destacar Gmsh\footnote{\url{https://gmsh.info/}{https://gmsh.info/}} como un excelente generador de mallas). En estos casos, las mallas generadas por programas externos pueden importarse en FEniCS para ser usadas en los cálculos de MEF.
+Lo primero que hacemos es crear una malla que almacenamos en la variable \mip{mesh}, en la línea 17. Para eso usamos \mip{UnitSquareMesh} que define una malla uniforme sobre el cuadrado unitario $[0,1] \times [0,1]$. Esta malla está compuesta de celdas que en 2D son triángulos. Los parámetros 10 y 10 especifican que el cuadrado debe dividirse primero en 10 divisiones en cada dimensión (lo que genera 100 cuadrados de lado $0.1$ que cubren todo el cuadrado unitario). Cada uno de estos cuadrados interiores se divide en un par de triángulos (incluso se puede definir en qué dirección trazar la diagonal que divide el cuadrado en dos triángulos). En total se generan $2 \times 10 \times 10 = 200$ triángulos, con un total de $(10 + 1) (10 + 1) = 121$ vértices o nodos. FEniCS dispone de rutinas que realizan mallados sobre geometrías simples en una, dos y tres dimensiones, pero en problemas con geometrías complejas es necesario utilizar programas especializados en esta tarea (podemos destacar \href{https://gmsh.info/}{Gmsh} como un excelente generador de mallas). En estos casos, las mallas generadas por programas externos pueden importarse en FEniCS para ser usadas en los cálculos de MEF.
 
 A continuación creamos el espacio $V$ de funciones de elemento finito, almacenado en la variable \mip{V} de la línea 18. Este espacio se crea sobre \mip{mesh}, que es el primer argumento. El segundo, \mip{'P'}, declara la utilización de la familia estándar Lagrange de elementos (también se puede usar \mip{'Lagrange'} para esta familia. FEniCS soporta todos los elementos de la Tabla Periódica de los Elementos Finitos\footnote{\href{https://www-users.math.umn.edu/~arnold/femtable/}{https://www-users.math.umn.edu/~arnold/femtable/}} \cite{arnold2014} con su correspondiente notación. El tercer argumento (\mip{1}) especifica el grado del elemento finito. En este caso, el elemento lineal de Lagrange estándar $P_1$ es un triángulo con nodos en los tres vértices (nombrado en algunas referencias como ``triángulo lineal''). 
 
@@ -506,7 +504,7 @@ Antes de definir las formas bilineal y lineal del problema es necesario definir 
 
 En las líneas 36 y 37 se resuelve el problema. Notemos que primero definimos la variable \mip{u} como \mip{TrialFunction} y la usamos para representar la función desconocida de la forma bilineal \mip{a}. Ahora la redefinimos como un objeto \mip{Function} que representa la solución. Si bien son objetos diferentes, ambos representan el mismo objeto matemático por lo que es natural usar la misma variable.
 
-Utilizaremos en este ejemplo un programa externo para visualizar la solución: ParaView\footnote{\href{https://www.paraview.org/}{https://www.paraview.org/}}. Esta es una herramienta poderosa para la representación gráfica de campos escalares y vectoriales, incluyendo los calculados por FEniCS. Para ello es necesario guardar la información de estos campos, contenida en la variable \mip{u}, en el popular formato VTK\footnote{\href{https://vtk.org/}{https://vtk.org/}}, lo que hacemos en las líneas 40 (definiendo el nombre del archivo que escribiremos en disco) y 41 (escribiendo en el archivo el contenido de \mip{u}). Debe notarse que la forma de esta operación de escritura no es muy \textit{pythónica}, ya que hace uso del operador de inserción ``\mip{<<}'' propio de C++.
+Utilizaremos en este ejemplo un programa externo para visualizar la solución: ParaView\footnote{\href{https://www.paraview.org/}{https://www.paraview.org/}}. Esta es una herramienta poderosa para la representación gráfica de campos escalares y vectoriales, incluyendo los calculados por FEniCS. Para ello es necesario guardar la información de estos campos, contenida en la variable \mip{u}, en el popular formato VTK\footnote{\href{https://vtk.org/}{https://vtk.org/}}, lo que hacemos en las líneas 40 (definiendo el nombre del archivo que escribiremos en disco) y 41 (escribiendo en el archivo el contenido de \mip{u}). Debe notarse que la forma de esta operación de escritura no es muy ``pythónica'', ya que hace uso del operador de inserción ``\mip{<<}'' propio de C++.
 
 Finalmente, dado que empezamos este ejemplo a partir de la solución exacta de la ecuación de Poisson, podemos calcular el error obtenido con el MEF. Este cálculo lo realizaremos de dos maneras: mediante la norma $L^2$ y el error en los vértices de la malla.
 

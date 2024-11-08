@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+"""
 Solución de la ecuación de Poisson en 2D con condiciones de Dirichlet
 para resolver un problema cuya solución es conocida.
 
@@ -8,7 +8,7 @@ para resolver un problema cuya solución es conocida.
 
     u_D = 1 + x + 2 y^2
       f = -4
-'''
+"""
 
 import fenics as fe
 import numpy as np
@@ -20,8 +20,10 @@ V = fe.FunctionSpace(mesh, 'P', 1)
 # Definimos las condiciones de borde
 u_D = fe.Expression("1 + x[0] + 2 * x[1]*x[1]", degree=2)
 
+
 def boundary(x, on_boundary):
     return on_boundary
+
 
 bc = fe.DirichletBC(V, u_D, boundary)
 
@@ -34,7 +36,7 @@ L = f * v * fe.dx
 
 # Calculamos la solución
 u = fe.Function(V)
-fe.solve( a == L, u, bc )
+fe.solve(a == L, u, bc)
 
 # Guardamos la solución en un archivo con formato VTK
 vtk_file = fe.File('poisson.pvd')
@@ -51,6 +53,6 @@ error_max = np.max(np.abs(vertex_values_u_D - vertex_values_u))
 print(f'    Error L2 = {error_L2}')
 print(f'Error máximo = {error_max}')
 
-# Copyright 2020-2021 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

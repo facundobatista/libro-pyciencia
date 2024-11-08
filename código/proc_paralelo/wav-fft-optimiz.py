@@ -42,6 +42,6 @@ fig.axes.xaxis.set_major_formatter(ticker.ScalarFormatter())
 plt.savefig("fft-menospuntos.pdf")
 print("Listo")
 
-# Copyright 2020-2022 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/
