@@ -60,3 +60,5 @@ Tanto los textos como el código fuente, ejemplos e imágenes son Copyright de F
 - [Procesamiento en GPU](procesamiento_gpu.pdf?raw=True): Introducción. Arquitectura de una GPU. Kernels y threads en CUDA. Organización de threads. Producto de matrices en GPU con PyCUDA y PyOpenCL.
 
 - [Python: Clases](pyclases.pdf?raw=True): Atributos de instancia y de clase. Métodos de clase y estáticos. Herencia: concepto y ejemplos. Simple y no lineal. Propiedades. Creando tipos de datos: conceptos y métodos con nombres especiales.
+
+- [Matemática simbólica](matematica_simbolica.pdf?raw=True): Conceptos y operaciones básicas. Simplificación de expresiones. Solución de ecuaciones. Funciones y cálculo diferencial e integral. Evaluaciones numéricas y gráficos.

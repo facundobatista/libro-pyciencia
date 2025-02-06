@@ -1,0 +1,513 @@
+
+% Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
+% Licencia CC BY-NC-SA 4.0
+% Para más info visitar https://github.com/facundobatista/libro-pyciencia/
+
+\chapter{Matemática simbólica} \label{ch:simbolica}  
+
+\begin{wraptable}{r}{5cm}
+\begin{modulesinfo}
+\begin{center}
+{\small
+    \begin{tabular}{l r}
+        \toprule
+        \textbf{Módulo} & \textbf{Versión} \\
+        \midrule
+        SymPy & 1.13.1 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.75em}
+    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/matematica_simbolica/}{Código disponible}
+}
+\end{center}
+\end{modulesinfo}
+\end{wraptable}
+
+
+Es común utilizar las computadoras para realizar cálculo numérico, que implica realizar veloces operaciones aritméticas utilizando muchas veces aproximaciones numéricas y siempre números con precisión determinada. Sin embargo, es posible también en muchos casos realizar operaciones exactas en forma simbólica (como resolver ecuaciones, derivar, integrar, simplificar expresiones) utilizando para ello símbolos y variables. En Python, esto es posible gracias al módulo (o biblioteca?) SymPy \cite{sympy}, que provee lo que se denomina un «sistema de álgebra computacional» (o CAS, del inglés \textit{computer algebra system}). 
+
+Una característica de SymPy que lo diferencia de otros CAS es que está escrito en Python y puede ejecutarse completamente en Python como cualquier otro módulo (NumPy, SciPy, etc.), tanto en forma interactiva como dentro de un programa. En particular, al usarlo en un \textit{notebook} de Jupyter, podemos mostrar las salidas interpretando \LaTeX{} lo cual facilita enormente la lectura de expresiones complejas.
+
+\section{Conceptos y operaciones básicas}
+
+Un concepto central en SymPy es el de símbolo. Éste representa, por medio de una variable simbólica, un valor abstracto o desconocido que puede ser utilizado en expresiones matemáticas. De este modo, es posible realizar cálculos simbólicos con dichas variables que son tratadas como entidades abstractas en vez de números específicos. 
+
+Los objetos de tipo símbolo se pueden instanciar a partir de \mip{sympy.Symbol()} o \mip{sympy.symbols()}. En el primer caso solo se instancia un único símbolo, mientras que el segundo caso permite instanciar varios símbolos en una sola instrucción. En ambos casos, además del nombre del símbolo creado, dichos objetos contienen atributos y métodos que describen sus propiedades y permiten operar sobre ellos. Del mismo modo que los objetos en Python, es posible asignarles nombres a los símbolos de modo de poder usarlos posteriormente.
+
+Veamos cómo instanciar un símbolo $x$ al que le asignaremos el nombre \mip{x}, luego de importar el módulo \mip{sympy} en la primera línea:
+
+\jupynotex[1]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+ 
+El método \mip{Symbol()} de SymPy recibe como argumento una cadena e instancia un objeto \mip{Symbol} al que le asignamos el nombre \mip{x}. Este nombre puede ser utilizado en expresiones, y al no tener un valor numérico asignado estas expresiones quedan en forma simbólica (y en el \textit{notebook} se muestra «renderizado» a partir de la salida en \LaTeX{}). En la celda siguiente instanciamos varios objetos utilizando \mip{sympy.symbols()} mediante una cadena que tiene palabras (separadas por espacios, pero también pueden separarse mediante comas) compuestas por una o varias letras, incluyendo algunas que denotan letras del alfabeto griego. A dichos objetos les asignamos nombres que son utilizados para construir una expresión:
+
+\jupynotex[2]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+Es posible, naturalmente, asignar un símbolo a un nombre arbitrario (por ejemplo el símbolo $z$ a la variable \mip{h}), sin embargo esto no constituye una buena práctica. Es importante señalar la diferencia entre un símbolo y el nombre que le asignamos. Veamos el siguiente ejemplo:
+
+\jupynotex[3]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+Este ejemplo muestra el procedimiento habitual de Python para asociar nombres a objetos tal como describimos en la Sección \ref{sec:pensando-pythonista}. Primero asignamos al nombre \mip{expresión} una operación suma en la que participa la variable \mip{x}, que a su vez «apunta» hacia el símbolo $x$. En la línea siguiente «reorientamos» el nombre \mip{x} hacia el objeto de tipo entero \mip{2}. Cuando mostramos \mip{expresión}, tal vez podríamos esperar obtener el valor 4, pero no es lo que ocurre, sino que recuperamos la definición inicial de \mip{expresión} con el símbolo $x$, sin que el nuevo valor asignado al nombre \mip{x} sea tenido en cuenta en la evaluación de \mip{expresión}. Si esto último es lo que estábamos buscando, lo que tenemos que hacer es sustituir el símbolo $x$ por el valor 2 en \mip{expresión}:
+
+\jupynotex[4]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+En esta última celda, el nombre \mip{x} representa un símbolo abstracto $x$, que «podría» ser un número entero, real, complejo, una función o cualquier otro ente matemático que pueda ser usado en expresiones y que permita su tratamiento simbólico. Es posible suministrar más información sobre el objeto de modo que SymPy pueda manipularlo apropiadamente. Podemos ver un ejemplo de esto en las celdas siguientes:
+
+\jupynotex[5-6]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+Aquí hemos definido dos variables simbólicas, estableciendo además que $y$ es positiva. De este modo, al aplicar la función \mip{sqrt()} sobre ambas, para el caso de $x$ no se produce la simplificación automática de la expresión como si sucede con $y$. Del mismo modo, podemos definir variables que representen números enteros, pares e impares. Con esta información, SymPy puede simplificar o evaluar analíticamente las expresiones:
+
+\jupynotex[7-9]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+Es posible preguntar si un símbolo posee determinados atributos. Por ejemplo, en el último caso, podemos interrogar al símbolo $l$ si es un número par o impar:
+
+\jupynotex[10]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+Como hemos visto en la celda 2, es posible definir múltiples símbolos en una sola instrucción utilizando \mip{symbols()}. En este caso, al establecer condiciones como las de las celdas precedentes, éstas aplican a todo el conjunto de símbolos creados. Es posible obtener el conjunto de atributos asignados a un determinado símbolo mediante \mip{assumptions0}, que contiene un diccionario cuyas claves son las propiedades y los valores son \mip{True}, \mip{False} o \mip{None}, dependiendo si esta propiedad ha sido definida o no:
+
+\jupynotex[11]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+Una característica que puede originar cierta confusión es que, dado que SymPy no extiende la sintaxis de Python, el símbolo \mip{=} no representa una igualdad en SymPy, sino que sigue siendo el operador de asignación usual de Python. Tampoco \mip{==} sirve para evaluar la igualdad matemática en SymPy, tal como se ve a continuación:
+
+\jupynotex[12]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+En este caso, podemos identificar claramente que estamos desarrollando el cuadrado de un binomio, por lo que matemáticamente las expresiones a izquierda y derecha del operador de comparación son iguales. Sin embargo, el operador \mip{==} compara estrictamente expresiones, que en el ejemplo de la celda 12 son estructuralmente diferentes en ambos lados del operador: a la izquierda tenemos un binomio elevado al cuadrado, mientras que a la derecha vemos la suma de tres términos. Para realizar la comparación en sentido matemático, podemos ver que $(x + 2)^2 - x^2 -4 x -4 =0$, entonces podemos intentar simplificar la diferencia entre ambos miembros y verificar la igualdad cuando esa simplificación dé como resultado un cero. Para realizar la simplificación algebraica de expresiones utilizamos el método \mip{simplify()}:
+
+\jupynotex[13-14]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb}
+
+En la celda 14 podemos comprobar que las expresiones no son matemáticamente iguales excepto para $x = 0$. Este método para verificar igualdades de expresiones no es infalible, dado que se puede probar teóricamente que es imposible determinar si dos expresiones simbólicas son idénticamente iguales en general\footnote{Ver la \href{https://en.wikipedia.org/wiki/Richardson's\_theorem}{entrada} del teorema de Richardson en Wikipedia.}. No obstante funciona aceptablemente para expresiones habituales no muy complejas. SymPy también dispone del método \mip{equals()}, que comprueba la igualdad de expresiones por medio de evaluaciones numéricas en puntos aleatorios:
+
+\jupynotex[15]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+En la celda 4 vimos que podemos reemplazar un símbolo por un valor numérico utilizando el método \mip{subs()}. En general, podemos usar este método para sustituir todas las instancias de algo en una expresión con alguna otra cosa. Por ejemplo:
+
+\jupynotex[16-18]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+En el caso de la celda 16, simplemente reemplazamos el símbolo $x$ por el valor numérico $0$, y como resultado se muestra la evaluación de la expresión. En la celda 17, la sustitución consiste en reempĺazar $\cos(x)$ por $\sqrt{1 - \sen^2(x)}$, sin realizar evaluaciones numéricas. Finalmente, vemos que \mip{subs()} devuelve un nueva expresión, dado que los objetos de SymPy son inmutables, tal como se ve al mostrar el valor que contiene la variable \mip{expresión}. 
+
+Es posible también construir expresiones simbólicas de SymPy a partir de cadenas, utilizando para ello el método \mip{sympify()} (no confundir con \mip{simplify()}):
+
+\jupynotex[19]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+Como dijimos al inicio de esta sección, los símbolos en SymPy permiten representar diversos objetos matemáticos, entre los que se encuentran particularmente los números. Dado que éstos comparten atributos y métodos de \mip{Symbol}, deben ser objetos distintos a los números propios de Python (como \mip{int} y \mip{float}). La conversión de números de Python a objetos de SymPy se realiza automáticamente por SymPy, o podemos hacerlo en forma explícita, y luego podemos acceder a diversos atributos, por ejemplo:
+
+\jupynotex[20-23]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+Podemos volver a convertir instancias de números de SymPy en los correspondientes tipos intrínsecos de Python con las funciones usuales \mip{int()} y \mip{float()}:
+
+\jupynotex[24]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+En la celda 7 vimos que podemos instanciar un objeto de \mip{Symbol} pasando el parámetro \mip{integer=True}. De esta forma, este objeto representa «algún» entero, mientras que una instancia de \mip{Integer} representa un entero específico. En ambos casos, el atributo \mip{is_integer} es \mip{True}, pero solo en el segundo es \mip{True} el atributo \mip{is_Integer} (notar la «I» mayúscula). Por ejemplo:
+
+\jupynotex[25]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+Los números enteros en SymPy son de precisión arbitraria, de modo que no tienen límites inferior y superior fijos como ocurre cuando se representan enteros con un número fijo de bits (como en el caso de los enteros de NumPy):
+
+\jupynotex[26]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+En la práctica, por supuesto, existen límites dados por los recursos finitos de la computadora, como la cantidad de memoria disponible. Al igual que para los enteros, los objetos \mip{Float} de SymPy también son de precisión arbitraria, en contraste con los \mip{float} intrínsecos de Python o de NumPy. El constructor de \mip{Float} recibe dos argumentos: el primero es un \mip{float} de Python o una cadena, mientras que el segundo, opcional, representa la precisión requerida. Por ejemplo, veamos el tratamiento diferente que recibe el número $0.3$ en Python y como objeto de SymPy:
+
+\jupynotex[27]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+Sabemos que en la representación de punto flotante binaria, el número $0.3$ no se puede representar exactamente, y así lo muestra la primera línea de la salida de la celda precedente. Al instanciar un objeto \mip{Float} de SymPy a partir del número \mip{0.3}, obtenemos la misma representación inexacta que el caso anterior, dado que SymPy recibe como argumento un número que Python no puede representar correctamente. Sin embargo, utilizando el constructor usando la cadena \mip{'0.3'}, SymPy muestra correctamente la representación del número con la precisión requerida como segundo argumento.
+
+SymPy también ofrece la posibilidad de expresar números racionales, y operar sobre ellos con la matemática usual. Por ejemplo:
+
+\jupynotex[28-29]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+Dado un número en forma racional, podemos acceder separadamente a su numerador y denominador a través de los atributos \mip{.p} y \mip{.q}:
+
+\jupynotex[30]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+Finalmente, SymPy contiene también constantes numéricas que se pueden utilizar en expresiones, como $\pi$, $e$, $\infty$ (que se representa con dos letras «o» minúsculas seguidas), entre otras, así como constantes físicas y unidades:
+
+\jupynotex[31]{Chapters/matematica_simbolica/code/conceptos_basicos.ipynb} 
+
+\section{Simplificación de expresiones}
+Una de las características más utilizadas en un CAS es la manipulación algrebraica de expresiones complejas para obtener expresiones más simples. SymPy contiene muchas funciones que realizan diferentes tareas de simplificación. Una de ellas, que mostramos en un ejemplo anterior, es \mip{simplify()}. Esta función intenta aplicar, en forma heurística, todas las funciones específicas que contiene SymPy con el propósito de obtener la forma más simple de una expresión. Veamos algunos casos: 
+
+\jupynotex[1-4]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+En la salida de la celda 2 obtenemos una expresión simple para un cociente de polinomios. En la celda siguiente el resultado se obtiene a partir de la simplificación de una identidad trigonométrica. En el último ejemplo, \mip{sp.gamma(x)} representa la función gamma $\Gamma(x)$. Si bien \mip{simplify} intenta encontrar la expresión más simple, a veces no estamos de acuerdo con el resultado que nos ofrece. Por ejemplo: 
+
+\jupynotex[5]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Como vemos, la salida de la función es simplemente su argumento, cuando tal vez esperábamos obtener $(x + 2)^2$. Veremos a continuación que podemos intentar realizar la simplificación utilizando un método más específico.  
+
+\subsection{Simplificación de funciones polinómicas y racionales}
+Una de las funciones de simplificación más utilizadas en SymPy es \mip{expand()}, que dado un polinomio, lo expresa en la forma canónica como suma de monomios:
+
+\jupynotex[6-7]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Tal como su nombre lo indica, \mip{expand()} no parece realizar tareas de simplificación dado que devuelve expresiones más grandes. Generalmente este es el caso, pero en ocasiones se obtienen expresiones más simples debido a cancelaciones de términos:
+
+\jupynotex[8]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Otra función de simplificación muy útil es \mip{factor()}, que recibe polinomios como argumentos y los expresa como productos de factores irreducibles sobre los números racionales. Por ejemplo:
+
+\jupynotex[9-10]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Es posible también acceder a la lista de los factores de una expresión, junto con sus correspondientes exponentes, por medio de \mip{factor_list()}:
+
+\jupynotex[11]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Para polinomios, \mip{factor()} y \mip{expand()} son funciones opuestas. Sin embargo, los argumentos de estas funciones no necesariamente deben ser polinomios, ya que ambas intentarán factorizar o expandir cualquier tipo de expresiones (aunque los factores pueden no ser irreducibles si los argumentos no son polinomios sobre los racionales):
+
+\jupynotex[12-13]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+La función \mip{collect()} permite agrupar las potencias de una variable determinada en una expresión. Por ejemplo:
+
+\jupynotex[14]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Si queremos aislar el coeficiente de una potencia específica de una expresión, podemos usar el método \mip{coeff()} tal como hacemos en la celda siguiente, para obtener el coeficiente de $x^3$ de \mip{expresión}:
+
+\jupynotex[15]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+La función \mip{cancel()} expresa una función racional en su argumento en la forma canónica $p/q$, donde numerador y denominador son polinomios sin factores comunes y los coeficientes de las máximas potencias de $p$ y $q$ son enteros (no fracciones). Por ejemplo:
+
+\jupynotex[16-18]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Por último, mencionamos la función \mip{apart()}, que realiza una descomposición en fracciones simples de una expresión racional:
+
+\jupynotex[19-20]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+\subsection{Simplificaciones trigonométricas}
+Para el caso de las funciones trigonométricas, podemos utilizar \mip{trigsimp()}, que intenta simplificar expresiones utilizando identidades trigonométricas, y \mip{expand_trig()} que aplica identidades para la suma o productos de ángulos:
+
+\jupynotex[21-24]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+\subsection{Simplificación de potencias}
+SymPy es capaz de simplificar expresiones utilizando las reglas usuales de potenciación:
+\begin{enumerate}
+    \item $x^a x^b = x^{a + b}$
+    \item $x^a y^a = (xy)^a$
+    \item $(x^a)^b = x^{ab}$
+\end{enumerate}
+
+No obstante, no realiza simplificaciones cuando dichas expresiones no son válidas en general. Por ejemplo: $x^a x^b = x^{a + b}$ es una igualdad válida, pero $x^a y^a = (xy)^a$ solo lo es cuando $x$ y $y$ no son negativos y $a$ es real. Por defecto, SymPy asume que los símbolos sobre los que opera son complejos, pero como vimos previamente, es posible indicar atributos durante la creación de estos símbolos. Por ejemplo:
+
+\jupynotex[25-28]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+En el último caso, no hemos indicado atributos en la creación de $m$, $n$, y $l$ que permitan a SymPy simplificar la expresión, sin embargo, podemos forzar a que se realice la simplificación independientemente de los atributos:
+
+\jupynotex[29]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Las operaciones de expansión de expresiones con potencias aplican las identidades 1 y 2 de derecha a izquierda, respectivamente, mediante las funciones \mip{expand_power_exp()} y \mip{expand_power_base()}:
+
+\jupynotex[30-31]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Al igual que en la simplificación, la identidad 2 no se aplica si no es válida, aunque podemos forzar a que se produzca:
+
+\jupynotex[32-33]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Para finalizar, podemos aplicar la identidad 3 usando \mip{powdenest()}, siempre que los atributos de los símbolos garanticen su validez:
+
+\jupynotex[34-36]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+\subsection{Simplificación de exponenciales y logaritmos}
+Las principales identidades que intenta aplicar SymPy para simplificar expresiones con logaritmos son:
+\begin{enumerate}
+    \item $\log(x y) = \log(x) + \log(y)$
+    \item $\log(x^n) = n \log(x)$
+\end{enumerate}
+
+Estas identidades no son válidas para valores complejos arbitrarios de $x$ y $y$, por lo que para que las expresiones puedan simplificarse es necesario establecer los atributos correspondientes:
+
+\jupynotex[37-43]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+La operación inversa a la expansión se realiza con \mip{logcombine()}:
+
+\jupynotex[44-47]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+\subsection{Funciones especiales}
+Para finalizar esta sección mencionaremos algunas funciones más que permiten manipular expresiones para expresarlas de un modo más simple (o conveniente). Una de ellas es \mip{rewrite()}, que sirve para escribir una expresión en términos de una función, tal como vemos en los ejemplos siguientes:
+
+\jupynotex[48-49]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Es posible también simplificar expresiones combinatorias por medio de \mip{combsimp()}:
+
+\jupynotex[50-51]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Del mismo modo podemos intentar transformar expresiones que contienen funciones gamma o combinatorias con argumentos no enteros, usando la función \mip{gammasimp()}:
+
+\jupynotex[52]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+Por último, mostramos un ejemplo en el que expendimos una función especial (gamma) utilizando alguna identidad conocida, utilizando la función \mip{expand_func()}:
+
+\jupynotex[53]{Chapters/matematica_simbolica/code/algebra.ipynb} 
+
+
+\section{Solución de ecuaciones}
+
+SymPy es capaz de resolver, en forma simbólica, ecuaciones lineales y no lineales, sistemas de ecuaciones lineales, desigualdades, ecuaciones diofánticas y ecuaciones diferenciales\footnote{Para ver cómo resolver ecuaciones diferenciales, ver el Capítulo \ref{ch:ordinarias}.}. En caso que la solución analítica de una ecuación (o sistema de ecuaciones) no exista, SymPy provee la posibilidad de resolverlas en forma numérica.
+
+Antes de iniciar un recorrido sobre algunas de estas posibilidades, es necesario recordar que una ecuación en SymPy no se representa con un símbolo \mip{=} o \mip{==}, sino a través de un objeto \mip{Eq}. Por ejemplo:
+\jupynotex[1]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+Por otra parte, cualquier expresión que no sea una instancia de \mip{Eq} se asume igual a cero en el contexto de funciones que resuelven ecuaciones (usualmente denominadas «\textit{solvers}»). Dado que en el ejemplo anterior $2 x + 8 = 16 y$ es equivalente a $2 x + 8 - 16 y = 0$, podemos pasar esta última expresión como argumento a un \textit{solver} para intentar obtener una solución a dicha ecuación:
+\jupynotex[2-4]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+Existen dos funciones para resolver ecuaciones algebraicas: \mip{solve()} y \mip{solveset()}. La primera opción es útil para obtener representaciones simbólicas de las posibles soluciones de una ecuación, y para sustituir dichas representaciones en otras ecuaciones o expresiones. \mip{solveset()} es una alternativa que representa las soluciones utilizando conjuntos matemáticos, y permite obtener todas las soluciones incluso si el conjunto es infinito (las recomendaciones de uso de una función u otra se pueden ver \href{https://docs.sympy.org/latest/guides/solving/solve-equation-algebraically.html}{acá}.). Veamos algunos ejemplos.
+\jupynotex[5-6]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+En las dos celdas precedentes resolvemos la ecuación $x^2 + 2 x - 3 = 0$ (o lo que es lo mismo, determinamos las raíces del polinomio). En el caso de \mip{solve()}, obtenemos una lista enumerando las soluciones para la variable $x$, mientras que con \mip{solveset()} lo que resulta es un conjunto finito. En la expresión que representa al polinomio, el único símbolo «indeterminado» es la variable independiente $x$, mientras que los coeficientes y potencias son números. Por este motivo es opcional indicar sobre qué símbolo debe resolverse la ecuación (no especificado en la celda 5). Naturalmente, podemos utilizar expresiones que contengan otros símbolos además de la variable que queremos determinar como solución, y en este caso debemos indicar cuál es esa variable:
+\jupynotex[7]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+SymPy permite, en algunos casos, hallar también la solución de ecuaciones trigonométricas. En el ejemplo siguiente podemos apreciar la diferencia en los resultados de \mip{solve()} y \mip{solveset()}:
+\jupynotex[8-9]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+En los casos en que no exista una solución analítica, o que SymPy sea incapaz de hallarla, devolverá una solución formal que eventualmente puede ser resuelta en forma numérica:
+\jupynotex[10-1r]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+\noindent mientras que si no existe la solución de una ecuación, estas funciones devolverán una lista vacía o un conjunto vacío:
+\jupynotex[12-13]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+La solución de un sistema de ecuaciones consiste en extender el procedimiento que utilizamos para ecuaciones de una sola incógnita. Simplemente es necesario pasar como argumento una lista de las ecuaciones a resolver, y otra con la lista de símbolos para los que se busca la solución (o las soluciones). Por ejemplo:
+\jupynotex[14-15]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+En estas últimas dos celdas, \mip{solve()} devuelve una lista en la que cada elemento representa una solución del sistema. Además, hemos pasado como argumento opcional \mip{dict=True} de forma que la respuesta de SymPy sea en forma de diccionario, lo que resulta útil para reutilizar los valores obtenidos de las soluciones. Por ejemplo, podemos verificar que se satisfacen las ecuaciones:
+\jupynotex[16]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+Por defecto, SymPy ofrecerá soluciones en el campo complejo para las incógnitas:
+\jupynotex[17-18]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+Es posible restringir el dominio de búsqueda de soluciones, por ejemplo limitando la incógnita al campo real o a un intervalo dado. Las funciones \mip{solve()} y \mip{solveset()} tienen abordajes diferentes para ello.
+
+En el caso de \mip{solve()}, podemos limitar el dominio al campo real incorporando una condición a la definición de la incógnita: 
+\jupynotex[19]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+\noindent o utilizando un método de Python para restringir las soluciones a un determinado intervalo:
+\jupynotex[20-21]{Chapters/matematica_simbolica/code/ecuaciones.ipynb} 
+
+\noindent donde hemos hecho uso de la disyunción lógica \mip{Or}. Para restringir el dominio al utilizar \mip{solveset()}, dicho dominio se debe pasar como argumento:
+\jupynotex[22-23]{Chapters/matematica_simbolica/code/ecuaciones.ipynb}
+
+En la celda 21, \mip{sym.S.Reals} es un «singleton» que representa los números reales desde $-\infty$ a $+\infty$.
+
+Como vimos en un ejemplo precedente, cuando SymPy no es capaz de resolver una ecuación en forma analítica devuelve una expresión sin evaluar o una excepción:
+\jupynotex[24]{Chapters/matematica_simbolica/code/ecuaciones.ipynb}
+
+En estos casos, podemos resolver la ecuación en forma numérica con la función \mip{nsolve()}, a la que es necesario pasar como argumento la expresión a resolver, el símbolo que representa la incógnita, y un valor próximo a la solución que inicia la secuencia de aproximaciones numéricas:
+\jupynotex[26]{Chapters/matematica_simbolica/code/ecuaciones.ipynb}
+
+Es habitual representar un sistema de ecuaciones lineales en forma matricial. SymPy permite resolver ecuaciones de esta forma, ya sea con un \textit{solver} como \mip{solve()} y también con factorizaciones como la descomposición LU o QR. Mostramos algunos ejemplos de esta forma de resolver ecuaciones matriciales en el capítulo \ref{ch:algebraicas}.
+
+
+\section{Funciones y cálculo diferencial e integral}
+En esta sección exploraremos superficialmente las capacidades de SymPy para el cálculo diferencial e integral, herramientas fundamentales en el análisis matemático. Comenzaremos con el concepto de funciones en el contexto de SymPy y a continuación abordaremos los cálculos de límites, derivadas e integrales. Finalmente mostraremos como evaluar expresiones que contienen sumas, productos y la posibilidad de expandir funciones en series de potencia o de Fourier.
+
+\subsection{Funciones}
+Así como podemos definir símbolos en SymPy, podemos también definir funciones. SymPy permite definir funciones abstractas (o indefinidas), y funciones definidas. Las funciones indefinidas son instancias de \mip{sympy.Function} y, al igual que con los símbolos, el primer argumento del constructor de \mip{Function} es el nombre que le asignamos.
+
+Una función indefinida no se puede evaluar, ya que no tiene definido el cuerpo de la función. Al igual que con los símbolos, se pueden establecer atributos sobre funciones que permitan su manipulación aprovechando propiedades derivadas de estos atributos. Veamos algunos ejemplos.
+
+\jupynotex[1]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+En la celda precedente, luego de importar el módulo \mip{sympy}, definimos los  símbolos $x$, $y$ y $z$ como hicimos anteriormente, y luego asignamos a la variable \mip{f} una función indefinida. Esta función, además de carecer de cuerpo, no ha sido aplicada a ningún conjunto de símbolos que representen sus argumentos, pero podemos hacerlo sobre los símbolos ya definidos: 
+
+\jupynotex[2-3]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+También podemos definir funciones indefinidas que dependan explícitamente de argumentos:
+
+\jupynotex[4]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Podemos acceder al conjunto de argumentos establecidos para $f$ y $g$ con el método \mip{free_symbols}:
+
+\jupynotex[5]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+\noindent resultando el conjunto vacío para el caso de $f$. Se pueden establecer propiedades sobre funciones del mismo modo que como hicimos para símbolos:
+
+\jupynotex[6]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+\noindent o también heredando propiedades de símbolos:
+
+\jupynotex[7]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Las funciones indefinidas son útiles en diversos contextos, por ejemplo, para escribir ecuaciones diferenciales en las que no conocemos la forma de la función, y justamente resolver la ecuación es lo que permite establecer cuál es su cuerpo. Por otro lado, es posible también definir funciones definidas cuya dependencia operacional con sus argumentos se encuentra implementada, ya sea como subclase de \mip{sympy.Function} o como combinación de las múltiples funciones definidas en SymPy. Por ejemplo, la función coseno se encuentra entre las disponibles en SymPy, y representa una función no evaluada que se puede aplicar a un símbolo, a un número o a una expresión:
+
+\jupynotex[8-9]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Cuando el argumento es un símbolo, la función se mantiene sin evaluar excepto que sea posible su evaluación hacia un valor numérico o una expresión a partir de las propiedades de su argumento, tal como se muestra en la celda siguiente:
+
+\jupynotex[10]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Podemos definir el cuerpo de nuestra propia función al estilo usual de funciones de Python. En este caso, si tenemos previamente definidos como símbolos los argumentos de la función, lo que devuelve \mip{return} en la función \mip{f_py(x, y)} siguiente es una expresión válida de dichos símbolos:
+
+\jupynotex[11]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+En este ejemplo, \mip{f_py} devuelve una expresión simbólica dado que los argumentos de esta función ya fueron definiddos como símbolos $x$ y $y$. No obstante, podemos también evaluar numéricamente a \mip{f_py} si le pasamos como argumentos dos números de un tipo de datos intrínseco del lenguaje, que en el siguiente ejemplo son del tipo \mip{int}:
+
+\jupynotex[12]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+\noindent mientras que si los argumentos son símbolos, podemos realizar algún tipo de manipulación simbólica sobre \mip{f_py}:
+
+\jupynotex[13]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+
+Por último, SymPy permite definir funciones anónimas, o funciones lambda, que no tienen nombre pero implementan el cuerpo de la función de forma que permitan su evaluación. Estas funciones son instancias de \mip{sympy.Lambda} y reciben como primer argumento una tupla con los símbolos que representan las variables independientes, y como segundo argumento la expresión que representa el cuerpo de la función:
+
+\jupynotex[14-15]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+\subsection{Límites}
+SymPy es capaz de calcular simbólicamente el límite de una expresión. Para obtener
+\[ \lim_{x \rightarrow x_0} f(x) \]
+se utiliza la función \mip{sympy.limit()}, pasando como primer argumento la expresión a la que se le calcula el límite, como segundo argumento la variable, y por último el valor al que se aproxima la variable, tal como muestra la celda siguiente:
+
+\jupynotex[16]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Naturalmente, en situaciones en que el límite dé origen a una expresión indefinida, no es válido evaluar este límite reemplazando el valor de la variable independiente por el valor al que tiende. Por ejemplo, en la celda siguiente queremos calcular el límite al que tiende $x^{3} - 3 x$ cuando $x \rightarrow \infty$ (que se representa en SymPy como \mip{sym.oo}):
+
+\jupynotex[17]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Dado que esta expresión resulta indeterminada, obtenemos un \mip{NaN} (\textit{Not-a-Number}) como respuesta. La forma correcta de realizar el cálculo es:
+
+\jupynotex[18]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Es posible también calcular límites simbólicos definidos sobre funciones abstractas, por ejemplo para el cálculo de derivadas por definición, que luego al utilizar funciones específicas obtenemos como resultado la derivada en cuestión: 
+
+\jupynotex[19-20]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Es posible generar una expresión que contenga el límite sin evaluar, que permite una evaluación posterior de la expresión obtenida. Estos límites sin evaluar también son utilizados por SymPy cuando no puede obtener un resultado, por ejemplo, cuando la expresión contiene una función abstracta. Para dejar sin evaluar un límite se utiliza la función \mip{sympy.Limit} (con «L» mayúscula) con idéntica sintaxis que \mip{sympy.limit()}:
+
+\jupynotex[21]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+\noindent y para realizar la evaluación sobre una función definida, podemos utilizar primero el método \mip{subs} que reemplaza la función abstracta $f$ por una específica (en la celda siguiente, \mip{sym.cos}), y realizamos la evaluación con \mip{doit()}:
+
+\jupynotex[22]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Para finalizar esta sección, mostraremos que también es posible calcular límites laterales, estableciando como cuarto parámetro el sentido desde el que nos aproximamos al valor límite del argumento: \mip{'+'} para límite por la derecha, y \mip{'-'} para el límite por izquierda:
+
+\jupynotex[23]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+\subsection{Derivadas}
+
+Vimos en la sección anterior que podemos calcular la derivada de una función mediante su definición utilizando límites. SymPy permite calcular la derivada usando directamente la función \mip{diff()}:
+
+\jupynotex[24]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+\noindent o utilizando el método \mip{.diff()} de una expresión:
+
+\jupynotex[25]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Para realizar múltiples derivadas se puede repetir la variable las veces que sean necesarias:
+
+\jupynotex[26]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+\noindent o simplemente indicar el orden de la derivación con un número entero:
+
+\jupynotex[27]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+También es posible realizar el cálculo de derivadas parciales de múltiples variables. Por ejemplo, para calcular
+
+\[ \frac{\partial^7}{\partial x^2 \partial y^2 \partial z^3} e^{x y z} \]
+\noindent podemos escribir:
+
+\jupynotex[28]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Dado que el cálculo de derivadas es una tarea relativamente simple, es posible evaluar las derivadas de la mayoría de las funciones matemáticas definidas en SymPy, incluso las que involucran expresiones complicadas:
+\jupynotex[29]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+
+Del mismo modo que para el caso de los límites, podemos crear una expresión que contenga una derivada sin evaluar:
+
+\jupynotex[30]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Cuando queremos efectivamente evaluar la derivada, invocamos el método \mip{doit()}
+
+\jupynotex[31]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Desde luego, podemos utilizar la función o el método \mip{diff()} sobre funciones abstractas:
+
+\jupynotex[32-34]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Las derivadas de expresiones abstractas son útiles porque permiten utilizarlas para representar, por ejemplo, ecuaciones diferenciales. Para ilustrar un caso de uso, podemos resolver la ecuación diferencial 
+\[ f''(x) - f(x) = \sen(x) \]
+
+Definimos entonces una expresión que representa esta ecuación:
+\jupynotex[35]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+\noindent y pasamos esta expresión como argumento de la función \mip{dsolve()}:
+\jupynotex[36]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Observamos que \mip{dsolve()} devuelve una instancia de \mip{Eq} debido a que, por lo general, las soluciones de una ecuación diferencial no se pueden resolver explícitamente por medio de una función. Como es usual, las constantes $C_1$ y $C_2$ deben determinarse a partir de las condiciones de contorno de la ecuación.
+
+\subsection{Integrales}
+El cálculo de integrales se realiza mediante la función \mip{sympy.integrate()}, mientras que la representación formal de integrales se realiza mediante \mip{sympy.Integral()} (que al igual que para los límites y las derivadas, pueden evaluarse explícitamente mediante el método \mip{doit()}). De esta forma es posible calcular integrales definidas o indefinidas de una o más variables utilizando para ello algoritmos heurísticos para el reconocimiento de patrones, el algoritmo de \href{https://es.wikipedia.org/wiki/Algoritmo_de_Risch}{Risch-Norman} y consultas en tablas. De esta manera se pueden obtener las integrales de funciones algebraicas elementales y trascendentales, y una variedad de funciones especiales.
+
+Para el caso de las integrales indefinidas, es necesario pasar como argumento de \mip{integrate()} la función integrando y un símbolo que representa la variable de integración:
+\jupynotex[37]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Debe observarse que el resultado no contiene la constante de integración. Para calcular integrales definidas, como segundo argumento hay que pasar una tupla con el símbolo correspondiente a la variable de integración, y los límites inferior y superior de la integral definida:
+\jupynotex[38]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Si \mip{integrate()} es incapaz de determinar la primitiva del integrando, devolverá un objeto \mip{Integral} no evaluado:
+\jupynotex[39]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Tanto para el caso de integrales definidas o indefinidas, es posible pasar como argumento de \mip{integrate()} múltiples tuplas para evaluar una integral múltiple. En el ejemplo siguiente definimos primero una integral múltiple que dejamos sin evaluar, y a continuación invocamos el método mip{doit()} para obtener el resultado:
+\jupynotex[40-41]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+SymPy provee rutinas para la evaluación numérica de integrales, que son especialmente útiles cuando no es posible determinar el resultado en forma analítica. Por ejemplo:
+\jupynotex[42-43]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Por último, mencionamos también que SymPy es capaz de resolver integrales de línea mediante la función \mip{line_integrate()}. En el ejemplo siguiente, definimos una curva paramétrica:
+\[ x(t) = e^t + 1, \; y(t) = e^t - 1 \]
+para $t$ en el intervalo $[0, \ln 2]$, y posteriormente integramos la función $f(x, y) = x^2 + y^2$ a lo largo de esa curva:
+\jupynotex[44]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+
+\subsection{Sumas, productos y series}
+Es posible representar simbólicamente sumas y productos con SymPy a través de instancias de las clases \mip{Sum} y \mip{Product}. Los constructores de ambas clases reciben como primer argumento una expresión, y una tupla \mip{(n, n1, n2)} como segundo argumento, siendo \mip{n} un símbolo y \mip{n1} y \mip{n2} los límites inferior y superior para la suma o producto, respectivamente. Después de instanciar estos objetos, la evaluación de las sumas o productos se realiza con el método \mip{doit()}. Por ejemplo, para el caso de sumas:
+\jupynotex[45-50]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Podemos notar que en las celdas 45 y 46 utilizamos $\infty$ (\mip{sym.oo}) como límite superior, y claramente la operación no puede evaluarse sumando explícitamente. SymPy realiza el cálculo en forma analítica, incluso en casos en los que el sumando contiene variables simbólicas además del índice de suma, como en el ejemplo a continuación:
+\jupynotex[51]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Para el caso de los productos, es posible evaluar expresiones con valores acotados del índice:
+\jupynotex[52-53]{Chapters/matematica_simbolica/code/calculo.ipynb}
+
+Sin embargo, para productos de infinitos factores resulta muy difícil obtener en forma directa una expresión cerrada. Si consideramos el \href{https://es.wikipedia.org/wiki/Producto_de_Wallis}{producto de Wallis}:
+\jupynotex[54]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+\noindent vemos que el cálculo directo falla y devuelve la expresión sin evaluar. Podemos recorrer un camino indirecto si definimos el producto de Wallis con un número finito de factores 
+\jupynotex[55]{Chapters/matematica_simbolica/code/calculo.ipynb}
+
+\noindent y luego evaluamos el límite cuando $m \rightarrow \infty$:
+\jupynotex[56]{Chapters/matematica_simbolica/code/calculo.ipynb}
+\noindent lo que nos produce el resultado correcto.
+
+Dada una función, se puede obtener su expansión en serie de potencias mediante el método \mip{series()} o invocando a la función \mip{series()}, indicando en ambos casos el valor alrededor del cual se expande la serie, y el orden hasta el que se obtienen los términos:
+\jupynotex[57-58]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Al omitir el valor de \mip{x0} se asume que $x_0 = 0$, mientras que si omitimos el valor para \mip{n}, toma por defecto el valor 6. El término $O(x^{10})$ representa todos los términos de la suma con potencia mayor o igual a $x^{10}$. Esta notación también se utiliza para otros puntos límite arbitrarios (por ejemplo $x \rightarrow \pi$ en la celda 58). Para evitar incorporar ese término a la expresión se utiliza el método \mip{removeO()}:
+\jupynotex[59]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+El método (o la función) \mip{series()} devuelve una expresión. Pero si especificamos \mip{n=None}, lo que obtenemos como resultado es un generador, que nos permite colectar, por ejemplo, un número determinado de términos de la serie:
+\jupynotex[60]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+Para finalizar esta sección, mostramos que SymPy es capaz de generar expansiones en series de Fourier. Si $f(x)$ está definida sobre el intervalo $(a, b)$, la serie de Fourier correspondiente es:
+\[ \frac{a_0}{2} + \sum_{n = 1}^{\infty} \left[a_n \cos\left(\frac{2 n \pi x}{L}\right) + b_n \sen\left(\frac{2 n \pi x}{L}\right)\right] \]
+donde:
+\begin{align*}
+    L &= b - a \\
+    a_0 &= \frac{2}{L} \int_a^b f(x) \, dx \\
+    a_n &= \frac{2}{L} \int_a^b f(x) \, \cos \left(\frac{2 n \pi x}{L}\right) \, dx \\
+    b_n &= \frac{2}{L} \int_a^b f(x) \, \sen \left(\frac{2 n \pi x}{L}\right) \, dx
+\end{align*}
+
+Dada entonces una función, el método \mip{fourier_series()} realiza la expansión. Podemos visualizar los términos hasta un cierto orden por medio del método \mip{truncate()}:
+\jupynotex[61-62]{Chapters/matematica_simbolica/code/calculo.ipynb} 
+
+
+\section{Evaluaciones numéricas y gráficos}
+Hemos visto en las secciones precedentes una introducción muy superficial de las capacidades de SymPy para realizar cálculo simbólico. Las posibilidades que ofrece este módulo son mucho más extensas y profundas de lo que podemos abarcar en este capítulo, por lo que invitamos a quienes estén interesados en conocer más a leer la \href{https://docs.sympy.org/latest/index.html}{documentación}. 
+
+Sin embargo, es muy común que en alguna instancia del cálculo necesitemos ver números, o gráficos, generados por las expresiones simbólicas. Para realizar evaluaciones numéricas de expresiones podemos usar el método \mip{evalf()} (que mencionamos al final de la primera sección para evaluar constantes) o la función \mip{N()}.
+\jupynotex[63]{Chapters/matematica_simbolica/code/calculo.ipynb}
+
+Se puede especificar la precisión de las evaluaciones numéricas (por defecto establecido en 15 dígitos decimales) pasando como primer argumento un entero positivo:
+\jupynotex[64-65]{Chapters/matematica_simbolica/code/calculo.ipynb}
+
+De esta forma se pueden evaluar expresiones en determinados valores de algún símbolo que contenga la expresión que resulta reemplazado mediante \mip{subs()}. Esto no resulta práctico cuando necesitamos realizar evaluaciones numéricas masivas. Para ello es conveniente utilizar la función \mip{lambdify()}, que permite realizar cálculos vectorizados veloces por medio del módulo NumPy. Entre otras aplicaciones, estas evaluaciones masivas permiten convertir expresiones simbólicas en arrays numéricos para su visualización con Matplotlib (aunque SymPy tiene su propia función \mip{plot()}, no resulta tan versátil como el popular módulo de visualización). Aprovecharemos las expansiones en series de Fourier de la sección anterior para realizar evaluaciones numéricas vectorizadas y visualizar estos resultados.
+
+En la celda 66 desarrollamos un pequeño script para ver cómo se aproximan a la función $f(x) = x$ las sucesivas sumas parciales de la expansión en serie de Fourier con $n$ términos. Primero importamos los módulos Matplotlib y NumPy (para realizar el gráfico y tener soporte para el uso de arrays, respectivamente).
+
+    A continuación asignamos a \mip{Fx} la transformada de Fourier, entre $-\pi$ y $\pi$, de la función $f$, y construimos un array de 500 puntos equiespaciados entre estos límites, asignándolo a \mip{x_array}. Inmediatamente después graficamos este array en función de si mismo (lo que representa $f(x) = x$).
+
+    Para generar las sumas parciales incoporando un número creciente de términos, recorremos un bucle asignando a la variable \mip{n} los valores de la lista \mip{[1, 3, 5, 7]}. Dentro de este bucle, la primera instrucción consiste en truncar la expansión de Fourier en el número de términos indicados por \mip{n}. Este paso convierte un objeto del tipo \mip{FourierSeries} (devuelto por \mip{fourier_series()}) en una instancia de \mip{Expr}, ya que \mip{lambdify()} acepta expresiones que representan funciones como argumento, pero no un objeto del tipo \mip{FourierSeries}. 
+
+    Una vez truncada la serie, le pasamos a \mip{lambdify()} el símbolo que representa la variable que evaluaremos numéricamente (\mip{x}), la expresión que representa la función a evaluar (\mip{F_trunc}) y el módulo que se utilizará para realizar la evaluación numérica de la expresión simbólica. En este caso usaremos el módulo \mip{'numpy'}, pero son posibles otras opciones como \mip{'math'}, que es el módulo por defecto de Python, o \mip{'mpmath'} para cálculos de precisión arbitraria. Asignamos a la variable \mip{F_numerica} la función que devuelve \mip{lambdify}.
+
+    La última instrucción dentro del bucle construye la representación gráfica, evaluando en forma vectorial \mip{F_numérica} para cada valor del array \mip{x_array}. Luego completamos el gŕafico agregando las etiquetas de los ejes y la leyenda que informa los colores asignados a cada \mip{n}.
+
+\jupynotex[66]{Chapters/matematica_simbolica/code/calculo.ipynb}
