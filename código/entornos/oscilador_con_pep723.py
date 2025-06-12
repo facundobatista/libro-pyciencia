@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Programa que integra el sistema masa-resorte-banda elástica."""
 
+# /// script
+# dependencies = [
+#   "matplotlib",
+#   "numpy",
+#   "scipy",
+# ]
+# ///
+
 import argparse
 
 import matplotlib.pyplot as plt

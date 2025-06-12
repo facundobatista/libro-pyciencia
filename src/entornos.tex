@@ -1,15 +1,20 @@
 
-% Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+% Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 % Licencia CC BY-NC-SA 4.0
 % Para más info visitar https://github.com/facundobatista/libro-pyciencia/
 
 \chapter{Entornos de ejecución de Python} \label{ch:entornos}
 
+\begin{figure}[!t]
+    \vspace{-15mm} 
+    \includegraphics[width=\textwidth]{Chapters/entornos/imgs/carat_entornos.jpeg}
+\end{figure}
+
 \begin{wraptable}{r}{5cm}
 \begin{modulesinfo}
 \begin{center}
 {\small
-    \href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/entornos/}{Código disponible}
+\href{https://github.com/facundobatista/libro-pyciencia/tree/master/código/entornos/}{Código disponible}
 }
 \end{center}
 \end{modulesinfo}
@@ -21,7 +26,7 @@ Lo más común es que tengamos distintos entornos de ejecución de nuestros prog
 
 Cuando el desarrollo es compartido, ya se nos presenta la primer dificultad: las distintas personas trabajando en el programa van a tener distintos entornos de ejecución. Luego, siempre hay nuevas situaciones con nuevos entornos: vamos a querer correr sistemas de integración continua\footnote{Una herramienta muy usada en el mundo del desarrollo de software para validar automáticamente la calidad de los programas, mediante pruebas que se ejecutan en distintos entornos (independientes del desarrollador) para cada cambio en esos programas.} y esos sistemas tendrán otros entornos, etc. Y claro, finalmente queremos que nuestro programa sea realmente usado, y normalmente esto implica que se instale en otras máquinas, sean locales o remotas.
 
-En la descripción anterior podemos distinguir dos mundos distintos, en función del control que tenemos como desarrolladores. Por un lado están los entornos de los desarrolladores mismos y sistemas aledaños (como los de integración continua que mencionábamos); en estos normalmente tenemos el poder de definir qué y cómo se instala y está disponible para nuestro programa. Por otro lado están aquellos entornos donde tenemos poco o ningún control: el de los servidores o instalaciones en máquinas particulares, en función del tipo de programa que estamos haciendo. En este capítulo veremos distintas formas de proveer entornos controlados de ejecución pensando en el primer grupo (entornos controlados por les desarrolladores). Aunque algunas de las técnicas y herramientas que contaremos se pueden utilizar o nos pueden facilitar el despligue de nuestros sistemas en servidores o la distribución e instalación en máquinas clientes, no es el foco de lo que expondremos.
+En la descripción anterior podemos distinguir dos mundos distintos, en función del control que tenemos como desarrolladores. Por un lado están los entornos de los desarrolladores mismos y sistemas aledaños (como los de integración continua que mencionábamos); en estos normalmente tenemos el poder de definir qué y cómo se instala y está disponible para nuestro programa. Por otro lado están aquellos entornos donde tenemos poco o ningún control: el de los servidores o instalaciones en máquinas particulares, en función del tipo de programa que estamos haciendo. En este capítulo veremos distintas formas de proveer entornos controlados de ejecución pensando en el primer grupo (entornos controlados durante el desarrollo). Aunque algunas de las técnicas y herramientas que contaremos se pueden utilizar o nos pueden facilitar el despligue de nuestros sistemas en servidores o la distribución e instalación en máquinas clientes, no es el foco de lo que expondremos.
 
 
 \section{Por qué tener distintos entornos}
@@ -36,16 +41,16 @@ Otra situación con la que nos encontramos es que para un determinado proyecto n
 
 En este caso lo que estamos buscando es ``aislamiento'': que las bibliotecas que usa nuestro programa sean distintas que las que tenga el sistema (en verdad, sin importarnos qué versiones tiene el sistema, o incluso si tiene esas bibliotecas). De esta manera cada proyecto indicará cuales bibliotecas y en qué versiones las necesita, y al estar aislado del sistema base tendremos el mismo comportamiento más allá de cual sea ese sistema.
 
-Entonces, la idea de tener distintos entornos de ejecución es, a priori, lograr estas dos grandes ventajas, repetibilidad y aislamiento. A continuación veremos dos formas de lograr estos entornos, con mayor o menor cumplimiento de estas dos ventajas y más características, que iremos explicando en cada caso. 
+Entonces, la idea de tener distintos entornos de ejecución es, a priori, lograr estas dos grandes ventajas, repetibilidad y aislamiento. A continuación veremos dos formas de lograr estos entornos, con mayor o menor cumplimiento de estas dos ventajas y más características, que iremos explicando en cada caso.
 
 Para hacer los ejemplos más prácticos, ejecutaremos un programa real (el \texttt{oscilador.py} que armamos en el capítulo de Ecuaciones Diferenciales Ordinarias \ref{ch:ordinarias}) utilizando cada una de las herramientas mostradas.
 
 
 \section{Entornos virtuales} \label{sec:virtualenvs}
 
-Un ``entorno virtual'' (que muchas veces denominamos directamente usando su nombre en inglés, \textit{virtualenv}) es la solución de \textit{virtualización} de entornos nativa a Python, y por ende es la más popular. Hay muchas herramientas para trabajar con este concepto, algunas incluso en la biblioteca estándar; veremos las principales más adelante en la subsección de Herramientas \ref{sub:venvs-herramientas}.
+Un ``entorno virtual'' (que muchas veces denominamos directamente usando su nombre en inglés, \textit{virtual environment}, o incluso acortamos con \textit{virtualenv}) es la solución de \textit{virtualización} de entornos nativa a Python, y por ende es la más popular. Hay muchas herramientas para trabajar con este concepto, algunas incluso en la biblioteca estándar; veremos las principales más adelante en la subsección de Herramientas \ref{sub:venvs-herramientas}.
 
-El uso de un entorno virtual es la forma más sencilla y liviana de conseguir las características que presentamos en las secciones anteriores, aunque sólo nos las ofrece para las bibliotecas que utilizaremos (sólo trabaja a nivel de dependencias de Python). Estamos atados al Python instalado en el sistema para cada entorno, y tendremos que recrear ese entorno en todos aquellos sistemas donde lo necesitemos (no es trasladable). 
+El uso de un entorno virtual es la forma más sencilla y liviana de conseguir las características que presentamos en las secciones anteriores, aunque sólo nos las ofrece para las bibliotecas que utilizaremos (sólo trabaja a nivel de dependencias de Python). Estamos atados al Python instalado en el sistema para cada entorno, y tendremos que recrear ese entorno en todos aquellos sistemas donde lo necesitemos (no es trasladable).
 
 La funcionalidad que nos ofrece es suficiente en la gran mayoría de los casos, más allá de las limitaciones indicadas, por lo que es normalmente la solución elegida sin tener que pasar a otras más complejas como la que veremos más adelante.
 
@@ -55,18 +60,18 @@ La funcionalidad que nos ofrece es suficiente en la gran mayoría de los casos, 
 Para mostrar la creación y uso de los entornos virtuales vamos a utilizar la herramienta integrada en la biblioteca estándar, el módulo \mip{venv}. Lo llamamos directamente (usando la opción \verb|-m| de Python para ejecutar un módulo como si fuese un script), indicándole el nombre del directorio donde queremos que nos cree toda la estructura.
 
 \begin{shell}
-[/temp]$ python3 -m venv mivenv
-[/temp]$ ls -l mivenv
-total 20
-drwxrwxr-x 2 facundo facundo 4096 jun  8 16:02 bin
-drwxrwxr-x 2 facundo facundo 4096 jun  8 16:02 include
-drwxrwxr-x 3 facundo facundo 4096 jun  8 16:02 lib
-lrwxrwxrwx 1 facundo facundo    3 jun  8 16:02 lib64 -> lib
--rw-rw-r-- 1 facundo facundo   69 jun  8 16:03 pyvenv.cfg
-drwxrwxr-x 3 facundo facundo 4096 jun  8 16:02 share
+    [/temp]$ python3 -m venv mivenv
+    [/temp]$ ls -l mivenv
+    total 20
+    drwxrwxr-x 2 facundo facundo 4096 jun  8 16:02 bin
+    drwxrwxr-x 2 facundo facundo 4096 jun  8 16:02 include
+    drwxrwxr-x 3 facundo facundo 4096 jun  8 16:02 lib
+    lrwxrwxrwx 1 facundo facundo    3 jun  8 16:02 lib64 -> lib
+    -rw-rw-r-- 1 facundo facundo   69 jun  8 16:03 pyvenv.cfg
+    drwxrwxr-x 3 facundo facundo 4096 jun  8 16:02 share
 \end{shell}
 
-Tengamos en cuenta que esta estructura puede variar segun el sistema donde estemos creando el entorno, porque justamente sigue la estructura de ese sistema. Si exploramos el contenido de este directorio veremos que tiene algunos ejecutables y bibliotecas preinstaladas (notoriamente Python mismo y \texttt{pip}, la herramienta para instalar otras bibliotecas). Un detalle importante con este directorio es que no podemos moverlo a otro lugar, ya que depende de su posición al ser creado. Y no deja de ser un directorio normal, así que si queremos ``limpiar'' el entorno, borrando ese directorio eliminará todo vestigio del mismo.
+Tengamos en cuenta que esta estructura puede variar segun el sistema donde estemos creando el entorno, porque justamente sigue la estructura de ese sistema. Si exploramos el contenido de este directorio veremos que tiene algunos ejecutables y bibliotecas preinstaladas (notoriamente Python mismo y \texttt{pip}, la herramienta para instalar otras bibliotecas). Un detalle importante con este directorio es que no podemos moverlo a otro lugar, ya que depende de su posición al ser creado. Pero no deja de ser un directorio normal, así que si queremos ``limpiar'' el entorno, borrando ese directorio eliminará todo vestigio del mismo.
 
 Cuando ejecutemos el Python de ese directorio, el mismo tendrá acceso a la biblioteca estándar del Python utilizado más las bibliotecas que instalemos en ese entorno virtual, y no podrá acceder a las del sistema. A nivel de sistema nada se modifica cuando instalamos bibliotecas en el entorno virtual, con lo que no hay riesgo de desestabilizarlo, y un buen efecto secundario al usar los entornos virtuales es que no dependemos de tener permisos especiales de \textit{root} o ``administrador'' para instalar las bibliotecas que necesitemos.
 
@@ -77,20 +82,20 @@ La forma habitual de usar los entornos virtuales es activándolos primero, lo qu
 Por ejemplo, en Linux y los sistemas \textit{UNIX-like}:
 
 \begin{shell}
-[/temp]$ source mivenv/bin/activate
-[(mivenv) /temp]$ 
+    [/temp]$ source mivenv/bin/activate
+    [(mivenv) /temp]$
 \end{shell}
 
 O en Windows:
 
-\begin{minted}[fontsize=\small]{doscon}
-[C:]>mivenv\Scripts\activate.bat
-[(mivenv) C:]>
-\end{minted}
+\begin{shell}
+    [C:]>mivenv\Scripts\activate.bat
+    [(mivenv) C:]>
+\end{shell}
 
-Notar como que en cada caso, luego de activar el entorno, el \textit{prompt} cambió para reflejar eso mismo. 
+Notar como que en cada caso, luego de activar el entorno, el \textit{prompt} cambió para reflejar eso mismo.
 
-Una vez dentro del entorno podremos proceder a instalar las bibliotecas que deseemos, usando la herramienta \texttt{pip}. 
+Una vez dentro del entorno podremos proceder a instalar las bibliotecas que deseemos, usando la herramienta \texttt{pip}.
 
 \texttt{pip} es el administrador de paquetes estándar de Python para manejar todas las bibliotecas (por fuera de la biblioteca estándar, claro), y no sólo instalará la biblioteca que le indiquemos, sino que automáticamente instalará sus dependencias (de ser necesario, ya que podrían estar instaladas de antes).
 
@@ -99,49 +104,49 @@ Aunque podemos indicar distintos repositorios o incluso indicarle que la fuente 
 En el siguiente ejemplo mostramos cómo instalar una biblioteca que usamos extensivamente en todo el libro:
 
 \begin{shell}
-[(mivenv) /temp]$ pip install numpy
-Collecting numpy
-...
-Successfully installed numpy-1.20.3
+    [(mivenv) /temp]$ pip install numpy
+    Collecting numpy
+    ...
+    Successfully installed numpy-1.20.3
 \end{shell}
 
 Una forma de validar que la biblioteca está instalada en el virtualenv es a través del \textit{path} del módulo:
 
 \begin{shell}
-[(mivenv) /temp]$ python
- Python 3.8.6 (default, May 27 2021, 13:28:02) 
- >>> import numpy
- >>> numpy.__file__
- '/temp/mivenv/lib/python3.8/site-packages/numpy/__init__.py'
+    [(mivenv) /temp]$ python
+    Python 3.12.3 (main, Feb  4 2025, 14:48:35) 
+    >>> import numpy
+    >>> numpy.__file__
+    '/temp/mivenv/lib/python3.12/site-packages/numpy/__init__.py'
 \end{shell}
 
 Decíamos que una de las ventajas de la aislación del entorno virtual era poder tener la misma biblioteca con distintas versiones en distintos entornos. Para ello, vamos a necesitar que \texttt{pip} no instale la última versión disponible (como sucedió recien con NumPy), sino poder especificar puntualmente cual necesitamos.
 
-Por ejemplo, instalemos otra biblioteca usada mucho en el libro, Matplotlib, pero no la última versión (que al momento de escribir estas lineas es la 3.4.2), sino una particular que podemos necesitar por algún motivo específico:
+Por ejemplo, instalemos otra biblioteca usada mucho en el libro, Matplotlib, pero no la última versión (que al momento de escribir estas líneas es la 3.9.2), sino una particular que podemos necesitar por algún motivo específico:
 
 \begin{shell}
-[(mivenv) /temp]$ pip install matplotlib==3.3.4
-Collecting matplotlib==3.3.4
-...
-Successfully installed cycler-0.10.0 kiwisolver-1.3.1 matplotlib-3.3.4 pillow-8.2.0 pyparsing-2.4.7 python-dateutil-2.8.1 six-1.16.0
+    [(mivenv) /temp]$ pip install matplotlib==3.3.4
+    Collecting matplotlib==3.3.4
+    ...
+    Successfully installed cycler-0.10.0 kiwisolver-1.3.1 matplotlib-3.3.4 pillow-8.2.0 pyparsing-2.4.7 python-dateutil-2.8.1 six-1.16.0
 \end{shell}
 
-Vemos como pip no sólo nos instaló el paquete que habíamos especificado, sino también las dependencias necesarias de forma automática. Cabe mencionar también que hay que tener cuidado cuando restringimos qué versión \texttt{pip} instalará, ya que como podemos utilizar los comparadores \verb|>|, \verb|<|, \verb|>=|, \verb|<=| para indicar esas restricciones, podemos meternos en problemas porque esos caracteres tienen un significado especial en la linea de comandos; la solución es sencilla, con utilizar comillas es suficiente (por ejemplo \texttt{pip install "matplotlib>3"}).
+Vemos como pip no sólo nos instaló el paquete que habíamos especificado, sino también las dependencias necesarias de forma automática. Cabe mencionar también que hay que tener cuidado cuando restringimos qué versión \texttt{pip} instalará, ya que como podemos utilizar los comparadores \verb|>|, \verb|<|, \verb|>=|, \verb|<=| para indicar esas restricciones, podemos meternos en problemas porque esos caracteres tienen un significado especial en la línea de comandos; la solución es sencilla, con utilizar comillas es suficiente (por ejemplo \texttt{pip install "matplotlib>3"}).
 
-Otra funcionalidad muy utilizada de \texttt{pip} es la de devolvernos todos los paquetes que están instalados en el entorno virtual, lo cual obviamente no solo incluye los que hayamos especificado al momento de la instalación, sino también las dependencias que se hayan instalado correspondientemente. 
+Otra funcionalidad muy utilizada de \texttt{pip} es la de devolvernos todos los paquetes que están instalados en el entorno virtual, lo cual obviamente no solo incluye los que hayamos especificado al momento de la instalación, sino también las dependencias que se hayan instalado correspondientemente.
 
 Vemos eso mismo en el siguiente ejemplo:
 
 \begin{shell}
-[(mivenv) /temp]$ pip freeze
-cycler==0.10.0
-kiwisolver==1.3.1
-matplotlib==3.3.4
-numpy==1.20.3
-Pillow==8.2.0
-pyparsing==2.4.7
-python-dateutil==2.8.1
-six==1.16.0
+    [(mivenv) /temp]$ pip freeze
+    cycler==0.10.0
+    kiwisolver==1.3.1
+    matplotlib==3.3.4
+    numpy==1.20.3
+    Pillow==8.2.0
+    pyparsing==2.4.7
+    python-dateutil==2.8.1
+    six==1.16.0
 \end{shell}
 
 Es normal en un proyecto tener anotadas todas las dependencias en un archivo, normalmente llamado \texttt{requirements.txt}, de manera de indicarle a \texttt{pip} que instale todas ellas en el entorno virtual usando el parámetro \texttt{--requirement}.
@@ -151,8 +156,8 @@ Recomandos revisar \href{https://pip.pypa.io/en/stable/}{la documentación de re
 Finalmente, para salir del entorno debemos ejecutar el comando \texttt{deactivate} (que tenemos a nuestro alcance justamente porque estamos dentro del entorno):
 
 \begin{shell}
-[(mivenv) /temp]$ deactivate
-[/temp]$
+    [(mivenv) /temp]$ deactivate
+    [/temp]$
 \end{shell}
 
 Realicemos todo este mismo procedimiento para ejecutar un programa ejemplo: el \texttt{oscilador.py} que mencionamos arriba, que podemos descargar \href{https://raw.githubusercontent.com/facundobatista/libro-pyciencia/main/código/entornos/oscilador.py}{desde el repositorio del libro}.
@@ -160,38 +165,38 @@ Realicemos todo este mismo procedimiento para ejecutar un programa ejemplo: el \
 Primero entonces creemos el entorno virtual, activémoslo e instalemos las dependencias necesarias.
 
 \begin{shell}
-[/temp]$ python3 -m venv oscilador-venv
-[/temp]$ source oscilador-venv/bin/activate
-[(oscilador-venv) /temp]$ pip install matplotlib numpy scipy PyQt5
-Collecting matplotlib
-  Downloading matplotlib-3.4.3-cp38-cp38-manylinux1_x86_64.whl (10.3 MB)
-     |████████████████████████████████| 10.3 MB 2.4 MB/s 
-Collecting numpy
-  Downloading numpy-1.21.2-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (15.8 MB)
-     |████████████████████████████████| 15.8 MB 2.0 MB/s 
-Collecting scipy
-  Downloading scipy-1.7.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (28.4 MB)
-     |████████████████████████████████| 28.4 MB 2.0 MB/s 
-Collecting PyQt5
-  Using cached PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl (8.3 MB)
-Collecting python-dateutil>=2.7
-  Using cached python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
-Collecting pillow>=6.2.0
-  Using cached Pillow-8.3.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (3.0 MB)
-Collecting cycler>=0.10
-  Using cached cycler-0.10.0-py2.py3-none-any.whl (6.5 kB)
-Collecting pyparsing>=2.2.1
-  Using cached pyparsing-2.4.7-py2.py3-none-any.whl (67 kB)
-Collecting kiwisolver>=1.0.1
-  Using cached kiwisolver-1.3.1-cp38-cp38-manylinux1_x86_64.whl (1.2 MB)
-Collecting PyQt5-Qt5>=5.15
-  Using cached PyQt5_Qt5-5.15.2-py3-none-manylinux2014_x86_64.whl (59.9 MB)
-Collecting PyQt5-sip<13,>=12.8
-  Using cached PyQt5_sip-12.9.0-cp38-cp38-manylinux1_x86_64.whl (332 kB)
-Collecting six>=1.5
-  Using cached six-1.16.0-py2.py3-none-any.whl (11 kB)
-Installing collected packages: six, python-dateutil, numpy, pillow, cycler, pyparsing, kiwisolver, matplotlib, scipy, PyQt5-Qt5, PyQt5-sip, PyQt5
-Successfully installed PyQt5-5.15.4 PyQt5-Qt5-5.15.2 PyQt5-sip-12.9.0 cycler-0.10.0 kiwisolver-1.3.1 matplotlib-3.4.3 numpy-1.21.2 pillow-8.3.1 pyparsing-2.4.7 python-dateutil-2.8.2 scipy-1.7.1 six-1.16.0
+    [/temp]$ python3 -m venv oscilador-venv
+        [/temp]$ source oscilador-venv/bin/activate
+    [(oscilador-venv) /temp]$ pip install matplotlib numpy scipy PyQt5
+    Collecting matplotlib
+    Downloading matplotlib-3.4.3-cp38-cp38-manylinux1_x86_64.whl (10.3 MB)
+    |████████████████████████████████| 10.3 MB 2.4 MB/s
+    Collecting numpy
+    Downloading numpy-1.21.2-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (15.8 MB)
+    |████████████████████████████████| 15.8 MB 2.0 MB/s
+    Collecting scipy
+    Downloading scipy-1.7.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (28.4 MB)
+    |████████████████████████████████| 28.4 MB 2.0 MB/s
+    Collecting PyQt5
+    Using cached PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl (8.3 MB)
+    Collecting python-dateutil>=2.7
+    Using cached python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
+    Collecting pillow>=6.2.0
+    Using cached Pillow-8.3.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (3.0 MB)
+    Collecting cycler>=0.10
+    Using cached cycler-0.10.0-py2.py3-none-any.whl (6.5 kB)
+    Collecting pyparsing>=2.2.1
+    Using cached pyparsing-2.4.7-py2.py3-none-any.whl (67 kB)
+    Collecting kiwisolver>=1.0.1
+    Using cached kiwisolver-1.3.1-cp38-cp38-manylinux1_x86_64.whl (1.2 MB)
+    Collecting PyQt5-Qt5>=5.15
+    Using cached PyQt5_Qt5-5.15.2-py3-none-manylinux2014_x86_64.whl (59.9 MB)
+    Collecting PyQt5-sip<13,>=12.8
+    Using cached PyQt5_sip-12.9.0-cp38-cp38-manylinux1_x86_64.whl (332 kB)
+    Collecting six>=1.5
+    Using cached six-1.16.0-py2.py3-none-any.whl (11 kB)
+    Installing collected packages: six, python-dateutil, numpy, pillow, cycler, pyparsing, kiwisolver, matplotlib, scipy, PyQt5-Qt5, PyQt5-sip, PyQt5
+    Successfully installed PyQt5-5.15.4 PyQt5-Qt5-5.15.2 PyQt5-sip-12.9.0 cycler-0.10.0 kiwisolver-1.3.1 matplotlib-3.4.3 numpy-1.21.2 pillow-8.3.1 pyparsing-2.4.7 python-dateutil-2.8.2 scipy-1.7.1 six-1.16.0
 \end{shell}
 
 A veces es complicado saber cuales son las dependencias que necesita un programa. Con los proyectos más grandes, como mencionábamos antes, se acostumbra tener un archivo conmunmente llamado \texttt{requirements.txt}, pero muchas veces no lo encontramos cuando estamos lidiando con un script ``suelto''. En el caso del ejemplo, una simple inspección del archivo nos indica que necesitamos \texttt{matplotlib}, \texttt{numpy} y \texttt{scipy}, pero en realidad también necesitamos \texttt{PyQt5} para que \texttt{matplotlib} pueda abrir una ventana con el resultado.
@@ -199,12 +204,12 @@ A veces es complicado saber cuales son las dependencias que necesita un programa
 Todo lo que nos queda es ejecutar el archivo utilizando directamente \texttt{python3}, ya que como tenemos activado el entorno virtual estaremos ejecutando el script ahí dentro:
 
 \begin{shell}
-[(oscilador-venv) /temp]$ python3 oscilador.py 
-Opciones del script: Namespace(archivo=None, usar_tex=False)
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
-[(oscilador-venv) /temp]$ deactivate
-[/temp]$ 
+    [(oscilador-venv) /temp]$ python3 oscilador.py
+    Opciones del script: Namespace(archivo=None, usar_tex=False)
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+    [(oscilador-venv) /temp]$ deactivate
+    [/temp]$
 \end{shell}
 
 
@@ -221,31 +226,13 @@ Esta herramienta fue durante mucho tiempo la única forma de crear entornos virt
 Hay algunas diferencias a favor y en contra con respecto al módulo integrado \texttt{venv}, que pueden ser más o menos importantes dependiendo de nuestro contexto, aquí mencionamos las principales. Entonces, \texttt{virtualenv}...
 
 \begin{itemize}
-    \item es varias veces más rápido en la creación del entorno: esto quizás no es importante cuando lo utilizamos manualmente, pero puede ser un factor si estamos generando muchos entornos automáticamente en algún sistema
-    \item necesita instalarse por separado a Python, previamente a ser utilizado
-    \item nos puede llegar a confundir con qué versión de Python está creando el entorno (en cambio cuando usamos el módulo \mip{venv} nosotros explicitamos qué Python usamos)
-    \item soporta versiones de Python en las que el módulo \texttt{venv} todavía no existía (aunque dicho módulo está en la biblioteca estándar desde Python 3.3)
+ \item es varias veces más rápido en la creación del entorno: esto quizás no es importante cuando lo utilizamos manualmente, pero puede ser un factor si estamos generando muchos entornos automáticamente en algún sistema
+ \item necesita instalarse por separado a Python, previamente a ser utilizado
+ \item nos puede llegar a confundir con qué versión de Python está creando el entorno (en cambio cuando usamos el módulo \mip{venv} nosotros explicitamos qué Python usamos)
+ \item soporta versiones de Python en las que el módulo \texttt{venv} todavía no existía (aunque dicho módulo está en la biblioteca estándar desde Python 3.3)
 \end{itemize}
 
-La utilización de esta herramienta es muy similar a lo que ya vimos. La creación de un entorno es simplemente:
-
-\begin{shell}
-[/temp]$ virtualenv mivenv
-created virtual environment CPython3.8.6.final.0-64 in 115ms
-  creator CPython3Posix(dest=/temp/mivenv, clear=False, global=False)
-  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy)
-    added seed packages: pip==20.1.1, pkg_resources==0.0.0, setuptools==44.0.0, wheel==0.34.2
-  activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator,XonshActivator
-[/temp]$ ls -l mivenv/
-total 12
-drwxrwxr-x 2 facundo facundo 4096 jun 24 12:20 bin
-drwxrwxr-x 3 facundo facundo 4096 jun 24 12:20 lib
--rw-rw-r-- 1 facundo facundo  205 jun 24 12:20 pyvenv.cfg
-\end{shell}
-
-Una vez creado, el resto del uso del entorno virtual es exactamente igual a lo ya visto. Incluso ni vale la pena mostrar la ejecución de \texttt{oscilador.py}, porque sería muy redundante.
-
-Recomendamos explorar más opciones haciendo \texttt{virtualenv --help} o leyendo \href{https://virtualenv.pypa.io/en/latest/}{la documentación de la herramienta}.
+Toda su \href{https://virtualenv.pypa.io/en/latest/}{documentación}.
 
 
 \subsubsection{virtualenvwrapper}
@@ -257,87 +244,6 @@ Por ejemplo, cuando armamos un entorno virtual nuevo, en vez de crearlo en el di
 Entonces, cuando queremos activar un entorno virtual, en lugar de tener que recordar cómo se llamaba y dónde lo habíamos creado, sólo con tener el nombre alcanza.
 
 La instalación no es trivial y lleva cierta configuración antes de que funcione, pero si la funcionalidad buscada es esta centralización de los entornos, se puede explorar más en \href{https://virtualenvwrapper.readthedocs.io/en/latest/}{su documentación}.
-
-Mostremos cómo correr nuestro programa ejemplo con esta herramienta. Con la creación del entorno virtual, en este caso, tenemos automáticamente la activación del mismo:
-
-\begin{shell}
-[/temp]$ export WORKON_HOME=/temp/
-[/temp]$ mkvirtualenv oscilador-venv-2
-created virtual environment CPython3.8.10.final.0-64 in 232ms
-  creator CPython3Posix(dest=/home/facundo/temp/oscilador-venv-2, clear=False, 
-    no_vcs_ignore=False, global=False)
-  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, 
-    via=copy, app_data_dir=/home/facundo/.local/share/virtualenv)
-      added seed packages: pip==21.2.3, setuptools==57.4.0, wheel==0.37.0
-  activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator
-virtualenvwrapper.user_scripts creating /temp/oscilador-venv-2/bin/predeactivate
-virtualenvwrapper.user_scripts creating /temp/oscilador-venv-2/bin/postdeactivate
-virtualenvwrapper.user_scripts creating /temp/oscilador-venv-2/bin/preactivate
-virtualenvwrapper.user_scripts creating /temp/oscilador-venv-2/bin/postactivate
-virtualenvwrapper.user_scripts creating /temp/oscilador-venv-2/bin/get_env_details
-[(oscilador-venv-2) /temp]$ 
-\end{shell}
-
-La instalación de los paquetes es igual que en los casos anteriores, pero ahora tenemos una forma fácil de ver el directorio de Python donde están instalados esos paquetes:
-
-
-\begin{shell}
-[(oscilador-venv-2) /temp]$ pip install matplotlib numpy scipy PyQt5
-Collecting matplotlib
-  Using cached matplotlib-3.4.3-cp38-cp38-manylinux1_x86_64.whl (10.3 MB)
-Collecting numpy
-  Using cached numpy-1.21.2-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (15.8 MB)
-Collecting scipy
-  Using cached scipy-1.7.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (28.4 MB)
-Collecting PyQt5
-  Using cached PyQt5-5.15.4-cp36.cp37.cp38.cp39-abi3-manylinux2014_x86_64.whl (8.3 MB)
-Collecting pillow>=6.2.0
-  Using cached Pillow-8.3.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl (3.0 MB)
-Collecting pyparsing>=2.2.1
-  Using cached pyparsing-2.4.7-py2.py3-none-any.whl (67 kB)
-Collecting kiwisolver>=1.0.1
-  Using cached kiwisolver-1.3.1-cp38-cp38-manylinux1_x86_64.whl (1.2 MB)
-Collecting cycler>=0.10
-  Using cached cycler-0.10.0-py2.py3-none-any.whl (6.5 kB)
-Collecting python-dateutil>=2.7
-  Using cached python_dateutil-2.8.2-py2.py3-none-any.whl (247 kB)
-Collecting PyQt5-sip<13,>=12.8
-  Using cached PyQt5_sip-12.9.0-cp38-cp38-manylinux1_x86_64.whl (332 kB)
-Collecting PyQt5-Qt5>=5.15
-  Using cached PyQt5_Qt5-5.15.2-py3-none-manylinux2014_x86_64.whl (59.9 MB)
-Collecting six
-  Using cached six-1.16.0-py2.py3-none-any.whl (11 kB)
-Installing collected packages: six, python-dateutil, PyQt5-sip, PyQt5-Qt5, pyparsing, pillow, numpy, kiwisolver, cycler, scipy, PyQt5, matplotlib
-Successfully installed PyQt5-5.15.4 PyQt5-Qt5-5.15.2 PyQt5-sip-12.9.0 cycler-0.10.0 kiwisolver-1.3.1 matplotlib-3.4.3 numpy-1.21.2 pillow-8.3.1 pyparsing-2.4.7 python-dateutil-2.8.2 scipy-1.7.1 six-1.16.0
-[(oscilador-venv-2) /temp]$ lssitepackages
-cycler-0.10.0.dist-info              Pillow-8.3.1.dist-info           scipy
-cycler.py                            Pillow.libs                      scipy-1.7.1.dist-info
-dateutil                             pip                              scipy.libs
-_distutils_hack                      pip-21.2.3.dist-info             setuptools
-distutils-precedence.pth             pip-21.2.3.virtualenv            setuptools-57.4.0.dist-info
-kiwisolver-1.3.1.dist-info           pkg_resources                    setuptools-57.4.0.virtualenv
-kiwisolver.cpython-38-x86-linux.so   __pycache__                      six-1.16.0.dist-info
-matplotlib                           pylab.py                         six.py
-matplotlib-3.4.3.dist-info           pyparsing-2.4.7.dist-info        _virtualenv.pth
-matplotlib-3.4.3-py3.8-nspkg.pth     pyparsing.py                     _virtualenv.py
-mpl_toolkits                         PyQt5                            wheel
-numpy                                PyQt5-5.15.4.dist-info           wheel-0.37.0.dist-info
-numpy-1.21.2.dist-info               PyQt5_Qt5-5.15.2.dist-info       wheel-0.37.0.virtualenv
-numpy.libs                           PyQt5_sip-12.9.0.dist-info
-PIL                                  python_dateutil-2.8.2.dist-info
-[(oscilador-venv-2) /temp]$
-\end{shell}
-
-La ejecución del script ejemplo es exactamente igual a lo que vimos anteriormente, y luego finalmente desactivamos el entorno.
-
-\begin{shell}
-[(oscilador-venv-2) /temp]$ python3 oscilador.py 
-Opciones del script: Namespace(archivo=None, usar_tex=False)
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
-[(oscilador-venv-2) /temp]$ deactivate
-[/temp]$ 
-\end{shell}
 
 
 \subsubsection{fades}\label{subsub:fades}
@@ -362,16 +268,16 @@ Dos cambios. El primero es que indicamos que el intérprete del script es Fades,
 
 Entonces, la primera vez que ejecutamos el script Fades armará el entorno virtual necesario y ejecutará el script allí. Y nos podemos olvidar. Volvemos al script luego de un tiempo, y sólo tenemos que ejecutarlo, no hace falta recordar el nombre o la ubicación del entorno virtual, ni siquiera si necesitabamos uno. Y si llevamos este script a una máquina nueva, automáticamente Fades se encargará de proveer el entorno necesario nuevamente.
 
-Otro caso de uso muy común de Fades es probar bibliotecas en el intérprete interactivo. Para ello utilizamos Fades desde la linea de comando y especificamos la(s) dependencia(s) necesaria(s), pero no un script a ejecutar, entonces Fades creará el entorno virtual correspondiente y ejecutará el intérprete interactivo allí, con lo cual tendremos acceso a esas bibliotecas:
+Otro caso de uso muy común de Fades es probar bibliotecas en el intérprete interactivo. Para ello utilizamos Fades desde la línea de comando y especificamos la(s) dependencia(s) necesaria(s), pero no un script a ejecutar, entonces Fades creará el entorno virtual correspondiente y ejecutará el intérprete interactivo allí, con lo cual tendremos acceso a esas bibliotecas:
 
 \begin{shell}
-[/temp]$ fades -d tinytag --autoimport
- Python 3.8.6 (default, May 27 2021, 13:28:02) 
- [GCC 10.2.0] on linux
- Type "help", "copyright", "credits" or "license" for more information.
- ::fades:: automatically imported 'tinytag'
- >>> tinytag.__file__
- '/home/facundo/.local/share/fades/c7b5b66b-0923-4866-b4e5-6d84924737b1/lib/python3.8/site-packages/tinytag/__init__.py'
+    [/temp]$ fades -d tinytag --autoimport
+    Python 3.8.6 (default, May 27 2021, 13:28:02)
+    [GCC 10.2.0] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    ::fades:: automatically imported 'tinytag'
+    >>> tinytag.__file__
+    '/home/facundo/.local/share/fades/c7b5b66b-0923-4866-b4e5-6d84924737b1/lib/python3.8/site-packages/tinytag/__init__.py'
 \end{shell}
 
 En el caso mostrado, Fades ya tenía el entorno virtual con \texttt{tinytag}, y lo reutilizó, pero si ejecutamos esa misma orden en una computadora diferente Fades nos informará que está creando el entorno e instalando esa dependencia.
@@ -379,54 +285,110 @@ En el caso mostrado, Fades ya tenía el entorno virtual con \texttt{tinytag}, y 
 Usemos Fades para ejecutar nuestro programa de ejemplo:
 
 \begin{shell}
-[/temp]$ fades -d matplotlib -d numpy -d scipy -d PyQt5 oscilador.py 
-*** fades ***  2021-08-21 10:41:37,143  INFO     Hi! This is fades 9.0.1, automatically managing your dependencies
-*** fades ***  2021-08-21 10:41:37,143  INFO     Checking the availabilty of dependencies in PyPI. You can use '--no-precheck-availability' to avoid it.
-*** fades ***  2021-08-21 10:41:41,115  INFO     Installing dependency: 'PyQt5'
-*** fades ***  2021-08-21 10:41:44,816  INFO     Installing dependency: 'numpy'
-*** fades ***  2021-08-21 10:41:47,650  INFO     Installing dependency: 'scipy'
-*** fades ***  2021-08-21 10:41:51,216  INFO     Installing dependency: 'matplotlib'
-Opciones del script: Namespace(archivo=None, usar_tex=False)
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
-[/temp]$ 
+    [/temp]$ fades -d matplotlib -d numpy -d scipy -d PyQt5 oscilador.py
+        *** fades ***  2021-08-21 10:41:37,143  INFO     Hi! This is fades 9.0.1, automatically managing your dependencies
+        *** fades ***  2021-08-21 10:41:37,143  INFO     Checking the availabilty of dependencies in PyPI. You can use '--no-precheck-availability' to avoid it.
+        *** fades ***  2021-08-21 10:41:41,115  INFO     Installing dependency: 'PyQt5'
+        *** fades ***  2021-08-21 10:41:44,816  INFO     Installing dependency: 'numpy'
+        *** fades ***  2021-08-21 10:41:47,650  INFO     Installing dependency: 'scipy'
+        *** fades ***  2021-08-21 10:41:51,216  INFO     Installing dependency: 'matplotlib'
+        Opciones del script: Namespace(archivo=None, usar_tex=False)
+        Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+        Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+        [/temp]$
 \end{shell}
 
-Como puede ser un incordio escribir todas las dependencias en la linea de comandos, es natural tener un archivo \texttt{requirements.txt} con las dependencias especificadas allí (el nombre de cada paquete en cada linea es suficiente si queremos la última versión disponible en cada caso, pero también podemos especificar qué versión queremos):
+Como puede ser un incordio escribir todas las dependencias en la línea de comandos, es natural tener un archivo \texttt{requirements.txt} con las dependencias especificadas allí (el nombre de cada paquete en cada línea es suficiente si queremos la última versión disponible en cada caso, pero también podemos especificar qué versión queremos):
 
 \begin{shell}
-[/temp]$ cat requirements.txt 
-PyQt5
-matplotlib
-numpy
-scipy
-[/temp]$ fades -r requirements.txt oscilador.py
-Opciones del script: Namespace(archivo=None, usar_tex=False)
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
-[/temp]$ 
+    [/temp]$ cat requirements.txt
+        PyQt5
+        matplotlib
+        numpy
+        scipy
+            [/temp]$ fades -r requirements.txt oscilador.py
+    Opciones del script: Namespace(archivo=None, usar_tex=False)
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+    [/temp]$
 \end{shell}
 
 Presten atención como en este segundo caso no tenemos mensajes de Fades instalando dependencias, porque al ser exactamente las mismas que antes, Fades ya encuentra un entorno virtual con esas mismas, entonces lo reutiliza.
 
 Más allá de eso, reconozcamos que también es un incordio tener las dependencias en un archivo externo, ya que al ser nuestro ejemplo un script suelto que podemos tener en cualquier lado, la obligación de recordar cual es su archivo de dependencias también es molesto.
 
-Volvamos a hacer entonces lo mismo que con el script sencillo del principio: especifiquemos las dependencias en el mismo script. Veamos las primeras lineas de nuestro \texttt{oscilador.py}, levemente modificado:
+Volvamos a hacer entonces lo mismo que con el script sencillo del principio: especifiquemos las dependencias en el mismo script. Veamos las primeras líneas de nuestro \texttt{oscilador.py}, levemente modificado:
 
 \pyfile[lastline=13]{Chapters/entornos/code/oscilador_con_fades.py}
 
-Allí podemos ver en la linea 1 que ahora no estamos ejecutando el script con Python sino con Fades (que llamará a Python luego de disponer el entorno virtual), y en las lineas 11 a 13 que le estamos diciendo a Fades que necesitamos las dependencias para esos imports. El caso de \texttt{PyQt5} es distinto, porque no tenemos un import (lo utiliza \texttt{matplotlib}, no nosotros directamente), entonces le indicamos esa dependencia en el docstring del módulo, en la linea 6.
+Allí podemos ver en la línea 1 que ahora no estamos ejecutando el script con Python sino con Fades (que llamará a Python luego de disponer el entorno virtual), y en las líneas 11 a 13 que le estamos diciendo a Fades que necesitamos las dependencias para esos imports. El caso de \texttt{PyQt5} es distinto, porque no tenemos un import (lo utiliza \texttt{matplotlib}, no nosotros directamente), entonces le indicamos esa dependencia en el docstring del módulo, en la línea 6.
 
 Una vez modificado el script de esta manera, ya no tenemos que recordar nada sobre las dependencias del script, archivos adjuntos, entrar a directorios en particular, o activar y desactivar entornos. Directamente ejectuamos el script:
 
 \begin{shell}
-[/temp]$ ./oscilador.py 
-Opciones del script: Namespace(archivo=None, usar_tex=False)
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+    [/temp]$ ./oscilador.py
+    Opciones del script: Namespace(archivo=None, usar_tex=False)
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
 \end{shell}
 
 Fades tiene muchas otras opciones (algunas útiles tambien para utilizarlo en proyectos grandes, no sólo scripts), recomendamos explorarlas con \texttt{fades --help}, revisar \href{https://fades.readthedocs.io/en/release-9.0/}{la documentación} o mirar \href{https://github.com/PyAr/fades/blob/master/resources/gifs/gifs.rst}{algunas animaciones} que muestran las funcionalidades más comunes.
+
+
+\subsubsection{uv}
+
+\texttt{uv} es la más moderna de estas herramientas, focalizada en la velocidad de ejecución y en la intención de reemplazar todo el espectro de herramientas que de un modo u otro manejan entornos virtuales.
+
+Por ejemplo, para crear un entorno virtual e instalar dependencias:
+
+\begin{shell}
+    $ uv venv xcss
+    Using CPython 3.12.3 interpreter at: /usr/bin/python3
+    Creating virtual environment at: xcss
+    Activate with: source xcss/bin/activate
+    $ source xcss/bin/activate
+    $ (xcss) $ uv pip install requests
+    Using Python 3.12.3 environment at: xcss
+    Resolved 5 packages in 50ms
+    Installed 5 packages in 7ms
+     + certifi==2025.4.26
+     + charset-normalizer==3.4.2
+     + idna==3.10
+     + requests==2.32.3
+     + urllib3==2.4.0
+\end{shell}
+
+Es extremadamente rápido. Cabe acotar, sin embargo, que a veces no instala las mismas versiones que instalaría \texttt{pip}, ya que algunas opciones de instalación tiene defaults distintos de la herramienta original.
+
+Es muy práctico porque tiene integrada la posibilidad de usar otro Python que no sea el del sistema:
+
+\begin{shell}
+    $ uv venv xcs7 --python 3.7
+    Using CPython 3.7.9
+    Creating virtual environment at: xcs7
+    Activate with: source xcs7/bin/activate
+\end{shell}
+
+En estos casos \texttt{uv} descargará el binario de Python que sea necesario y lo utilizará para armar el entorno. Hay que tener la precaución que \texttt{uv} utiliza binarios de Python pre-armadas por la empresa responsable de la herramienta (Astral), los cuales tienen algunas diferencias de comportamiento con el Python oficial, generalmente como una consecuencia de la portabilidad buscada.
+
+Una de las grandes ventajas de \texttt{uv} es que soporta la \href{https://peps.python.org/pep-0723/}{PEP 723}, una formalización/generalización de la idea de Fades de declarar dentro del script qué dependencias deben instalarse para su funcionamiento.
+
+Veamos el mismo ejemplo de antes, el oscilador, pero con esta metadata. Las primeas líneas entonces son:
+
+\pyfile[lastline=16]{Chapters/entornos/code/oscilador_con_pep723.py}
+
+Entonces, luego:
+
+\begin{shell}
+    $ uv run oscilador_con_pep723.py 
+    Reading inline script metadata from `oscilador_con_pep723.py`
+    Installed 12 packages in 24ms
+    Opciones del script: Namespace(usar_tex=False, archivo=None)
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+\end{shell}
+
+Recomendamos revisar \href{https://docs.astral.sh/uv/}{la documentación correspondiente} para más opciones.
 
 
 \subsubsection{pipenv}
@@ -434,110 +396,43 @@ Fades tiene muchas otras opciones (algunas útiles tambien para utilizarlo en pr
 Pipenv es una herramienta que apunta al manejo automático de los entornos virtuales más a nivel de proyectos. Con sólo indicarle que instale las dependencias del proyecto, creará automáticamente (de no tenerlo de antes) un entorno virtual para el proyecto en una ubicación específica, e instalará las dependencias allí.
 
 \begin{shell}
-[/temp/proyecto]$ pipenv install -r requirements.txt 
-Creating a virtualenv for this project…
-Using /usr/bin/python3 (3.8.6) to create virtualenv…
-⠋created virtual environment CPython3.8.6.final.0-64 in 104ms
-  creator CPython3Posix(dest=/home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx, clear=False, global=False)
-  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy, app_data_dir=/home/facundo/.local/share/virtualenv)
+    [/temp/proyecto]$ pipenv install -r requirements.txt
+    Creating a virtualenv for this project…
+    Using /usr/bin/python3 (3.8.6) to create virtualenv…
+    ⠋created virtual environment CPython3.8.6.final.0-64 in 104ms
+    creator CPython3Posix(dest=/home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx, clear=False, global=False)
+    seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy, app_data_dir=/home/facundo/.local/share/virtualenv)
     added seed packages: pip==20.1.1, pkg_resources==0.0.0, setuptools==44.0.0, wheel==0.34.2
-  activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator,XonshActivator
-Virtualenv location: /home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx
-Creating a Pipfile for this project…
-Requirements file provided! Importing into Pipfile…
-Pipfile.lock not found, creating…
-Locking [dev-packages] dependencies…
-Locking [packages] dependencies…
-Updated Pipfile.lock (00d0fa)!
-Installing dependencies from Pipfile.lock (00d0fa)…
-  🐍   ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ 4/4 — 00:00:04
-To activate this project's virtualenv, run the following:
-‎  $ pipenv shell
+    activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator,XonshActivator
+    Virtualenv location: /home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx
+    Creating a Pipfile for this project…
+    Requirements file provided! Importing into Pipfile…
+    Pipfile.lock not found, creating…
+    Locking [dev-packages] dependencies…
+    Locking [packages] dependencies…
+    Updated Pipfile.lock (00d0fa)!
+    Installing dependencies from Pipfile.lock (00d0fa)…
+    🐍   ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ 4/4 — 00:00:04
+    To activate this project's virtualenv, run the following:
+    ‎  $ pipenv shell
 \end{shell}
-% la última linea arriba tiene un caracter "blanco no espacio" al principio, para que no sea coloreada como "prompt"
+% la última línea arriba tiene un caracter "blanco no espacio" al principio, para que no sea coloreada como "prompt"
 
 Tengamos en cuenta que necesitamos recordar de activar el entorno virtual antes de trabajar con nuestro proyecto:
 
 \begin{shell}
-[/temp/proyecto]$ pipenv shell
-Spawning environment shell (/bin/bash). Use 'exit' to leave.
-. /home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx/bin/activate
-/temp/proyecto$ . /home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx/bin/activate
-[(trunk-cLuRPqaE) /temp/proyecto]$ 
+    [/temp/proyecto]$ pipenv shell
+    Spawning environment shell (/bin/bash). Use 'exit' to leave.
+    . /home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx/bin/activate
+    /temp/proyecto$ . /home/facundo/.local/share/virtualenvs/trunk-qJfLQWAx/bin/activate
+    [(trunk-cLuRPqaE) /temp/proyecto]$
 \end{shell}
 
-Vemos en la última linea como estamos ``dentro'' del entorno virtual, como veíamos al principio con otras herramientas.
+Vemos en la última línea como estamos ``dentro'' del entorno virtual, como veíamos al principio con otras herramientas.
 
 Luego de ejecutar el \texttt{install} encontramos que Pipenv nos dejó dos archivos nuevos: el \texttt{Pipfile} y el \texttt{Pipfile.lock}. Estos son archivos de control que usa Pipenv mismo para proveer la funcionalidad de entornos virtuales armados determinísticamente en distintos sistemas de trabajo. La idea es que en desarrollo especificamos las dependencias necesarias en un \texttt{requirements.txt} o similar, y Pipenv armará sus dos archivos de control; luego cuando enviemos el proyecto a otros sistemas (integración continua, servidores de producción, etc.) los entornos virtuales que se armarán en esos casos serán \textit{exactamente iguales} que los que armamos en desarrollo, evitando posibles inconvenientes (como por ejemplo que una dependencia cambió de versión entre que probamos el proyecto localmente y que lo subimos a un servidor).
 
-Usemos esta herramienta para manejar el entorno virtual de nuestro ejemplo. Por lo pronto, como está más orientada a proyectos que a scripts individuales, creemos un directorio vacío y especifiquemos las dependencias necesarias en el archivo correspondiente:
-
-\begin{shell}
-[/temp]$ mkdir ejemplo-oscilador
-[/temp]$ cd ejemplo-oscilador
-[/temp/ejemplo-oscilador]$ vi requirements.txt
-...
-[/temp/ejemplo-oscilador]$ cat requirements.txt 
-PyQt5
-matplotlib
-numpy
-scipy
-\end{shell}
-
-Instalemos entonces las dependencias especificadas en nuestro archivo:
-
-\begin{shell}
-[/temp/ejemplo-oscilador]$ pipenv install -r requirements.txt 
-Creating a virtualenv for this project...
-Pipfile: /temp/ejemplo-oscilador/Pipfile
-Using /usr/bin/python3 (3.8.10) to create virtualenv...
-⠴ Creating virtual environment...created virtual environment CPython3.8.10.final.0-64 in 286ms
-  creator CPython3Posix(dest=/home/facundo/.local/share/virtualenvs/ejemplo-oscilador-lsVEUz2j, 
-    clear=False, no_vcs_ignore=False, global=False)
-  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy, 
-    app_data_dir=/home/facundo/.local/share/virtualenv)
-      added seed packages: pip==21.2.3, setuptools==57.4.0, wheel==0.37.0
-  activators BashActivator,CShellActivator,FishActivator,PowerShellActivator,PythonActivator
-✔ Successfully created virtual environment! 
-Virtualenv location: /home/facundo/.local/share/virtualenvs/ejemplo-oscilador-lsVEUz2j
-Creating a Pipfile for this project...
-Requirements file provided! Importing into Pipfile...
-Pipfile.lock not found, creating...
-Locking [dev-packages] dependencies...
-Locking [packages] dependencies...
-Building requirements...
-Resolving dependencies...
-✔ Success! 
-Updated Pipfile.lock (cbf070)!
-Installing dependencies from Pipfile.lock (cbf070)...
-  🐍   ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ 12/12 — 00:00:08
-To activate this project's virtualenv, run pipenv shell.
-Alternatively, run a command inside the virtualenv with pipenv run.
-\end{shell}
-
-Casi estamos. Ahora activemos el entorno virtual, y ejecutemos nuestro programa:
-
-\begin{shell}
-[/temp/ejemplo-oscilador]$ pipenv shell
-Launching subshell in virtual environment...
- . /home/facundo/.local/share/virtualenvs/ejemplo-oscilador-lsVEUz2j/bin/activate
-/temp/ejemplo-oscilador$  . /home/facundo/.local/share/virtualenvs/ejemplo-oscilador-lsVEUz2j/bin/activate
-[(ejemplo-oscilador) /temp/ejemplo-oscilador]$ python oscilador.py 
-Opciones del script: Namespace(archivo=None, usar_tex=False)
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
-[(ejemplo-oscilador) /temp/ejemplo-oscilador]$ 
-\end{shell}
-
-Listo. Siempre que hayamos activado un entorno virtual, al terminar debemos recordar desactivarlo. Pero a diferencia de otros administradores de entornos virtuales, en este caso en lugar de \texttt{deactivate} tenemos que usar otro comando:
-
-\begin{shell}
-[(ejemplo-oscilador) /temp/ejemplo-oscilador]$ exit
-exit
-[/temp/ejemplo-oscilador]$ 
-\end{shell}
-
-Finalmente, también para esta herramienta, recomendamos explorar sus opciones haciendo \texttt{pipenv --help}, y revisar \href{https://pipenv-es.readthedocs.io/es/latest/}{la documentación correspondiente}.
+Finalmente, también para esta herramienta, recomendamos revisar \href{https://pipenv-es.readthedocs.io/es/latest/}{la documentación correspondiente}.
 
 
 \section{Contenedores} \label{sec:contenedores}
@@ -557,7 +452,7 @@ Una palabra sobre Kubernetes: hay muchos textos que mezclan un poco Docker y Kub
 
 Hasta ahora estuvimos hablando de contenedores de forma genérica, porque privilegiamos hablar sobre las ventajas de los mismos (especialmente en el contexto de este capítulo) y no mezclar el tema de las ``imágenes''.
 
-Pero entremos en este detalle ahora, antes de ir a la parte más práctica, para separar bien los conceptos y poder entender mejor las próximas subsecciones. Empecemos por las imágenes, ya que sin imágenes no vamos a poder tener contenedores. 
+Pero entremos en este detalle ahora, antes de ir a la parte más práctica, para separar bien los conceptos y poder entender mejor las próximas subsecciones. Empecemos por las imágenes, ya que sin imágenes no vamos a poder tener contenedores.
 
 Una imagen es un archivo binario en disco, algo estático, que contiene todo lo necesario para poder ejecutar nuestra aplicación cuando corramos el contenedor.
 
@@ -572,22 +467,22 @@ Por ejemplo, podemos tener nuestra aplicación en una imagen de Docker, junto co
 
 \subsection{Creando imágenes}
 
-La forma primera de crear una imagen es a partir de un documento de texto (llamado \textit{Dockerfile}) que contiene todas las órdenes que un usuario podría ejecutar en una linea de comandos. 
+La forma primera de crear una imagen es a partir de un documento de texto (llamado \textit{Dockerfile}) que contiene todas las órdenes que un usuario podría ejecutar en una línea de comandos.
 
 En este archivo especificaremos el ``sistema base'' sobre el cual trabajaremos, y luego distintas órdenes que irán construyendo la imagen (instalando dependencias, ajustando configuraciones, etc.).
 
 El Dockerfile tiene su complejidad, y hay órdenes de todo tipo (pueden revisar \href{https://docs.docker.com/engine/reference/builder/}{su referencia}), pero las más usadas son las siguientes, que mencionaremos brevemente para poder continuar con el resto del contenido, obviamente sin entrar en todo el detalle o potencial de cada una:
 
 \begin{itemize}
-    \item \verb|FROM|: define la imagen base para el resto de las instrucciones (el Dockerfile \textit{debe} comenzar con esta orden); la imagen indicada puede ser cualquiera, local o remota, al principio es muy útil usar alguna de un repositorio público (como \href{https://hub.docker.com/search?q=&type=image}{Dockerhub}).
-    \item \verb|RUN|: ejecuta un comando de la misma manera que si lo estuvieramos ejecutando en el sistema que estamos armando.
-    \item \verb|ENTRYPOINT|: el comando que ejecutará Docker cuando le hagamos \verb|run| a la imagen, luego de crear el contenedor en sí; la forma preferida de escribir el comando aquí es usando una lista de cadenas (como \texttt{["python3", "script.py"]}) y no directamente \texttt{python3 script.py}, ya que esto último lo interpreta el shell del contenedor y no siempre sucederá lo que esperamos. Si queremos pasarle parámetros y opciones al script que estamos ejecutando podemos ponerlo como parte del \verb|ENTRYPOINT|, pero se recomienda usar otra orden para ello que es \verb|CMD| ya que de esta manera podremos luego modificar esos parámetros y opciones al momento de ejecutar el contenedor.
-    \item \verb|ENV|: configura variables de entorno para todas las instrucciones que se ejecutarán a continuación.
-    \item \verb|COPY|: copia archivos y directorios desde nuestro sistema al sistema de archivos de la imagen en el destino especificado.
-    \item \verb|WORKDIR|: cambia el directorio actual para todas las órdenes que vienen a continuación.
+ \item \verb|FROM|: define la imagen base para el resto de las instrucciones (el Dockerfile \textit{debe} comenzar con esta orden); la imagen indicada puede ser cualquiera, local o remota, al principio es muy útil usar alguna de un repositorio público (como \href{https://hub.docker.com/search?q=&type=image}{Dockerhub}).
+ \item \verb|RUN|: ejecuta un comando de la misma manera que si lo estuvieramos ejecutando en el sistema que estamos armando.
+ \item \verb|ENTRYPOINT|: el comando que ejecutará Docker cuando le hagamos \verb|run| a la imagen, luego de crear el contenedor en sí; la forma preferida de escribir el comando aquí es usando una lista de cadenas (como \texttt{["python3", "script.py"]}) y no directamente \texttt{python3 script.py}, ya que esto último lo interpreta el shell del contenedor y no siempre sucederá lo que esperamos. Si queremos pasarle parámetros y opciones al script que estamos ejecutando podemos ponerlo como parte del \verb|ENTRYPOINT|, pero se recomienda usar otra orden para ello que es \verb|CMD| ya que de esta manera podremos luego modificar esos parámetros y opciones al momento de ejecutar el contenedor.
+ \item \verb|ENV|: configura variables de entorno para todas las instrucciones que se ejecutarán a continuación.
+ \item \verb|COPY|: copia archivos y directorios desde nuestro sistema al sistema de archivos de la imagen en el destino especificado.
+ \item \verb|WORKDIR|: cambia el directorio actual para todas las órdenes que vienen a continuación.
 \end{itemize}
 
-El Dockerfile, entonces, es básicamente una secuencia de órdenes, cada una en una linea. Cada orden terminará armando una de las capas que mencionábamos antes, lo cual es importante ya que una vez creada la capa Docker la puede reutilizar en el futuro cuando rearmemos la imagen.
+El Dockerfile, entonces, es básicamente una secuencia de órdenes, cada una en una línea. Cada orden terminará armando una de las capas que mencionábamos antes, lo cual es importante ya que una vez creada la capa Docker la puede reutilizar en el futuro cuando rearmemos la imagen.
 
 Docker utilizará este archivo y nos dejará como resultado una imagen según lo especificado. Veamos un ejemplo con el mismo programa que utilizamos cuando aprendimos entornos virtuales (aunque lo ejecutaremos distinto: en lugar de que nos abra una ventana con el resultado, haremos que grabe esa imagen resultado a disco \footnote{Esto es porque para abrir una ventana el proceso de adentro del container se tiene que comunicar con el servidor de ventanas del host, lo cual no sólo no es sencillo, sino que depende del sistema operativo de nuestro host, y esta configuración avanzada ya se escapa del alcance del libro.}).
 
@@ -600,20 +495,20 @@ El siguiente paso es construir nuestra imagen. Para ello creamos un directorio n
 Ejecutamos el \texttt{build}, entonces, indicando el directorio actual y usando \texttt{-t} para indicar el nombre de la imagen creada:
 
 \begin{shell}
-$ docker build -t app-ejemplo .
-Sending build context to Docker daemon   2.56kB
-Step 1/5 : FROM python:3.9
-...
-Successfully built 48b2a52afd8d
-Successfully tagged app-ejemplo:latest
+    $ docker build -t app-ejemplo .
+    Sending build context to Docker daemon   2.56kB
+    Step 1/5 : FROM python:3.9
+    ...
+    Successfully built 48b2a52afd8d
+    Successfully tagged app-ejemplo:latest
 \end{shell}
 
 Podemos ver como Docker tiene nuestra imagen recién creada:
 
 \begin{shell}
-$ docker images
-REPOSITORY        TAG       IMAGE ID       CREATED              SIZE
-app-ejemplo       latest    48b2a52afd8d   About a minute ago   1.16GB
+    $ docker images
+    REPOSITORY        TAG       IMAGE ID       CREATED              SIZE
+    app-ejemplo       latest    48b2a52afd8d   About a minute ago   1.16GB
 \end{shell}
 
 
@@ -622,10 +517,10 @@ app-ejemplo       latest    48b2a52afd8d   About a minute ago   1.16GB
 Para probar que lo que hicimos hasta ahora funciona correctamente, ejecutaremos un contenedor a partir de la imagen recién creada.
 
 \begin{shell}
-$ docker run app-ejemplo
-Opciones del script: Namespace(usar_tex=False, archivo='imagen.pdf')
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+    $ docker run app-ejemplo
+    Opciones del script: Namespace(usar_tex=False, archivo='imagen.pdf')
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
 \end{shell}
 
 Docker entonces creó el contenedor a partir de nuestra imagen, y ejecutó el script tal como indicamos en el Dockerfile con \texttt{ENTRYPOINT}. Cuando nuestro script terminó, automáticamente el contenedor también paró.
@@ -633,8 +528,8 @@ Docker entonces creó el contenedor a partir de nuestra imagen, y ejecutó el sc
 Podemos validar que no nos quedó un contenedor corriendo usando \verb|ps|.
 
 \begin{shell}
-$ docker ps
-CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+    $ docker ps
+    CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
 \end{shell}
 
 En otras situaciones, donde el contenedor encapsula a una aplicación que queda ejecutándose (por ejemplo, una aplicación web), veremos al contenedor en ese listado.
@@ -650,46 +545,46 @@ En ese mismo directorio creemos el Dockerfile para esta aplicación:
 Y creamos la imagen con \texttt{docker build -t demorona .}; si ejecutamos entonces la imagen creada y esperamos los 30 segundos, veremos una salida similar a la siguiente:
 
 \begin{shell}
-$ docker run demorona
-Wed Jul 18 20:17:20 2022
-Wed Jul 18 20:17:50 2022
+    $ docker run demorona
+    Wed Jul 18 20:17:20 2022
+    Wed Jul 18 20:17:50 2022
 \end{shell}
 
-Pero si en vez de quedarnos esperando entre una linea y la otra, vamos a otra terminal y antes de que termine miramos los procesos corriendo, vamos a encontrar nuestro contenedor:
+Pero si en vez de quedarnos esperando entre una línea y la otra, vamos a otra terminal y antes de que termine miramos los procesos corriendo, vamos a encontrar nuestro contenedor:
 
 \begin{shell}
-$ docker ps
-CONTAINER ID   IMAGE      COMMAND                    CREATED          STATUS          ...
-74f26f383fb9   demorona   "python3 -u demorona.py"   13 seconds ago   Up 12 seconds   ...
+    $ docker ps
+    CONTAINER ID   IMAGE      COMMAND                    CREATED          STATUS          ...
+    74f26f383fb9   demorona   "python3 -u demorona.py"   13 seconds ago   Up 12 seconds   ...
 \end{shell}
 
-Volvamos a la ejecución de nuestra aplicación ejemplo (el oscilador). Como le indicamos en el Dockerfile, la opción por default al ejecutar el script es que guarde el resultado en un archivo. Obviamente queremos obtener ese archivo, ya que es el resultado del trabajo. 
+Volvamos a la ejecución de nuestra aplicación ejemplo (el oscilador). Como le indicamos en el Dockerfile, la opción por default al ejecutar el script es que guarde el resultado en un archivo. Obviamente queremos obtener ese archivo, ya que es el resultado del trabajo.
 
-Esto es sencillo usando el comando \texttt{cp} de \texttt{docker}, que copia archivos y directorios desde/a contenedores. En este caso queremos traer \texttt{imagen.pdf} desde el contenedor, pero no sabemos \textit{cual} es el contenedor en cuestión. 
+Esto es sencillo usando el comando \texttt{cp} de \texttt{docker}, que copia archivos y directorios desde/a contenedores. En este caso queremos traer \texttt{imagen.pdf} desde el contenedor, pero no sabemos \textit{cual} es el contenedor en cuestión.
 
 Veamos entonces \textit{todos} los contenedores (incluso los parados), para encontrar el que necesitamos:
 
 \begin{shell}
-$ docker ps --all
-CONTAINER ID   IMAGE          COMMAND                  CREATED       STATUS               ...
-6c3589d2933d   app-ejemplo    "python3 oscilador.p…"   An hour ago   Exited a minute ago  ...
+    $ docker ps --all
+    CONTAINER ID   IMAGE          COMMAND                  CREATED       STATUS               ...
+    6c3589d2933d   app-ejemplo    "python3 oscilador.p…"   An hour ago   Exited a minute ago  ...
 \end{shell}
 
 Luego, copiamos el archivo en cuestión. El comando \texttt{cp} (como otros comandos similares para copiar) necesita que le especifiquemos desde dónde y hasta dónde, con el detalle que tenemos que indicar el \textit{ID} del contenedor separado por dos puntos:
 
 \begin{shell}
-$ docker cp 6c3589d2933d:/oscilador/imagen.pdf .
-$ ls imagen.pdf 
-imagen.pdf
+    $ docker cp 6c3589d2933d:/oscilador/imagen.pdf .
+    $ ls imagen.pdf
+    imagen.pdf
 \end{shell}
 
 Si quisieramos dejar la imagen resultado en un archivo con otro formato, podemos aprovechar la flexibilidad que incluimos en el Dockerfile, donde el \textit{entrypoint} está separado de los argumentos que recibe por default. Entonces, si especificamos parámetros al ejecutar el contenedor, estos reemplazarán ese default, lo cual podemos ver de forma sencilla para nuestro ejemplo porque el mismo muestra las opciones que recibió:
 
 \begin{shell}
-$ docker run app-ejemplo --archivo=imagen.png
-Opciones del script: Namespace(usar_tex=False, archivo='imagen.png')
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
+    $ docker run app-ejemplo --archivo=imagen.png
+    Opciones del script: Namespace(usar_tex=False, archivo='imagen.png')
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large'}
 \end{shell}
 
 
@@ -708,22 +603,22 @@ Claro, para hacer eso necesitamos instalar paquetes a nivel del sistema, lo cual
 Atentos al detalle que cambiamos el argumento por default del script: ahora estamos incluyendo que use \LaTeX. Creamos la imagen como vimos anteriormente, y lo probamos:
 
 \begin{shell}
-$ docker run app-ejemplo
-Opciones del script: Namespace(usar_tex=True, archivo='imagen.pdf')
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large', 'text.usetex': True}
+    $ docker run app-ejemplo
+    Opciones del script: Namespace(usar_tex=True, archivo='imagen.pdf')
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large', 'text.usetex': True}
 \end{shell}
 
 Y este es el resultado que nos trajimos del contenedor, donde podemos ver la elegancia obtenida:
 
 \begin{center}
-    \includegraphics[width=400pt,keepaspectratio=true]{Chapters/entornos/imgs/imagen.pdf}
+ \includegraphics[width=400pt,keepaspectratio=true]{Chapters/entornos/imgs/imagen.pdf}
 \end{center}
 
 
 \subsection{Compartiendo imagenes}
 
-Una vez que tenemos nuestra imagen construida y probada, es momento de compartirla. 
+Una vez que tenemos nuestra imagen construida y probada, es momento de compartirla.
 
 Para esto, como adelantamos antes, necesitamos un repositorio a donde subir la imagen y desde donde otras personas puedan bajarla. El más usado al momento de escribir este libro es \href{https://hub.docker.com/search?q=&type=image}{Dockerhub}, una comunidad/biblioteca ofrecida por Docker mismo de imágenes de contenedores.
 
@@ -734,52 +629,52 @@ Por ejemplo, para los casos que mostramos en este libro, el repositorio público
 Una vez lista la parte remota, tenemos que configurar apropiadamente la parte local. La herramienta que utilizaremos para interactuar con Dockerhub es el mismo \texttt{docker} que veníamos usando antes. Tenemos que indicarle que se autentique:
 
 \begin{shell}
-$ docker login
-Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, 
-head over to https://hub.docker.com to create one.
-Username: facundobatista
-Password: 
-Login Succeeded
+    $ docker login
+    Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID,
+    head over to https://hub.docker.com to create one.
+    Username: facundobatista
+    Password:
+    Login Succeeded
 \end{shell}
 
 Nos falta un último paso, que es renombrar la imagen que armamos para que coincida con el repositorio remoto para la misma. Tengamos en cuenta que podríamos haberla nombrado apropiadamente al crearla (cuando usamos la opción \texttt{-t} en el \texttt{build}), pero tampoco es un incordio realizar ese paso a posteriori, usando \texttt{docker tag}:
 
 \begin{shell}
-$ docker images
-REPOSITORY        TAG       IMAGE ID       CREATED         SIZE
-app-ejemplo       latest    d727e49a4b61   2 days ago      1.83GB
-$ docker tag app-ejemplo facundobatista/app-ejemplo
-$ docker images
-REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
-facundobatista/app-ejemplo   latest    d727e49a4b61   2 days ago      1.83GB
+    $ docker images
+        REPOSITORY        TAG       IMAGE ID       CREATED         SIZE
+        app-ejemplo       latest    d727e49a4b61   2 days ago      1.83GB
+    $ docker tag app-ejemplo facundobatista/app-ejemplo
+    $ docker images
+    REPOSITORY                   TAG       IMAGE ID       CREATED         SIZE
+    facundobatista/app-ejemplo   latest    d727e49a4b61   2 days ago      1.83GB
 \end{shell}
 
 Entonces sólo nos queda enviar la imagen:
 
 \begin{shell}
-$ docker push facundobatista/app-ejemplo
-Using default tag: latest
-The push refers to repository [docker.io/facundobatista/app-ejemplo]
-43413aee136b: Pushed 
-...
-latest: digest: sha256:6de9f25c02e0ae924f41d3273e01e56939366eef6d830b27e19fcc17818dde04 size: 3058
+    $ docker push facundobatista/app-ejemplo
+    Using default tag: latest
+    The push refers to repository [docker.io/facundobatista/app-ejemplo]
+    43413aee136b: Pushed
+    ...
+    latest: digest: sha256:6de9f25c02e0ae924f41d3273e01e56939366eef6d830b27e19fcc17818dde04 size: 3058
 \end{shell}
 
 Ya está. A partir de este momento cualquier persona puede descargar la imagen que subimos (referenciándola de la misma manera) y ejecutarla:
 
 \begin{shell}
-$ docker pull facundobatista/app-ejemplo
-Using default tag: latest
-latest: Pulling from facundobatista/app-ejemplo
-30a9a79b0d7e: Pull complete 
-...
-Digest: sha256:6de9f25c02e0ae924f41d3273e01e56939366eef6d830b27e19fcc17818dde04
-Status: Downloaded newer image for facundobatista/app-ejemplo:latest
-docker.io/facundobatista/app-ejemplo:latest
-$ docker run facundobatista/app-ejemplo
-Opciones del script: Namespace(usar_tex=True, archivo='imagen.pdf')
-Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
-Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large', 'text.usetex': True}
+    $ docker pull facundobatista/app-ejemplo
+        Using default tag: latest
+        latest: Pulling from facundobatista/app-ejemplo
+        30a9a79b0d7e: Pull complete
+        ...
+        Digest: sha256:6de9f25c02e0ae924f41d3273e01e56939366eef6d830b27e19fcc17818dde04
+        Status: Downloaded newer image for facundobatista/app-ejemplo:latest
+        docker.io/facundobatista/app-ejemplo:latest
+    $ docker run facundobatista/app-ejemplo
+    Opciones del script: Namespace(usar_tex=True, archivo='imagen.pdf')
+    Ejecutando con parámetros: a=17 b=1 λ=15.4 µ=0.75
+    Config de matplotlib: {'font.size': 14, 'axes.labelsize': 'large', 'text.usetex': True}
 \end{shell}
 
 Esto es algo que mismo ustedes pueden probar con sólo tener \texttt{docker} instalado, ya que es anónimo: no hace falta sacar una cuenta en Dockerhub o autenticar \texttt{docker} para utilizar una imagen pública.
