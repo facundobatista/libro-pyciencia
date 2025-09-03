@@ -54,6 +54,6 @@ print(f'Proporción de no convergencia: {n_div / n_trial**2:.4f}')
 plt.ylim([-5, 15])
 plt.savefig('sol_hybr.pdf')
 
-# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

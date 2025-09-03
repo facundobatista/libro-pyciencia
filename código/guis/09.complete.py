@@ -352,10 +352,10 @@ class Window(QMainWindow):
 
     def on_about(self):
         """Muestra el diálogo de Acerca de."""
-        title = "Python en Ámbitos Científicos"
+        title = "Python para Ciencia y Tecnología"
         text = textwrap.dedent("""
             Ejemplo de aplicación gráfica para el libro
-            Python en Ámbitos Científicos
+            Python para Ciencia y Tecnología
             de Facundo Batista y Manuel Carlevaro
 
             http://pyciencia.taniquetil.com.ar/
@@ -368,6 +368,6 @@ window = Window()
 window.show()
 sys.exit(app.exec())
 
-# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

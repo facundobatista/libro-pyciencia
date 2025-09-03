@@ -18,6 +18,6 @@ CS2 = ax.contour(X, Y, Z2, levels=[0], colors=['maroon'])
 ax.clabel(CS2, levels=[0], fmt={0: r'$f_2$'})
 plt.savefig('f1_f2_ceros.pdf')
 
-# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

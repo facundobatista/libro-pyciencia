@@ -15,7 +15,7 @@ class Window(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        self.message = "Python en Ámbitos Científicos"
+        self.message = "Python para Ciencia y Tecnología"
         self.label = QLabel(self.message)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label)
@@ -34,6 +34,6 @@ window = Window()
 window.show()
 sys.exit(app.exec())
 
-# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

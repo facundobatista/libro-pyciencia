@@ -63,6 +63,6 @@ ax1.set_ylabel(r"$dy/dt$")
 ax1.text(0.05, 0.9, 'b)', transform=ax1.transAxes, fontsize=18)
 plt.show()
 
-# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/

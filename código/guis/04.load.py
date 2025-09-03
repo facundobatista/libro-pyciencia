@@ -52,7 +52,7 @@ class Window(QMainWindow):
 
         self._status_bar.showMessage("Comenzando", 3000)
 
-        label = QLabel("Python en Ámbitos Científicos")
+        label = QLabel("Python para Ciencia y Tecnología")
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setCentralWidget(label)
 
@@ -109,6 +109,6 @@ window = Window()
 window.show()
 sys.exit(app.exec())
 
-# Copyright 2020-2024 Facundo Batista y Manuel Carlevaro
+# Copyright 2020-2025 Facundo Batista y Manuel Carlevaro
 # Licencia CC BY-NC-SA 4.0
 # Para más info visitar https://github.com/facundobatista/libro-pyciencia/
