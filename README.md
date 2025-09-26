@@ -8,6 +8,6 @@ Este proyecto es parte del contenido del libro "Python para Ciencia y Tecnologí
 
 El objetivo principal de este proyecto es para ofrecer de forma sencilla la posibilidad de obtener todos los códigos utilizados en el libro.
 
-Recomendamos visitar [la página principal del mismo](https://www.libropython.science/) para toda la info sobre el libro, incluso para [descargar el PDF del mismo](https://libropython.science/#descarga)
+Recomendamos visitar [la página principal](https://www.libropython.science/) para toda la info sobre el libro, incluso para [descargar el PDF](https://libropython.science/#descarga)
 
 Tanto el texto como el código fuente, ejemplos e imágenes son Copyright de Facundo Batista y Manuel Carlevaro y están compartidos bajo la licencia [Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es), salvo que se especifique puntualmente lo contrario.
